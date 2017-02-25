@@ -1,0 +1,322 @@
+﻿Use Case Element	Description
+====================================================
+Use Case Number: 001	
+Application: Mobile app
+Use Case Name: User sign up
+Use Case Description: A user of the app register yourself as a casual football player.
+Primary Actor: Mobile user(player).
+Precondition: The user is not logged.
+Trigger: The mobile user clicks into: Sign up (as a player)
+Basic Flow:
+	1: The register screen/interface is showed to complete with the options(name, e-mail, password,city, 
+									        checkboxes of "usual avaiable free time to play"/"position"/"level as player",etc).
+
+	2: The user completes the register fields and confirms the cadastre.The info is checked and proves to be valid .
+
+	3:  A new user is registered in the database.
+	
+	4: The app shows a "Sucess" textbox about the register and informs his ID into the system.
+	
+	5: The app returns the user for the main screen, where he can now login.
+
+Alternate Flow:
+--------------------------------------
+	2.a: The entered info is not valid (e-mail already in use, required options left without response, password don't meet requirements).
+	
+ 	3.a.: The app shows a "Warning" textbox informing which fields are not valid. 
+
+	4.a: Return to 1.
+-------------------------------------
+	3.b: There's a problem with the internet connection while registering the user in the database.
+	
+	4.b: The database is clean of any not completed/invalid entry.
+
+	5.b: The app shows a "Error" textbox informing the sign up was not complete because of internet connectivity problems.
+
+	6-b: Return to 1
+-------------------------------------
+Use Case Number: 002	
+Application: Mobile app
+Use Case Name: Pitch manager sign up
+Use Case Description: A user of the app register yourself as a pitch manager.
+Primary Actor: Mobile user(pitch manager/worker).
+Precondition: There's no manager registered to this football pitch.
+Trigger: The mobile user clicks into: Sign up (as a pitch manager/worker)
+Basic Flow:
+	1: The register screen/interface is showed to complete with the options(name, e-mail, password,pitch city,pitch address, pitch ID in the app,etc) 
+									    
+	2: The user completes the register fields and confirms the cadastre.The info is checked and proves to match pitch caught in the GPS system.
+
+	3: The app shows a textbox warning of a confirmation code sent to the pitch e-mail of contact (searched in the GPS data about this field).
+
+	4: The mobile user enters the code sent to the contact e-mail.
+	
+	5: The app now knows this user is really afiliated with the said football field.
+           A new user(pitch manager) is registered in the database.
+           
+	6: The app shows a "Sucess" textbox about the register and informs his ID into the system.
+	
+	7: The app returns the user for the main screen, where he can now login.
+
+Alternate Flow:
+--------------------------------------
+	2.a: The entered info is not valid (password doesn't meet requirements,pitch name/address/ID don't match with one caught in the GPS system).
+	
+ 	3.a.: The app shows a "Warning" textbox informing which fields are not valid. 
+
+	4.a: Return to 1.
+-------------------------------------
+	4.b: The confirmation code is not valid.
+
+	5.b: The app shows a "Warning" textbox informing the sign up was not complete because the confirmation code is not the one sent to the e-mail.
+
+	6-b: Return to 3
+-------------------------------------
+	5.c: There's a problem with the internet connection while registering the user in the database.
+	
+	6.c: The database is clean of any not completed/invalid entry.
+
+	7.c: The app shows a "Error" textbox informing the sign up was not complete because of internet connectivity problems.
+
+	8-c: Return to 1
+-------------------------------------
+Post-condition: A new client is registered into the database (as a pitch manager) and can edit the pitch info and schedule.
+
+
+-------------------------------------
+Use Case Number: 003	
+Application: Mobile app
+Use Case Name: Match registration.
+Use Case Description: A logged user of the app registers a football match into the system.
+Primary Actor: Signed up mobile user.
+Precondition: The user is logged in the system.
+Trigger: The mobile user clicks into the option "Register a match" in the interface. This options is only available after login.
+Basic Flow:
+	1: The register screen/interface is showed to complete with the options(football pitch,number of players into each team, players/positions,score,date, etc.) 
+									    
+	2: The user completes the register fields and confirms the match cadastre.The info is checked and proves to be valid.
+
+	3: A new match is registered in the database. The "registered matches" variable in the selected pitch and according players database is updated.
+
+	4: The system send a notification of the registered match to each player of the match that is a registered player in the app.
+           
+	5: The app shows a "Sucess" textbox about the register and informs the match ID into the system.
+	
+	6: The app returns the user for the main screen.
+
+
+Alternate Flow:
+--------------------------------------
+	2.a: The entered info is not valid (pitch name doesn't match with any caught in the GPS system/database, blank required fields, etc).
+	
+ 	3.a.: The app shows a "Warning" textbox informing which fields are not valid. 
+
+	4.a: Return to 1.
+---------------------------------------
+	3.c: There's a problem with the internet connection while registering the match in the database.
+	
+	4.c: The database is clean of any not completed/invalid entry.
+
+	5.c: The app shows a "Error" textbox informing the match register was not complete because of internet connectivity problems.
+
+	6-c: Return to 1
+-------------------------------------
+Post-condition: A new match is registered in the database.
+
+
+Use Case Number: 004	
+Application: Mobile app
+Use Case Name: Search for football pitches around
+Use Case Description: A user of the app looks for football pitches around using the GPS.
+Primary Actor: Mobile app user(registered or not).
+Precondition: ---------
+Trigger: The user selects the option to look for football pitches around in the main menu/interface.
+Basic Flow:
+	1: The GPS screen is showed (Google Maps) around the user, with the football fields around properly marked.
+									    
+	2: The user selects one of the marked locations, and the system shows a large textbox with info as (Field name, operation hours, full address, telephone,
+													    e-mail(if registered), and a small picture).
+
+	3: The user clicks outside the textbox or picture, return to 1.
+
+Alternate Flow:
+--------------------------------------
+	1.a: There's no connection into the GPS (internet or GPS connectivity failed)
+	
+ 	2.a.: The app shows a "Error" textbox informing that was impossible to connect to the gps, be aware if the internet and gps are properly functioning. 
+
+	3.a: Return to the main menu/interface.
+-------------------------------------
+	2.b: Required info as "pitch name" can't be obtained by Google Maps.
+
+	3.b: The app shows a "Warning" textbox informing there's a problem in this pitch info and a OK button.
+
+	4-b: Return to 1
+-------------------------------------
+	3.c: The user clicks into the textbox or picture
+	
+	4.c: The mobile zooms into the place that was clicked, showing the info with a zoomed-in/focused view.
+
+	5-c: Return to 2 after 30 seconds if no other click happens.
+-------------------------------------
+	3.d: The user clicks into the pitch telefone
+	
+	4.d: The app returns to step 1 status.
+	
+	5.d: The mobile starts a phone call to the selected pitch phone number.
+--------------------------------------
+Post-condition: xxx
+
+
+Use Case Number: 005
+Application: Mobile app
+Use Case Name: Login into the app.
+Use Case Description: A user login into the app system.
+Primary Actor: Mobile app user(not logged).
+Precondition: The user is not currently logged.
+Trigger: The user selects the option to login from the main menu/interface, while currently not logged.
+Basic Flow:
+	1: A textbox with two fields (e-mail and password) and two blank fields to enter the identification is showed at the center.
+									    
+	2: The user fills up e-mail and password and clicks to "Login".The info is checked and proves to be valid.
+
+	3: The system returns the user to the main menu/interface, now logged and with the his logged options (different for pitch manager and common user) available.
+
+Alternate Flow:
+--------------------------------------
+	2.a: There's no sucessful connection into the database.
+	
+ 	3.a.: The app shows a "Error" textbox informing there is a connectivity problem.
+
+	4.a: Return to the main menu/interface.
+-------------------------------------
+	2.b: The entered e-mail and password are not valid.
+
+	3.b: The app shows a "Warning" textbox informing there's a problem in the e-mail or password
+
+	4-b: Return to 1
+-------------------------------------
+Post-condition: The user is logged in.
+
+
+Use Case Number: 006
+Application: Mobile app
+Use Case Name: Search for player.
+Use Case Description: A user search for a player registered in the database.
+Primary Actor: Mobile app user.
+Precondition:
+Trigger: The user selects the option to search for a player.
+
+Basic Flow:
+	1: A textbox with three optional fields (e-mail, name, and ID) is showed, where the user can fill up with info about the player he wants to find.
+									    
+	2: The user fills one or more fields and clicks to "Search".The info is checked and proves to be valid.
+
+	3: The use case "View player profile" starts related to the found player.
+
+Alternate Flow:
+--------------------------------------
+	2.a: There's no sucessful connection into the database.
+	
+ 	3.a.: The app shows a "Error" textbox informing there is a connectivity problem.
+
+	4.a: Return to the main menu/interface.
+-------------------------------------
+	2.b: The entered data don't match any player of the database.
+
+	3.b: The app shows a "Warning" textbox informing the searched player doesn't exists in the database, to make sure the info is correct and try again.
+
+	4-b: Return to 1
+-------------------------------------
+Post-condition: The user is into the searched player profile.
+
+
+Use Case Number: 007
+Application: Mobile app
+Use Case Name: View player profile.
+Use Case Description: A user is presented with a player profile.
+Primary Actor: Mobile app user.
+Precondition: xxx
+Trigger: The user selects the "View profile" option to see his profile, search another player profile, or clicks into a player name in a match log.
+
+Basic Flow:
+	1: A window with the currently info about the player is showed (name, "usual available free time to play"/"position"/"level as player", etc.)
+									    
+	2: The user clicks in the X button or outside the player window and retuns to the main menu/interface.
+
+Alternate Flow:
+--------------------------------------
+	1.a: The user is currently in his own profile. A option to edit exists after some info (as "usual available free time to play"/"position"/"level as player").
+	
+	 	2.a.a: The user clicks in the X button or outside the player window and retuns to the main menu/interface.
+	
+		2.a.b: The user clicks in some space of the window(not edit), and the window is zoomed in/focused in that space for 30 seconds or until another click.
+		
+		2.a.c: The user clicks to edit a field and this field is released to edit, the same as when the user signed up.	
+
+-------------------------------------
+	2.b: The user clicks in some space of the window(not edit), and the window is zoomed in/focused in that space for 30 seconds or until another click.
+-------------------------------------
+Post-condition: xxx
+
+Use Case Number: 008
+Application: Mobile app
+Use Case Name: Search for football pitch.
+Use Case Description: A user search for a pitch registered in the database.
+Primary Actor: Mobile app user.
+Precondition:
+Trigger: The user selects the option to search for a football pitch.
+
+Basic Flow:
+	1: A textbox with three optional fields (name, pitch ID, telephone) is showed, where the user can fill up with info about the pitch he wants to find.
+									    
+	2: The user fills one or more fields and clicks to "Search".The info is checked and proves to be valid.
+
+	3: The use case "View Football Pitch" starts related to the found place.
+
+Alternate Flow:
+--------------------------------------
+	2.a: There's no sucessful connection into the database.
+	
+ 	3.a.: The app shows a "Error" textbox informing there is a connectivity problem.
+
+	4.a: Return to the main menu/interface.
+-------------------------------------
+	2.b: The entered data don't match any registered pitch on the database.
+
+	3.b: The app shows a "Warning" textbox informing the searched pitch doesn't exists in the database, but maybe exists if he looks for it in the GPS option.
+
+	4-b: Return to 1
+-------------------------------------
+Post-condition: The user is into the searched football pitch profile.
+
+Use Case Number: 009
+Application: Mobile app
+Use Case Name: View  Football Pitch.
+Use Case Description: A user is presented with the profile of a football pitch registered by a manager.
+Primary Actor: Mobile app user.
+Precondition: xxx
+Trigger: A pitch manager selects the "View Pitch Profile" option to see his profile, search the pitch profile, or clicks into the "location" in a match log.
+
+Basic Flow:
+	1: A window with the currently info about the pitch is showed (name, city,address, pitch ID in the app, operating hours, total of matches registered here,etc).
+								       	    
+	2: The user clicks in the X button or outside the profile window and retuns to the main menu/interface.
+
+Alternate Flow:
+--------------------------------------
+	1.a: The user is currently in the profile he manages. A option to edit exists after some info (as "operation hours",etc.).
+	
+	 	2.a.a: The manager clicks in the X button or outside the pitch profile window and retuns to the main menu/interface.
+	
+		2.a.b: The manager clicks in some space of the window(not edit), and the window is zoomed in/focused in that space for 30 seconds or until another click.
+		
+		2.a.c: The manager clicks to edit a field and this field is released to edit, the same as when he is signing up.	
+
+-------------------------------------
+	2.b: The user clicks in some space of the window(not edit), and the window is zoomed in/focused in that space for 30 seconds or until another click.
+-------------------------------------
+Post-condition: xxx
+
+
+

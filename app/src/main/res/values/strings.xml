@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">FootballMatch</string>
+    <string name="auth_fail">Authentication Failed</string>
+
+    <string name="facebook_app_id">1840847389518927</string>
+    <string name="fb_login_protocol_scheme">fb1840847389518927</string>
+
+    <!-- Shared Preferences -->
+    <string name="user_id_SharedPref">User Id</string>
+</resources>
