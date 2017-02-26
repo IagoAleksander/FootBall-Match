@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import static android.R.attr.value;
+import static android.R.id.message;
 import static com.filipe.footballmatch.R.id.buttonLogin;
 import static com.filipe.footballmatch.R.id.buttonRegister;
 
@@ -97,10 +98,40 @@ public class MainMenuActivity extends AppCompatActivity {
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
+                final MessageDialog dialog = new MessageDialog(MainMenuActivity.this, R.string.logout_confirmation_message,
+                        -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
+                dialog.setCancelable(false);
+                dialog.show();
+                dialog.noButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.yesButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseAuth.getInstance().signOut();
 
-                Intent intent = new Intent(MainMenuActivity.this, MainActivity.class);
-                MainMenuActivity.this.startActivity(intent);
+                        Intent intent = new Intent(MainMenuActivity.this, MainActivity.class);
+                        MainMenuActivity.this.startActivity(intent);
+                    }
+                });
+
+//                final MessageDialog dialog = new MessageDialog(context, message, R.string
+//                        .dialog_general_ok, -1, -1);
+//                dialog.setCancelable(false);
+//                if (!context.isFinishing()) {
+//                    dialog.show();
+//
+//                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            dialog.cancel();
+//                        }
+//                    });
+//                }
+
             }
         });
 

@@ -26,7 +26,6 @@ import static com.filipe.footballmatch.R.id.buttonCancel;
 import static com.filipe.footballmatch.R.id.buttonCreate;
 import static com.filipe.footballmatch.R.id.buttonLogin;
 import static com.filipe.footballmatch.R.id.buttonRegister;
-import static com.filipe.footballmatch.R.id.editTextAddress;
 import static com.filipe.footballmatch.R.id.editTextName;
 
 /**

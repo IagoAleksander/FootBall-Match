@@ -1,10 +1,24 @@
 <resources>
     <string name="app_name">FootballMatch</string>
-    <string name="auth_fail">Authentication Failed</string>
 
     <string name="facebook_app_id">1840847389518927</string>
     <string name="fb_login_protocol_scheme">fb1840847389518927</string>
 
     <!-- Shared Preferences -->
     <string name="user_id_SharedPref">User Id</string>
+
+    <!-- Dialog Messages -->
+    <string name="logout_confirmation_message">Are you sure that you want to logout?</string>
+    <string name="dialog_edit_no_text">No</string>
+    <string name="dialog_edit_yes_text">Yes</string>
+    <string name="dialog_edit_ok_text">Ok</string>
+    <string name="error_no_network">There is no network to complete the request. Please reconnect to the internet and retry.</string>
+    <string name="error_general">Something unexpected happened. Please try again or contact us if the problem continues.</string>
+
+    <!-- Login Activity -->
+    <string name="prompt_login">Login</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_google_sign_in">Login with Google</string>
+    <string name="action_facebook_sign_in">Login with Facebook</string>
+
 </resources>

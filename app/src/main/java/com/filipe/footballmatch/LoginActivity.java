@@ -9,10 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.support.design.widget.TextInputLayout;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -26,9 +26,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.CallbackManagerImpl;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -44,14 +41,17 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
 
+import static com.facebook.internal.CallbackManagerImpl.RequestCodeOffset.Login;
+import static com.filipe.footballmatch.R.id.editTextName;
+
 public class LoginActivity extends AppCompatActivity implements  GoogleApiClient.OnConnectionFailedListener{
 
-    private EditText editTextName;
-    private EditText editTextAddress;
-    private Button buttonRegister;
-    private Button buttonLogin;
-    private Button buttonGoogleLogin;
-    private Button buttonFacebookLogin;
+    private TextInputLayout login_et;
+    private TextInputLayout password_et;
+    private TextView buttonRegister;
+    private TextView buttonLogin;
+    private TextView buttonGoogleLogin;
+    private TextView buttonFacebookLogin;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -110,12 +110,15 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         };
 
 
-        buttonLogin = (Button) findViewById(R.id.buttonLogin);
-        buttonGoogleLogin = (Button) findViewById(R.id.googleLogin);
-        buttonFacebookLogin = (Button) findViewById(R.id.facebookLogin);
-        buttonRegister = (Button) findViewById(R.id.buttonRegister);
-        editTextName = (EditText) findViewById(R.id.editTextName);
-        editTextAddress = (EditText) findViewById(R.id.editTextAddress);
+        buttonLogin = (TextView) findViewById(R.id.buttonLogin);
+        buttonGoogleLogin = (TextView) findViewById(R.id.google_login);
+        buttonFacebookLogin = (TextView) findViewById(R.id.facebook_login);
+        buttonRegister = (TextView) findViewById(R.id.buttonRegister);
+        login_et = (TextInputLayout) findViewById(R.id.tilLogin);
+        password_et = (TextInputLayout) findViewById(R.id.tilPassword);
+
+        login_et.setHint(getString(R.string.prompt_login));
+        password_et.setHint(getString(R.string.prompt_password));
 
         //Click Listener for button
         buttonRegister.setOnClickListener(new View.OnClickListener() {
@@ -132,45 +135,93 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
             @Override
             public void onClick(View v) {
 
-//              Getting values to store
-                String email = editTextName.getText().toString().trim();
-                String password = editTextAddress.getText().toString().trim();
+                if (Utility.isConnectedToNet(LoginActivity.this)) {
 
-                mAuth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                    // Getting values to store
+                    String email = login_et.getEditText().getText().toString().trim();
+                    String password = password_et.getEditText().getText().toString().trim();
 
-                                // If sign in fails, display a message to the user. If sign in succeeds
-                                // the auth state listener will be notified and logic to handle the
-                                // signed in user can be handled in the listener.
-                                if (!task.isSuccessful()) {
-                                    Log.w(TAG, "signInWithEmail:failed", task.getException());
-                                    Toast.makeText(LoginActivity.this, R.string.auth_fail,
-                                            Toast.LENGTH_SHORT).show();
+                    mAuth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                                    // If sign in fails, display a message to the user. If sign in succeeds
+                                    // the auth state listener will be notified and logic to handle the
+                                    // signed in user can be handled in the listener.
+                                    if (!task.isSuccessful()) {
+                                        Log.w(TAG, "signInWithEmail:failed", task.getException());
+                                        final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+                                        dialog.setCancelable(false);
+                                        dialog.show();
+                                        dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                mAuth.signOut();
+                                                dialog.cancel();
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        Intent intent = new Intent(LoginActivity.this, MainMenuActivity.class);
+                                        LoginActivity.this.startActivity(intent);
+                                    }
                                 }
-                                else {
-                                    Intent intent = new Intent(LoginActivity.this, MainMenuActivity.class);
-                                    LoginActivity.this.startActivity(intent);
-                                }
-                            }
-                        });
-
+                            });
+                }
+                else {
+                    final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.cancel();
+                        }
+                    });
+                }
             }
         });
 
         buttonGoogleLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signInWithGoogle();
+
+                if (Utility.isConnectedToNet(LoginActivity.this)) {
+                    signInWithGoogle();
+                }
+                else {
+                    final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.cancel();
+                        }
+                    });
+                }
             }
         });
 
         buttonFacebookLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signInWithFacebook();
+                if (Utility.isConnectedToNet(LoginActivity.this)) {
+                    signInWithFacebook();
+                }
+                else {
+                    final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.cancel();
+                        }
+                    });
+                }
             }
         });
 
@@ -200,6 +251,16 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
             @Override
             public void onError(FacebookException error) {
                 Log.d(TAG, "onFacebookConnectionFailed:" + error.getMessage());
+                final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+                dialog.setCancelable(false);
+                dialog.show();
+                dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mAuth.signOut();
+                        dialog.cancel();
+                    }
+                });
 
             }
         });
@@ -238,7 +299,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         super.onActivityResult(requestCode, resultCode, data);
 
         //facebook
-        if(requestCode == CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()){
+        if(requestCode == Login.toRequestCode()){
             callbackManager.onActivityResult(requestCode, resultCode, data);
 
         }
@@ -253,7 +314,16 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
             } else {
                 // Google Sign In failed
                 Log.e(TAG, "Google Sign In failed.");
-                mAuth.signOut();
+                final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+                dialog.setCancelable(false);
+                dialog.show();
+                dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mAuth.signOut();
+                        dialog.cancel();
+                    }
+                });
             }
         }
     }
@@ -271,10 +341,17 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            mAuth.signOut();
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+                            dialog.setCancelable(false);
+                            dialog.show();
+                            dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    mAuth.signOut();
+                                    dialog.cancel();
+                                }
+                            });
                         }
                     }
                 });
@@ -299,8 +376,17 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+                            dialog.setCancelable(false);
+                            dialog.show();
+                            dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    mAuth.signOut();
+                                    dialog.cancel();
+                                }
+                            });
+
                         }
 
                     }
