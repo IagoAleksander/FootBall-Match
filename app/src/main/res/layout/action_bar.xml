@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="FootBall Match"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorAccent2"
         android:id="@+id/action_bar_title_text"
         android:textSize="22sp" />
 

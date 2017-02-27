@@ -67,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         buttonRegister = (TextView) findViewById(R.id.buttonSave);
-        editTextName = (TextInputLayout) findViewById(R.id.tilLogin);
+        editTextName = (TextInputLayout) findViewById(R.id.tilName);
         editTextAge = (TextInputLayout) findViewById(R.id.tilAge);
         editTextEmail = (TextInputLayout) findViewById(R.id.tilEmail);
         editTextConfirmEmail = (TextInputLayout) findViewById(R.id.tilConfirmEmail);

@@ -1,5 +1,6 @@
 package com.filipe.footballmatch;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,6 +36,8 @@ public class MainMenuActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+    Button createMatchButton;
+    Button listAvailableMatchesButton;
     Button logoutButton;
 
     String name;
@@ -52,7 +56,26 @@ public class MainMenuActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        createMatchButton = (Button) findViewById(R.id.buttonCreateMatch);
+        listAvailableMatchesButton = (Button) findViewById(R.id.buttonListMatches);
         logoutButton = (Button) findViewById(R.id.buttonLogout);
+
+        createMatchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainMenuActivity.this, PlacePickerActivity.class);
+                MainMenuActivity.this.startActivity(intent);
+            }
+        });
+
+        listAvailableMatchesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainMenuActivity.this, ListAvailableEventsActivity.class);
+                MainMenuActivity.this.startActivity(intent);
+            }
+        });
+
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,20 +140,6 @@ public class MainMenuActivity extends AppCompatActivity {
                         MainMenuActivity.this.startActivity(intent);
                     }
                 });
-
-//                final MessageDialog dialog = new MessageDialog(context, message, R.string
-//                        .dialog_general_ok, -1, -1);
-//                dialog.setCancelable(false);
-//                if (!context.isFinishing()) {
-//                    dialog.show();
-//
-//                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View view) {
-//                            dialog.cancel();
-//                        }
-//                    });
-//                }
 
             }
         });

@@ -1,19 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.filipe.footballmatch.LoginActivity">
-
-    <ImageView
-        android:id="@+id/ranking_prod_pic"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/app_name"
-        android:scaleType="centerCrop"
-        android:src="@drawable/background1"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +11,7 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_margin="64dp"
+        android:layout_margin="12dp"
         android:layout_centerInParent="true"
         android:background="@color/colorAccent2">
 
@@ -32,8 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <EditText
-            android:id="@+id/editTextName"
+        <TextView
+            android:id="@+id/textViewName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -43,12 +31,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <EditText
-            android:id="@+id/editTextPlace"
+        <TextView
+            android:id="@+id/textViewPlace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:text="Date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/textViewDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
 
-
     </LinearLayout>
-</RelativeLayout>
+
+</LinearLayout>
