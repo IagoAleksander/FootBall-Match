@@ -67,6 +67,11 @@
             android:name=".ListAvailableEventsActivity"
             android:screenOrientation="portrait">
         </activity>
+        <activity
+            android:name=".ListUsersActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
 
     </application>
 

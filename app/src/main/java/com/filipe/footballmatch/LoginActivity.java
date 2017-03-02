@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -36,13 +37,21 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
+import static android.R.attr.id;
+import static android.R.attr.value;
 import static com.facebook.internal.CallbackManagerImpl.RequestCodeOffset.Login;
 import static com.filipe.footballmatch.R.id.editTextName;
+import static com.google.android.gms.internal.zzav.getKey;
 
 public class LoginActivity extends AppCompatActivity implements  GoogleApiClient.OnConnectionFailedListener{
 
@@ -55,13 +64,16 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    public String id;
 
     private GoogleApiClient mGoogleApiClient;
     private CallbackManager callbackManager;
 
     public static final String TAG = LoginActivity.class.getSimpleName();
     private static final int GOOGLE_SIGN_IN = 9001;
+
+    private  boolean loginWithGoogle = false;
+    private  boolean loginWithFacebook = false;
+    private boolean userExists = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,29 +90,58 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
+                final FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
+
                     // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + id);
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" +user.getUid());
 
-                    // Write a message to the database
+
+                    // Get instance of database
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    DatabaseReference myRef = database.getReference("Person/" + user.getUid());
+                    final DatabaseReference myRef = database.getReference("Person/");
 
-                    // Creating Person object
-                    Person person = new Person();
+                    // Check if user already exists
+                    myRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
 
-                    // Adding values
-                    person.setName(user.getDisplayName());
-                    myRef.setValue(person);
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot){
 
-                    SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor=saved_values.edit();
-                    editor.putString(getString(R.string.user_id_SharedPref), user.getUid());
-                    editor.commit();
+                            // If user still does not exist, create a new entry in the database
+                            if (!dataSnapshot.exists()) {
 
-                    Intent intent = new Intent(LoginActivity.this, MainMenuActivity.class);
-                    LoginActivity.this.startActivity(intent);
+                                Log.d(TAG, "New User");
+
+                                // Creating new user node, which returns the unique key value
+                                // new user node would be /User/$userid/
+                                final String newUserId = user.getUid();
+
+                                // Creating Person object
+                                Person person = new Person();
+
+                                // Adding values
+                                person.setName(user.getDisplayName());
+
+                                myRef.child(newUserId).setValue(person);
+                            }
+
+                            SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                            SharedPreferences.Editor editor=saved_values.edit();
+                            editor.putString(getString(R.string.user_id_SharedPref), user.getUid());
+                            editor.commit();
+
+                            Intent intent = new Intent(LoginActivity.this, MainMenuActivity.class);
+                            LoginActivity.this.startActivity(intent);
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError error){
+                            // Failed to read value
+                            Log.w(TAG,"Failed to read value.",error.toException());
+                        }
+                    });
+
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -135,51 +176,48 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
             @Override
             public void onClick(View v) {
 
-                if (Utility.isConnectedToNet(LoginActivity.this)) {
+                if (validateInfo()) {
+                    if (Utility.isConnectedToNet(LoginActivity.this)) {
 
-                    // Getting values to store
-                    String email = login_et.getEditText().getText().toString().trim();
-                    String password = password_et.getEditText().getText().toString().trim();
+                        // Getting values to store
+                        String email = login_et.getEditText().getText().toString().trim();
+                        String password = password_et.getEditText().getText().toString().trim();
 
-                    mAuth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                        mAuth.signInWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
-                                    // If sign in fails, display a message to the user. If sign in succeeds
-                                    // the auth state listener will be notified and logic to handle the
-                                    // signed in user can be handled in the listener.
-                                    if (!task.isSuccessful()) {
-                                        Log.w(TAG, "signInWithEmail:failed", task.getException());
-                                        final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
-                                        dialog.setCancelable(false);
-                                        dialog.show();
-                                        dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                mAuth.signOut();
-                                                dialog.cancel();
-                                            }
-                                        });
+                                        // If sign in fails, display a message to the user. If sign in succeeds
+                                        // the auth state listener will be notified and logic to handle the
+                                        // signed in user can be handled in the listener.
+                                        if (!task.isSuccessful()) {
+                                            Log.w(TAG, "signInWithEmail:failed", task.getException());
+                                            final MessageDialog dialog = new MessageDialog(LoginActivity.this, task.getException().getMessage(), R.string.dialog_edit_ok_text, -1, -1);
+                                            dialog.setCancelable(false);
+                                            dialog.show();
+                                            dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+                                                    mAuth.signOut();
+                                                    dialog.cancel();
+                                                }
+                                            });
+                                        }
                                     }
-                                    else {
-                                        Intent intent = new Intent(LoginActivity.this, MainMenuActivity.class);
-                                        LoginActivity.this.startActivity(intent);
-                                    }
-                                }
-                            });
-                }
-                else {
-                    final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
-                    dialog.setCancelable(false);
-                    dialog.show();
-                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.cancel();
-                        }
-                    });
+                                });
+                    } else {
+                        final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
+                        dialog.setCancelable(false);
+                        dialog.show();
+                        dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.cancel();
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -285,7 +323,16 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         // An unresolvable error has occurred and Google APIs (including Sign-In) will not
         // be available.
         Log.d(TAG, "onGoogleConnectionFailed:" + connectionResult);
-        Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+        final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_google, R.string.dialog_edit_ok_text, -1, -1);
+        dialog.setCancelable(false);
+        dialog.show();
+        dialog.okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mAuth.signOut();
+                dialog.cancel();
+            }
+        });
     }
 
     private void signInWithGoogle() {
@@ -314,16 +361,6 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
             } else {
                 // Google Sign In failed
                 Log.e(TAG, "Google Sign In failed.");
-                final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
-                dialog.setCancelable(false);
-                dialog.show();
-                dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mAuth.signOut();
-                        dialog.cancel();
-                    }
-                });
             }
         }
     }
@@ -335,6 +372,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        loginWithGoogle = true;
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
                         // If sign in fails, display a message to the user. If sign in succeeds
@@ -369,6 +407,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        loginWithFacebook = true;
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
                         // If sign in fails, display a message to the user. If sign in succeeds
@@ -391,5 +430,34 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
 
                     }
                 });
+    }
+
+    public boolean validateInfo() {
+
+        final String EMAIL_PATTERN = "^[a-zA-Z0-9#_~!$&'()*+,;=:.\"(),:;<>@\\[\\]\\\\]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*$";
+        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+
+        boolean validated = true;
+
+        String email = login_et.getEditText().getText().toString().trim();
+        if (!pattern.matcher(email).matches()) {
+            login_et.setError("Please insert a valid email address");
+            validated = false;
+        }
+        else {
+            login_et.setErrorEnabled(false);
+        }
+
+        String password = password_et.getEditText().getText().toString().trim();
+        if (password.length() <= 5) {
+            password_et.setError("Please insert a valid password");
+            validated = false;
+        }
+        else {
+            password_et.setErrorEnabled(false);
+        }
+
+        return validated;
+
     }
 }

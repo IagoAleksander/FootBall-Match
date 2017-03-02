@@ -16,7 +16,9 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -89,25 +91,36 @@
 
                 </LinearLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/section3"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:orientation="horizontal"
                     android:visibility="gone">
 
                     <TextView
+                        android:id="@+id/venue_phone_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Phone: "/>
+                        android:text="Phone: "
+                        android:layout_centerVertical="true"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/venue_phone"/>
+                        android:id="@+id/venue_phone"
+                        android:layout_toRightOf="@id/venue_phone_label"
+                        android:layout_centerVertical="true"/>
 
-                </LinearLayout>
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Call"
+                        android:id="@+id/callButton"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"/>
+
+                </RelativeLayout>
 
             </LinearLayout>
 

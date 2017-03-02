@@ -5,6 +5,7 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -17,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +47,9 @@ import java.util.Date;
 import static android.R.attr.data;
 import static android.R.attr.name;
 import static android.view.View.Z;
+import static com.filipe.footballmatch.R.id.callButton;
+import static com.filipe.footballmatch.R.id.pickerButton;
+import static com.google.android.gms.analytics.internal.zzy.e;
 import static com.google.android.gms.analytics.internal.zzy.o;
 import static com.google.android.gms.analytics.internal.zzy.p;
 import static com.google.android.gms.analytics.internal.zzy.v;
@@ -58,10 +63,11 @@ public class PlacePickerActivity extends AppCompatActivity implements
     private static final int PERMISSION_REQUEST_CODE = 100;
 
     private LinearLayout section2;
-    private LinearLayout section3;
+    private RelativeLayout section3;
     private TextView mName;
     private TextView mAddress;
     private TextView mPhone;
+    private Button callButton;
     private Spinner mSpinner;
 
     private Button timePicker;
@@ -86,11 +92,12 @@ public class PlacePickerActivity extends AppCompatActivity implements
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
         section2 = (LinearLayout) findViewById(R.id.section2);
-        section3 = (LinearLayout) findViewById(R.id.section3);
+        section3 = (RelativeLayout) findViewById(R.id.section3);
 
         mName = (TextView) findViewById(R.id.venue_name);
         mAddress = (TextView) findViewById(R.id.venue_address);
         mPhone = (TextView) findViewById(R.id.venue_phone);
+        callButton = (Button) findViewById(R.id.callButton);
         Button pickerButton = (Button) findViewById(R.id.pickerButton);
 
         datePicker = (Button) findViewById(R.id.date_picker);
@@ -130,6 +137,13 @@ public class PlacePickerActivity extends AppCompatActivity implements
             }
         });
 
+        callButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callVenue(PlacePickerActivity.this, place.getPhoneNumber().toString());
+            }
+        });
+
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1,
@@ -164,7 +178,20 @@ public class PlacePickerActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 if (validateData()) {
-                    registerMatch();
+                    if (Utility.isConnectedToNet(PlacePickerActivity.this)) {
+                        registerMatch();
+                    }
+                    else {
+                        final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
+                        dialog.setCancelable(false);
+                        dialog.show();
+                        dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.cancel();
+                            }
+                        });
+                    }
                 }
                 else {
                     displayErrorPopup();
@@ -223,10 +250,15 @@ public class PlacePickerActivity extends AppCompatActivity implements
         Log.e(TAG, "Google Places API connection failed with error code: "
                 + connectionResult.getErrorCode());
 
-        Toast.makeText(this,
-                "Google Places API connection failed with error code:" +
-                        connectionResult.getErrorCode(),
-                Toast.LENGTH_LONG).show();
+        final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+        dialog.setCancelable(false);
+        dialog.show();
+        dialog.okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+            }
+        });
     }
 
     private void callPlaceDetectionApi() throws SecurityException {
@@ -258,6 +290,15 @@ public class PlacePickerActivity extends AppCompatActivity implements
                 } catch (GooglePlayServicesRepairableException
                         | GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
+                    final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.cancel();
+                        }
+                    });
                 }
             }
         });
@@ -293,6 +334,15 @@ public class PlacePickerActivity extends AppCompatActivity implements
             } catch (ParseException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
+                final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+                dialog.setCancelable(false);
+                dialog.show();
+                dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.cancel();
+                    }
+                });
             }
 
         }
@@ -351,7 +401,11 @@ public class PlacePickerActivity extends AppCompatActivity implements
     public void registerMatch() {
         //  Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("Event/" + place.getId() + eventDate);
+        DatabaseReference myRef = database.getReference("Event");
+
+        // Creating new event node, which returns the unique key value
+        // new event node would be /Event/$eventid/
+        String eventId = myRef.push().getKey();
 
         // Creating Event object
         Event event = new Event();
@@ -361,7 +415,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
         event.setNumberOfPlayers(eventNumberOfPlayers);
         event.setDate(eventDate);
 
-        myRef.setValue(event);
+        myRef.child(eventId).setValue(event);
 
         final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.success_register_match, R.string.dialog_edit_ok_text, -1, -1);
         dialog.setCancelable(false);
@@ -375,5 +429,12 @@ public class PlacePickerActivity extends AppCompatActivity implements
                 dialog.cancel();
             }
         });
+    }
+
+    public static void callVenue(PlacePickerActivity activity, String number) {
+
+        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + number));
+        activity.startActivity(intent);
+
     }
 }

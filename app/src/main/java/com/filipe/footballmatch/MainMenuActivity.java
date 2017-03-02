@@ -33,9 +33,7 @@ import static com.filipe.footballmatch.R.id.buttonRegister;
 
 public class MainMenuActivity extends AppCompatActivity {
 
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
-
+    Button searchUserButton;
     Button createMatchButton;
     Button listAvailableMatchesButton;
     Button logoutButton;
@@ -56,9 +54,18 @@ public class MainMenuActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        searchUserButton = (Button) findViewById(R.id.buttonSearchUser);
         createMatchButton = (Button) findViewById(R.id.buttonCreateMatch);
         listAvailableMatchesButton = (Button) findViewById(R.id.buttonListMatches);
         logoutButton = (Button) findViewById(R.id.buttonLogout);
+
+        searchUserButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainMenuActivity.this, ListUsersActivity.class);
+                MainMenuActivity.this.startActivity(intent);
+            }
+        });
 
         createMatchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,18 +90,16 @@ public class MainMenuActivity extends AppCompatActivity {
             }
         });
 
-        mAuth = FirebaseAuth.getInstance();
-
         SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
 
         if (!id.isEmpty()) {
-            DatabaseReference myRef = database.getReference("Person/" + id);
+            DatabaseReference myRef = database.getReference("Person/");
 
             // Read from the database
-            myRef.addValueEventListener(new ValueEventListener() {
+            myRef.child(id).addValueEventListener(new ValueEventListener() {
                 TextView nameTextView = (TextView) findViewById(R.id.activity_main_menu_name);
                 TextView ageTextView = (TextView) findViewById(R.id.activity_main_menu_age);
 

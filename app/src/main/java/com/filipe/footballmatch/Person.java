@@ -7,9 +7,7 @@ public class Person {
     //name and address string 
     private String name;
     private String address;
-
     private int age;
-    private String u_id;
  
     public Person() {
       /*Blank default constructor essential for Firebase*/
@@ -37,13 +35,5 @@ public class Person {
 
     public void setAge(int age) {
         this.age = age;
-    }
-
-    public String getU_id() {
-        return u_id;
-    }
-
-    public void setU_id(String u_id) {
-        this.u_id = u_id;
     }
 }

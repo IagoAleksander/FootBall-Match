@@ -15,6 +15,10 @@ public class Event extends AppCompatActivity {
     private Date date;
     private int numberOfPlayers;
 
+    public Event() {
+      /*Blank default constructor essential for Firebase*/
+    }
+
     public String getName() {
         return name;
     }

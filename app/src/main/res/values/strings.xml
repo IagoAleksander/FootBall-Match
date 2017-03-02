@@ -16,6 +16,7 @@
     <string name="dialog_edit_ok_text">Ok</string>
     <string name="error_no_network">There is no network to complete the request. Please reconnect to the internet and retry.</string>
     <string name="error_general">Something unexpected happened. Please try again or contact us if the problem continues.</string>
+    <string name="error_google">Google Play services error. Please try again or contact us if the problem continues.</string>
 
     <!-- Login Activity -->
     <string name="prompt_login">Login</string>
@@ -29,5 +30,6 @@
     <string name="error_invalid_time">Please insert a valid time to continue.</string>
     <string name="error_past_date">Please insert a future date to continue.</string>
     <string name="success_register_match">Match registered successfully in the system..</string>
+
 
 </resources>

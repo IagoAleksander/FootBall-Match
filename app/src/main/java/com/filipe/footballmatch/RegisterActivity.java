@@ -4,20 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -27,11 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static android.R.attr.password;
-import static android.R.id.message;
 
 /**
  * Created by alks_ander on 21/01/2017.
@@ -84,7 +75,11 @@ public class RegisterActivity extends AppCompatActivity {
 
 //                     Write a message to the database
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    DatabaseReference myRef = database.getReference("Person/" + user.getUid());
+                    DatabaseReference myRef = database.getReference("Person/");
+
+                    // Creating new user node, which returns the unique key value
+                    // new user node would be /User/$userid/
+                    String userId = user.getUid();
 
                     //Creating Person object
                     Person person = new Person();
@@ -92,12 +87,11 @@ public class RegisterActivity extends AppCompatActivity {
                     //Adding values
                     person.setName(name);
                     person.setAge(age);
-                    person.setU_id(user.getUid());
 //
-                    myRef.setValue(person);
+                    myRef.child(userId).setValue(person);
 
                     SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor=saved_values.edit();
+                    SharedPreferences.Editor editor = saved_values.edit();
                     editor.putString(getString(R.string.user_id_SharedPref), user.getUid());
                     editor.commit();
 

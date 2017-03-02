@@ -55,6 +55,12 @@
             android:layout_height="wrap_content" />
 
         <Button
+            android:id="@+id/buttonSearchUser"
+            android:text="Search User"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
             android:id="@+id/buttonCreateMatch"
             android:text="Create Match"
             android:layout_width="match_parent"
