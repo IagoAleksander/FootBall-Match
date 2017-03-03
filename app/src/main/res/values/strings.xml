@@ -29,7 +29,11 @@
     <string name="error_invalid_date">Please insert a valid date to continue.</string>
     <string name="error_invalid_time">Please insert a valid time to continue.</string>
     <string name="error_past_date">Please insert a future date to continue.</string>
-    <string name="success_register_match">Match registered successfully in the system..</string>
+    <string name="success_register_match">Match registered successfully in the system.</string>
+
+    <!-- EditProfile Activity -->
+    <string name="success_update_profile">Profile updated successfully.</string>
+    <string name="cancel_profile_update_message">If you go back now, any changes made in the profile will be lost. Do you want to continue?</string>
 
 
 </resources>

@@ -49,8 +49,8 @@
 
         <Button
             android:layout_marginTop="50dp"
-            android:id="@+id/buttonLogin"
-            android:text="Edit Profile"
+            android:id="@+id/buttonViewProfile"
+            android:text="View Profile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

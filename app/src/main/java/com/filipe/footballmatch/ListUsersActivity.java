@@ -20,8 +20,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-import static com.google.android.gms.analytics.internal.zzy.i;
-
 /**
  * Created by alks_ander on 23/01/2017.
  */
@@ -70,7 +68,7 @@ public class ListUsersActivity extends AppCompatActivity {
                     userName = userNameLayout.getEditText().getText().toString().trim();
                 }
                 if (!userAgeLayout.getEditText().getText().toString().trim().isEmpty()) {
-                    userAge = Integer.getInteger(userAgeLayout.getEditText().getText().toString().trim());
+                    userAge = Integer.parseInt(userAgeLayout.getEditText().getText().toString().trim());
                 }
 
                 FirebaseDatabase database = FirebaseDatabase.getInstance();

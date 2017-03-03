@@ -71,6 +71,14 @@
             android:name=".ListUsersActivity"
             android:screenOrientation="portrait">
         </activity>
+        <activity
+            android:name=".ViewProfileActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name=".EditProfileActivity"
+            android:screenOrientation="portrait">
+        </activity>
 
 
     </application>

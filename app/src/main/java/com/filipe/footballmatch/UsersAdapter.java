@@ -37,7 +37,7 @@ public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         final MyViewHolder holder = (MyViewHolder) holder_;
         holder.name.setText(users.get(position).getName());
-        holder.age.setText(Integer.toString(users.get(position).getAge()));
+        holder.age.setText(users.get(position).getAge());
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {

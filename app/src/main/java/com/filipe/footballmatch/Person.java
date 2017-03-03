@@ -1,13 +1,19 @@
 package com.filipe.footballmatch;
- 
+
+import org.parceler.Parcel;
+
 /**
  * Created by Belal on 2/23/2016.
  */
+
+@Parcel
 public class Person {
     //name and address string 
     private String name;
-    private String address;
     private int age;
+    private String preferredPosition;
+    private String contactNumber;
+    private String address;
  
     public Person() {
       /*Blank default constructor essential for Firebase*/
@@ -35,5 +41,21 @@ public class Person {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public String getPreferredPosition() {
+        return preferredPosition;
+    }
+
+    public void setPreferredPosition(String preferredPosition) {
+        this.preferredPosition = preferredPosition;
     }
 }
