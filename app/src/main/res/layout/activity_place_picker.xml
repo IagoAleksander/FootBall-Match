@@ -2,25 +2,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".PlacePickerActivity">
-
-    <ImageView
-        android:id="@+id/ranking_prod_pic"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/app_name"
-        android:scaleType="centerCrop"
-        android:src="@drawable/background1"/>
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    tools:context=".PlacePickerActivity"
+    android:background="@drawable/background1">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_centerInParent="true">
 
-        <LinearLayout
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            card_view:cardCornerRadius="4dp">
+
+            <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/activity_vertical_margin"
@@ -53,12 +50,21 @@
                         android:layout_marginBottom="10dp"
                         android:visibility="gone"/>
 
-                    <Button
+                    <TextView
+                        android:id="@+id/pickerButton"
+                        style="?android:textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@color/colorPrimary"
+                        android:elevation="1dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:minWidth="196dp"
+                        android:padding="8dp"
                         android:text="Choose Match Venue"
-                        android:id="@+id/pickerButton"
-                        android:layout_gravity="center"/>
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
 
                     <LinearLayout
                         android:id="@+id/separator_1"
@@ -95,7 +101,7 @@
                     android:id="@+id/section3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="12dp"
                     android:visibility="gone">
 
                     <TextView
@@ -112,11 +118,24 @@
                         android:layout_toRightOf="@id/venue_phone_label"
                         android:layout_centerVertical="true"/>
 
-                    <Button
+                    <TextView
+                        android:id="@+id/callButton"
+                        style="?android:textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@color/colorPrimary"
+                        android:elevation="1dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:minWidth="100dp"
+                        android:padding="8dp"
                         android:text="Call"
-                        android:id="@+id/callButton"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"/>
 
@@ -127,7 +146,8 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp">
+                android:layout_marginTop="12dp"
+                android:gravity="center">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -159,7 +179,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="20dp">
+                android:layout_marginTop="12dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -182,14 +202,24 @@
                             android:layout_height="wrap_content"/>
                     </LinearLayout>
 
-
-
-                    <Button
+                    <TextView
                         android:id="@+id/date_picker"
+                        style="?android:textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
                         android:layout_marginTop="8dp"
-                        android:text="Pick Date"/>
+                        android:background="@color/colorPrimary"
+                        android:elevation="1dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:minWidth="196dp"
+                        android:padding="8dp"
+                        android:text="Pick Date"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
@@ -214,12 +244,24 @@
                             android:layout_height="wrap_content"/>
                     </LinearLayout>
 
-                    <Button
+                    <TextView
                         android:id="@+id/time_picker"
+                        style="?android:textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
                         android:layout_marginTop="8dp"
-                        android:text="Pick time"/>
+                        android:background="@color/colorPrimary"
+                        android:elevation="1dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:minWidth="196dp"
+                        android:padding="8dp"
+                        android:text="Pick time"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
@@ -234,22 +276,77 @@
                 android:background="@color/colorPrimaryDark"
                 android:orientation="horizontal" />
 
-            <Button
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/event_players_list"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Create Event"
-                android:layout_marginTop="20dp"
-                android:id="@+id/buttonCreateEvent"
-                android:layout_gravity="center"/>
+                android:layout_marginTop="12dp"
+                android:orientation="vertical"/>
 
-            <Button
-                android:id="@+id/buttonCancel"
-                android:text="Cancel"
+            <TextView
+                android:id="@+id/buttonAddPlayer"
+                style="?android:textAppearanceSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:background="@color/colorPrimary"
+                android:elevation="1dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:minWidth="196dp"
+                android:padding="8dp"
+                android:text="Add Player"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:id="@+id/separator_4"
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="12dp"
+                android:background="@color/colorPrimaryDark"
+                android:orientation="horizontal" />
+
+            <TextView
+                android:id="@+id/buttonCreateEvent"
+                style="?android:textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="8dp"
+                android:background="@color/colorPrimary"
+                android:elevation="1dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:minWidth="196dp"
+                android:padding="8dp"
+                android:text="Create Event"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/buttonCancel"
+                style="?android:textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:background="@color/colorPrimary"
+                android:elevation="1dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:minWidth="196dp"
+                android:padding="8dp"
+                android:text="Cancel"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
 
         </LinearLayout>
+
+        </android.support.v7.widget.CardView>
 
     </ScrollView>
 </RelativeLayout>

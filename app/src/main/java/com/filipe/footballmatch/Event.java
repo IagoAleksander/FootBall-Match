@@ -2,6 +2,7 @@ package com.filipe.footballmatch;
 
 import android.support.v7.app.AppCompatActivity;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -14,6 +15,7 @@ public class Event extends AppCompatActivity {
     private String place;
     private Date date;
     private int numberOfPlayers;
+    private ArrayList<String> playersIdList;
 
     public Event() {
       /*Blank default constructor essential for Firebase*/
@@ -51,4 +53,11 @@ public class Event extends AppCompatActivity {
         this.numberOfPlayers = numberOfPlayers;
     }
 
+    public ArrayList<String> getPlayersIdList() {
+        return playersIdList;
+    }
+
+    public void setPlayersIdList(ArrayList<String> playersIdList) {
+        this.playersIdList = playersIdList;
+    }
 }

@@ -10,10 +10,11 @@ import org.parceler.Parcel;
 public class Person {
     //name and address string 
     private String name;
+    private String email;
     private int age;
     private String preferredPosition;
     private String contactNumber;
-    private String address;
+    private String userKey;
  
     public Person() {
       /*Blank default constructor essential for Firebase*/
@@ -26,13 +27,13 @@ public class Person {
     public void setName(String name) {
         this.name = name;
     }
- 
-    public String getAddress() {
-        return address;
+
+    public String getEmail() {
+        return email;
     }
- 
-    public void setAddress(String address) {
-        this.address = address;
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public int getAge() {
@@ -57,5 +58,13 @@ public class Person {
 
     public void setPreferredPosition(String preferredPosition) {
         this.preferredPosition = preferredPosition;
+    }
+
+    public String getUserKey() {
+        return userKey;
+    }
+
+    public void setUserKey(String userKey) {
+        this.userKey = userKey;
     }
 }

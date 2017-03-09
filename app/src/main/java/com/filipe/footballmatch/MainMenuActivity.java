@@ -26,14 +26,13 @@ import static android.R.attr.value;
 
 public class MainMenuActivity extends AppCompatActivity {
 
-    Button editProfileButton;
-    Button searchUserButton;
-    Button createMatchButton;
-    Button listAvailableMatchesButton;
-    Button logoutButton;
+    TextView viewProfileButton;
+    TextView searchUserButton;
+    TextView createMatchButton;
+    TextView listAvailableMatchesButton;
+    TextView logoutButton;
 
     String name;
-    int age;
 
     String id;
 
@@ -48,13 +47,13 @@ public class MainMenuActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
-        editProfileButton = (Button) findViewById(R.id.buttonViewProfile);
-        searchUserButton = (Button) findViewById(R.id.buttonSearchUser);
-        createMatchButton = (Button) findViewById(R.id.buttonCreateMatch);
-        listAvailableMatchesButton = (Button) findViewById(R.id.buttonListMatches);
-        logoutButton = (Button) findViewById(R.id.buttonLogout);
+        viewProfileButton = (TextView) findViewById(R.id.buttonViewProfile);
+        searchUserButton = (TextView) findViewById(R.id.buttonSearchUser);
+        createMatchButton = (TextView) findViewById(R.id.buttonCreateMatch);
+        listAvailableMatchesButton = (TextView) findViewById(R.id.buttonListMatches);
+        logoutButton = (TextView) findViewById(R.id.buttonLogout);
 
-        editProfileButton.setOnClickListener(new View.OnClickListener() {
+        viewProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, ViewProfileActivity.class);
@@ -104,7 +103,6 @@ public class MainMenuActivity extends AppCompatActivity {
             // Read from the database
             myRef.child(id).addValueEventListener(new ValueEventListener() {
                 TextView nameTextView = (TextView) findViewById(R.id.activity_main_menu_name);
-                TextView ageTextView = (TextView) findViewById(R.id.activity_main_menu_age);
 
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -112,10 +110,8 @@ public class MainMenuActivity extends AppCompatActivity {
                     // whenever data at this location is updated.
                     Person person = dataSnapshot.getValue(Person.class);
                     name = person.getName();
-                    age = person.getAge();
                     Log.d(TAG, "Value is: " + value);
-                    nameTextView.setText(name);
-                    ageTextView.setText(Integer.toString(age));
+                    nameTextView.setText("Hello, " +name +"!");
                 }
 
                 @Override

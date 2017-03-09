@@ -44,6 +44,7 @@ public class RegisterActivity extends AppCompatActivity {
     public static final String TAG = RegisterActivity.class.getSimpleName();
 
     String name;
+    String email;
     int age;
 
     @Override
@@ -86,6 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                     //Adding values
                     person.setName(name);
+                    person.setEmail(email);
                     person.setAge(age);
 //
                     myRef.child(userId).setValue(person);
@@ -114,7 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (validateInfo()) {
 
 //              Getting values to store
-                    String email = editTextEmail.getEditText().getText().toString().trim();
+                    email = editTextEmail.getEditText().getText().toString().trim();
                     String password = editTextPassword.getEditText().getText().toString().trim();
                     name = editTextName.getEditText().getText().toString().trim();
                     age = Integer.parseInt(editTextAge.getEditText().getText().toString().trim());

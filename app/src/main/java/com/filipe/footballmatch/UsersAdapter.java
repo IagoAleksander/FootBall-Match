@@ -1,11 +1,17 @@
 package com.filipe.footballmatch;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 
@@ -33,23 +39,55 @@ public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder_, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder_, final int position) {
 
         final MyViewHolder holder = (MyViewHolder) holder_;
         holder.name.setText(users.get(position).getName());
-        holder.age.setText(users.get(position).getAge());
+        holder.email.setText(users.get(position).getEmail());
+
+        if (activity.isfromCreateMatch) {
+            holder.checkbox.setVisibility(View.VISIBLE);
+
+            holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("userId",users.get(position).getUserKey());
+                        activity.setResult(Activity.RESULT_OK,returnIntent);
+                        activity.finish();
+                    }
+                }
+            });
+        }
+
+
+        holder.userLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(activity, ViewProfileActivity.class);
+                intent.putExtra("userKey", users.get(position).getUserKey());
+//                intent.putExtra("person", Parcels.wrap(users.get(position)));
+                activity.startActivity(intent);
+            }
+        });
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView name;
-        TextView age;
+        TextView email;
+        CheckBox checkbox;
+        LinearLayout userLayout;
 
         public MyViewHolder(View v) {
             super(v);
 
-            name = (TextView) v.findViewById(R.id.textViewName);
-            age = (TextView) v.findViewById(R.id.textViewAge);
+            name = (TextView) v.findViewById(R.id.user_name);
+            email = (TextView) v.findViewById(R.id.user_email);
+            checkbox = (CheckBox) v.findViewById(R.id.user_checkBox);
+            userLayout = (LinearLayout) v.findViewById(R.id.layoutUser);
 
         }
     }

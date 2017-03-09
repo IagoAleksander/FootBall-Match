@@ -29,6 +29,7 @@
     <string name="error_invalid_date">Please insert a valid date to continue.</string>
     <string name="error_invalid_time">Please insert a valid time to continue.</string>
     <string name="error_past_date">Please insert a future date to continue.</string>
+    <string name="error_user_already_added">This player is already added to the event.</string>
     <string name="success_register_match">Match registered successfully in the system.</string>
 
     <!-- EditProfile Activity -->

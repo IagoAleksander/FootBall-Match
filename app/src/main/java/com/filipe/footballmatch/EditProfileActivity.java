@@ -40,6 +40,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+import static android.R.id.edit;
+
 /**
  * Created by alks_ander on 21/01/2017.
  */
@@ -183,6 +185,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         Intent intent = new Intent(EditProfileActivity.this, ViewProfileActivity.class);
                         EditProfileActivity.this.startActivity(intent);
+                        finish();
                     }
                 });
             }
@@ -248,6 +251,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 dialog.cancel();
                 Intent intent = new Intent(EditProfileActivity.this, ViewProfileActivity.class);
                 EditProfileActivity.this.startActivity(intent);
+                finish();
             }
         });
     }

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -37,22 +38,32 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.vision.text.Line;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import org.parceler.Parcels;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import static android.R.attr.data;
 import static android.R.attr.name;
+import static android.R.attr.value;
 import static android.view.View.Z;
 import static com.filipe.footballmatch.R.id.callButton;
 import static com.filipe.footballmatch.R.id.pickerButton;
+import static com.filipe.footballmatch.R.id.spPreferredPosition;
 import static com.google.android.gms.analytics.internal.zzy.e;
 import static com.google.android.gms.analytics.internal.zzy.o;
 import static com.google.android.gms.analytics.internal.zzy.p;
 import static com.google.android.gms.analytics.internal.zzy.v;
+import static com.google.android.gms.internal.zzrw.IF;
 
 public class PlacePickerActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener{
@@ -61,26 +72,32 @@ public class PlacePickerActivity extends AppCompatActivity implements
     private static final int GOOGLE_API_CLIENT_ID = 0;
     private GoogleApiClient mGoogleApiClient;
     private static final int PERMISSION_REQUEST_CODE = 100;
+    private static final int ADD_PLAYER_REQUEST_CODE = 1002;
 
     private LinearLayout section2;
     private RelativeLayout section3;
+    private LinearLayout playerListLayout;
     private TextView mName;
     private TextView mAddress;
     private TextView mPhone;
-    private Button callButton;
+    private TextView callButton;
     private Spinner mSpinner;
 
-    private Button timePicker;
+    private TextView timePicker;
     private TextView mTime;
-    private Button datePicker;
+    private TextView datePicker;
     private TextView mDate;
 
-    private Button createEventButton;
+    private TextView addPlayerButton;
+    private TextView createEventButton;
 
     Place place;
     private String eventName;
-    private int eventNumberOfPlayers = 1;
     private Date eventDate;
+    private ArrayList<String> playerIdList = new ArrayList<>();
+    private ArrayList<Person> playerList = new ArrayList<>();
+
+    private int index;
  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,24 +110,26 @@ public class PlacePickerActivity extends AppCompatActivity implements
 
         section2 = (LinearLayout) findViewById(R.id.section2);
         section3 = (RelativeLayout) findViewById(R.id.section3);
+        playerListLayout = (LinearLayout) findViewById(R.id.event_players_list);
 
         mName = (TextView) findViewById(R.id.venue_name);
         mAddress = (TextView) findViewById(R.id.venue_address);
         mPhone = (TextView) findViewById(R.id.venue_phone);
-        callButton = (Button) findViewById(R.id.callButton);
-        Button pickerButton = (Button) findViewById(R.id.pickerButton);
+        callButton = (TextView) findViewById(R.id.callButton);
+        TextView pickerButton = (TextView) findViewById(R.id.pickerButton);
 
-        datePicker = (Button) findViewById(R.id.date_picker);
+        datePicker = (TextView) findViewById(R.id.date_picker);
         mDate = (TextView) findViewById(R.id.event_date);
 
-        timePicker = (Button) findViewById(R.id.time_picker);
+        timePicker = (TextView) findViewById(R.id.time_picker);
         mTime = (TextView) findViewById(R.id.event_time);
 
-        createEventButton = (Button) findViewById(R.id.buttonCreateEvent);
+        addPlayerButton = (TextView) findViewById(R.id.buttonAddPlayer);
+        createEventButton = (TextView) findViewById(R.id.buttonCreateEvent);
 
         mSpinner = (Spinner) findViewById(R.id.spinner);
-        Integer[] items = new Integer[]{1, 2, 3, 4};
-        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_spinner_item, items);
+        String[] items = new String[]{"10 (5x2)", "14 (7x2)", "22 (11x2)"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, items);
         mSpinner.setAdapter(adapter);
 
         mGoogleApiClient = new GoogleApiClient.Builder(PlacePickerActivity.this)
@@ -144,18 +163,6 @@ public class PlacePickerActivity extends AppCompatActivity implements
             }
         });
 
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                       int position, long id) {
-                eventNumberOfPlayers = position;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-            }
-        });
-
         timePicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -171,6 +178,15 @@ public class PlacePickerActivity extends AppCompatActivity implements
                 FragmentManager fm = getFragmentManager();
                 DialogFragment newFragment = new DatePickerFragment();
                 newFragment.show(fm, "datePicker");
+            }
+        });
+
+        addPlayerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PlacePickerActivity.this, ListUsersActivity.class);
+                intent.putExtra("isFromCreateMatch", true);
+                PlacePickerActivity.this.startActivityForResult(intent, ADD_PLAYER_REQUEST_CODE);
             }
         });
 
@@ -227,7 +243,28 @@ public class PlacePickerActivity extends AppCompatActivity implements
                 section3.setVisibility(View.VISIBLE);
             }
  
-        } else {
+        }
+        else if (requestCode == ADD_PLAYER_REQUEST_CODE
+                && resultCode == Activity.RESULT_OK){
+            String userId = data.getStringExtra("userId");
+
+            if (playerIdList.contains(userId)) {
+                final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_user_already_added, R.string.dialog_edit_ok_text, -1, -1);
+                dialog.setCancelable(false);
+                dialog.show();
+                dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.cancel();
+                    }
+                });
+            }
+            else {
+                playerIdList.add(userId);
+                getIdInfo(userId);
+            }
+        }
+        else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -412,8 +449,9 @@ public class PlacePickerActivity extends AppCompatActivity implements
 
         // Adding values
         event.setPlace(eventName);
-        event.setNumberOfPlayers(eventNumberOfPlayers);
+        event.setNumberOfPlayers(Integer.parseInt(mSpinner.getSelectedItem().toString().substring(0,2)));
         event.setDate(eventDate);
+        event.setPlayersIdList(playerIdList);
 
         myRef.child(eventId).setValue(event);
 
@@ -436,5 +474,53 @@ public class PlacePickerActivity extends AppCompatActivity implements
         Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + number));
         activity.startActivity(intent);
 
+    }
+
+    public void getIdInfo(String id) {
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("Person/");
+
+        // Read from the database
+        myRef.child(id).addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                playerList.add(dataSnapshot.getValue(Person.class));
+                populatePlayerLayout();
+                Log.d(TAG, "Value is: " + value);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
+    }
+
+    public void populatePlayerLayout() {
+        View.inflate(this, R.layout.item_user_list, playerListLayout);
+
+        for (int i = 0; i < playerListLayout.getChildCount(); i++) {
+            View view = playerListLayout.getChildAt(i);
+            TextView playerName = (TextView) view.findViewById(R.id.user_name);
+            TextView playerPreferredPosition = (TextView) view.findViewById(R.id.user_preferred_position);
+            playerName.setText(playerList.get(i).getName());
+            playerPreferredPosition.setText("(" +playerList.get(i).getPreferredPosition() +")");
+
+            index = i;
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(PlacePickerActivity.this, ViewProfileActivity.class);
+                    intent.putExtra("userId",playerList.get(index).getUserKey());
+                    PlacePickerActivity.this.startActivity(intent);
+                }
+            });
+        }
     }
 }

@@ -85,8 +85,12 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         buttonEditProfile = (TextView) findViewById(R.id.buttonEditProfile);
 
-        SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
+        id = getIntent().getStringExtra("userKey");
+
+        if (id == null || id.isEmpty()) {
+            SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
+        }
 
         // Get instance of Storage
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -154,6 +158,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 Intent intent = new Intent(ViewProfileActivity.this, EditProfileActivity.class);
                 intent.putExtra("person", Parcels.wrap(person));
                 ViewProfileActivity.this.startActivity(intent);
+                finish();
             }
         });
 

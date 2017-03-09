@@ -10,6 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -33,13 +35,19 @@ public class ListUsersActivity extends AppCompatActivity {
     UsersAdapter adapter;
     Context context;
 
+    LinearLayout searchUserLayout;
+    LinearLayout showFilterLayout;
+
     TextInputLayout userNameLayout;
     TextInputLayout userAgeLayout;
 
-    Button searchUserButton;
+    TextView searchUserButton;
+    TextView showFilterButton;
 
     String userName;
     int userAge;
+
+    boolean isfromCreateMatch = false;
 
     public static final String TAG = ListUsersActivity.class.getSimpleName();
 
@@ -55,14 +63,24 @@ public class ListUsersActivity extends AppCompatActivity {
         context = this;
         mAuth = FirebaseAuth.getInstance();
 
+        isfromCreateMatch = getIntent().getBooleanExtra("isFromCreateMatch", false);
+
+        searchUserLayout = (LinearLayout) findViewById(R.id.search_user_layout);
+        showFilterLayout = (LinearLayout) findViewById(R.id.search_user_showFilter);
+
         userNameLayout = (TextInputLayout) findViewById(R.id.tilName);
         userAgeLayout = (TextInputLayout) findViewById(R.id.tilAge);
-        searchUserButton = (Button) findViewById(R.id.search_button);
+        searchUserButton = (TextView) findViewById(R.id.search_button);
+        showFilterButton = (TextView) findViewById(R.id.show_filter_button);
         mRecyclerView = (RecyclerView) findViewById(R.id.users_recycler_view);
 
         searchUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                searchUserLayout.setVisibility(View.GONE);
+                showFilterLayout.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.VISIBLE);
 
                 if (!userNameLayout.getEditText().getText().toString().trim().isEmpty()) {
                     userName = userNameLayout.getEditText().getText().toString().trim();
@@ -79,17 +97,19 @@ public class ListUsersActivity extends AppCompatActivity {
                 myRef.addValueEventListener(new ValueEventListener() {
 
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot){
+                    public void onDataChange(DataSnapshot dataSnapshot) {
 
                         ArrayList<Person> users = new ArrayList<>();
 
                         for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                             if ((userNameLayout.getEditText().getText().toString().trim().isEmpty()
                                     || dsp.getValue(Person.class).getName().equals(userName))
-                                && (userAgeLayout.getEditText().getText().toString().trim().isEmpty()
-                                    || dsp.getValue(Person.class).getAge() == userAge))
+                                    && (userAgeLayout.getEditText().getText().toString().trim().isEmpty()
+                                    || dsp.getValue(Person.class).getAge() == userAge)) {
 
                                 users.add(dsp.getValue(Person.class));
+                                users.get(users.size() - 1).setUserKey(dsp.getKey());
+                            }
                         }
 
                         LinearLayoutManager llm = new LinearLayoutManager(context);
@@ -104,11 +124,20 @@ public class ListUsersActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError error){
+                    public void onCancelled(DatabaseError error) {
                         // Failed to read value
-                        Log.w(TAG,"Failed to read value.",error.toException());
+                        Log.w(TAG, "Failed to read value.", error.toException());
                     }
                 });
+            }
+        });
+
+        showFilterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchUserLayout.setVisibility(View.VISIBLE);
+                showFilterLayout.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.GONE);
             }
         });
 
