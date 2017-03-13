@@ -1,4 +1,4 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Models;
 
 import org.parceler.Parcel;
 

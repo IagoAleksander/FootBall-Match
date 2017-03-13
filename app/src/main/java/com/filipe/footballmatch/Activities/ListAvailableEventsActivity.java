@@ -1,39 +1,24 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Activities;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.filipe.footballmatch.Adapters.AvailableEventsAdapter;
+import com.filipe.footballmatch.Models.Event;
+import com.filipe.footballmatch.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static android.R.attr.id;
-import static android.R.attr.name;
-import static android.R.attr.singleUser;
-import static android.R.attr.value;
-import static com.google.android.gms.analytics.internal.zzy.e;
-import static com.google.android.gms.analytics.internal.zzy.n;
-import static com.google.android.gms.internal.zzng.ev;
 
 /**
  * Created by alks_ander on 23/01/2017.

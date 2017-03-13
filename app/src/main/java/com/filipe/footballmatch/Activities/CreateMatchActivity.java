@@ -1,4 +1,4 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Activities;
 
 import android.app.Activity;
 import android.app.DialogFragment;
@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -15,16 +14,20 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.Manifest;
 
+import com.filipe.footballmatch.Utilities.DatePickerFragment;
+import com.filipe.footballmatch.Models.Event;
+import com.filipe.footballmatch.Utilities.MessageDialog;
+import com.filipe.footballmatch.Models.Person;
+import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Utilities.TimePickerFragment;
+import com.filipe.footballmatch.Utilities.Utility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -38,36 +41,23 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.vision.text.Line;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.parceler.Parcels;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static android.R.attr.data;
-import static android.R.attr.name;
 import static android.R.attr.value;
-import static android.view.View.Z;
-import static com.filipe.footballmatch.R.id.callButton;
-import static com.filipe.footballmatch.R.id.pickerButton;
-import static com.filipe.footballmatch.R.id.spPreferredPosition;
-import static com.google.android.gms.analytics.internal.zzy.e;
-import static com.google.android.gms.analytics.internal.zzy.o;
-import static com.google.android.gms.analytics.internal.zzy.p;
-import static com.google.android.gms.analytics.internal.zzy.v;
-import static com.google.android.gms.internal.zzrw.IF;
+import static com.filipe.footballmatch.R.id.buttonCancel;
 
-public class PlacePickerActivity extends AppCompatActivity implements
+public class CreateMatchActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener{
-    private static final String TAG = "PlacePickerActivity";
+    private static final String TAG = "CreateMatchActivity";
     private static final int PLACE_PICKER_REQUEST = 1;
     private static final int GOOGLE_API_CLIENT_ID = 0;
     private GoogleApiClient mGoogleApiClient;
@@ -90,6 +80,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
 
     private TextView addPlayerButton;
     private TextView createEventButton;
+    private TextView cancelButton;
 
     Place place;
     private String eventName;
@@ -103,7 +94,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_place_picker);
+        setContentView(R.layout.activity_create_match);
 
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
@@ -126,13 +117,14 @@ public class PlacePickerActivity extends AppCompatActivity implements
 
         addPlayerButton = (TextView) findViewById(R.id.buttonAddPlayer);
         createEventButton = (TextView) findViewById(R.id.buttonCreateEvent);
+        cancelButton = (TextView) findViewById(buttonCancel);
 
         mSpinner = (Spinner) findViewById(R.id.spinner);
         String[] items = new String[]{"10 (5x2)", "14 (7x2)", "22 (11x2)"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, items);
         mSpinner.setAdapter(adapter);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(PlacePickerActivity.this)
+        mGoogleApiClient = new GoogleApiClient.Builder(CreateMatchActivity.this)
                 .addApi(Places.PLACE_DETECTION_API)
                 .enableAutoManage(this, GOOGLE_API_CLIENT_ID, this)
                 .build();
@@ -142,10 +134,10 @@ public class PlacePickerActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 if (mGoogleApiClient.isConnected()) {
-                    if (ContextCompat.checkSelfPermission(PlacePickerActivity.this,
+                    if (ContextCompat.checkSelfPermission(CreateMatchActivity.this,
                             Manifest.permission.ACCESS_FINE_LOCATION)
                             != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(PlacePickerActivity.this,
+                        ActivityCompat.requestPermissions(CreateMatchActivity.this,
                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 PERMISSION_REQUEST_CODE);
                     } else {
@@ -159,7 +151,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
         callButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callVenue(PlacePickerActivity.this, place.getPhoneNumber().toString());
+                callVenue(CreateMatchActivity.this, place.getPhoneNumber().toString());
             }
         });
 
@@ -184,9 +176,9 @@ public class PlacePickerActivity extends AppCompatActivity implements
         addPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(PlacePickerActivity.this, ListUsersActivity.class);
+                Intent intent = new Intent(CreateMatchActivity.this, ListUsersActivity.class);
                 intent.putExtra("isFromCreateMatch", true);
-                PlacePickerActivity.this.startActivityForResult(intent, ADD_PLAYER_REQUEST_CODE);
+                CreateMatchActivity.this.startActivityForResult(intent, ADD_PLAYER_REQUEST_CODE);
             }
         });
 
@@ -194,11 +186,11 @@ public class PlacePickerActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 if (validateData()) {
-                    if (Utility.isConnectedToNet(PlacePickerActivity.this)) {
+                    if (Utility.isConnectedToNet(CreateMatchActivity.this)) {
                         registerMatch();
                     }
                     else {
-                        final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
+                        final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
                         dialog.setCancelable(false);
                         dialog.show();
                         dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -212,6 +204,27 @@ public class PlacePickerActivity extends AppCompatActivity implements
                 else {
                     displayErrorPopup();
                 }
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, "cancel?", -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
+                dialog.setCancelable(false);
+                dialog.show();
+                dialog.noButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.yesButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        finish();
+                    }
+                });
             }
         });
     }
@@ -249,7 +262,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
             String userId = data.getStringExtra("userId");
 
             if (playerIdList.contains(userId)) {
-                final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_user_already_added, R.string.dialog_edit_ok_text, -1, -1);
+                final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_user_already_added, R.string.dialog_edit_ok_text, -1, -1);
                 dialog.setCancelable(false);
                 dialog.show();
                 dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -287,7 +300,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
         Log.e(TAG, "Google Places API connection failed with error code: "
                 + connectionResult.getErrorCode());
 
-        final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+        final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
         dialog.setCancelable(false);
         dialog.show();
         dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -321,13 +334,13 @@ public class PlacePickerActivity extends AppCompatActivity implements
                     PlacePicker.IntentBuilder intentBuilder =
                             new PlacePicker.IntentBuilder();
                     intentBuilder.setLatLngBounds(LIKELY_PLACE);
-                    Intent intent = intentBuilder.build(PlacePickerActivity.this);
+                    Intent intent = intentBuilder.build(CreateMatchActivity.this);
                     startActivityForResult(intent, PLACE_PICKER_REQUEST);
 
                 } catch (GooglePlayServicesRepairableException
                         | GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
-                    final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+                    final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
                     dialog.setCancelable(false);
                     dialog.show();
                     dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -371,7 +384,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
             } catch (ParseException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-                final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
+                final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
                 dialog.setCancelable(false);
                 dialog.show();
                 dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -390,7 +403,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
     public void displayErrorPopup() {
 
         if (eventName.isEmpty()) {
-            final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_invalid_venue, R.string.dialog_edit_ok_text, -1, -1);
+            final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_invalid_venue, R.string.dialog_edit_ok_text, -1, -1);
             dialog.setCancelable(false);
             dialog.show();
             dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -401,7 +414,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
             });
         }
         else if (mDate.getText().toString().trim().isEmpty()) {
-            final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_invalid_date, R.string.dialog_edit_ok_text, -1, -1);
+            final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_invalid_date, R.string.dialog_edit_ok_text, -1, -1);
             dialog.setCancelable(false);
             dialog.show();
             dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -412,7 +425,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
             });
         }
         else if (mTime.getText().toString().trim().isEmpty()) {
-            final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_invalid_time, R.string.dialog_edit_ok_text, -1, -1);
+            final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_invalid_time, R.string.dialog_edit_ok_text, -1, -1);
             dialog.setCancelable(false);
             dialog.show();
             dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -423,7 +436,7 @@ public class PlacePickerActivity extends AppCompatActivity implements
             });
         }
         else {
-            final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.error_past_date, R.string.dialog_edit_ok_text, -1, -1);
+            final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_past_date, R.string.dialog_edit_ok_text, -1, -1);
             dialog.setCancelable(false);
             dialog.show();
             dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -448,28 +461,34 @@ public class PlacePickerActivity extends AppCompatActivity implements
         Event event = new Event();
 
         // Adding values
-        event.setPlace(eventName);
-        event.setNumberOfPlayers(Integer.parseInt(mSpinner.getSelectedItem().toString().substring(0,2)));
+//        event.setPlace(place);
+        event.setName(place.getName().toString());
+        event.setAddress(place.getAddress().toString());
+        if (mPhone.length() != 0) {
+            event.setPhone(place.getPhoneNumber().toString());
+        }
+        event.setNumberOfPlayers(mSpinner.getSelectedItem().toString());
         event.setDate(eventDate);
         event.setPlayersIdList(playerIdList);
+        event.setEventKey(eventId);
 
         myRef.child(eventId).setValue(event);
 
-        final MessageDialog dialog = new MessageDialog(PlacePickerActivity.this, R.string.success_register_match, R.string.dialog_edit_ok_text, -1, -1);
+        final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.success_register_match, R.string.dialog_edit_ok_text, -1, -1);
         dialog.setCancelable(false);
         dialog.show();
         dialog.okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(PlacePickerActivity.this, MainMenuActivity.class);
-                PlacePickerActivity.this.startActivity(intent);
+                Intent intent = new Intent(CreateMatchActivity.this, MainMenuActivity.class);
+                CreateMatchActivity.this.startActivity(intent);
 
                 dialog.cancel();
             }
         });
     }
 
-    public static void callVenue(PlacePickerActivity activity, String number) {
+    public static void callVenue(CreateMatchActivity activity, String number) {
 
         Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + number));
         activity.startActivity(intent);
@@ -509,16 +528,16 @@ public class PlacePickerActivity extends AppCompatActivity implements
             TextView playerName = (TextView) view.findViewById(R.id.user_name);
             TextView playerPreferredPosition = (TextView) view.findViewById(R.id.user_preferred_position);
             playerName.setText(playerList.get(i).getName());
-            playerPreferredPosition.setText("(" +playerList.get(i).getPreferredPosition() +")");
+            playerPreferredPosition.setText(" (" +playerList.get(i).getPreferredPosition() +")");
 
             index = i;
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(PlacePickerActivity.this, ViewProfileActivity.class);
+                    Intent intent = new Intent(CreateMatchActivity.this, ViewProfileActivity.class);
                     intent.putExtra("userId",playerList.get(index).getUserKey());
-                    PlacePickerActivity.this.startActivity(intent);
+                    CreateMatchActivity.this.startActivity(intent);
                 }
             });
         }

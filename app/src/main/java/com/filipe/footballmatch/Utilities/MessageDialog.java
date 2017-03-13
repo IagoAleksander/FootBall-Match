@@ -1,4 +1,4 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Utilities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,6 +8,8 @@ import android.text.SpannableStringBuilder;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.filipe.footballmatch.R;
 
 public class MessageDialog {
 

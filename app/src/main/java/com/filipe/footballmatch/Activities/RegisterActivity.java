@@ -1,4 +1,4 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,15 +14,23 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
+import com.filipe.footballmatch.Utilities.MessageDialog;
+import com.filipe.footballmatch.Models.Person;
+import com.filipe.footballmatch.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.regex.Pattern;
+
+import static com.filipe.footballmatch.R.id.tilEmail;
 
 /**
  * Created by alks_ander on 21/01/2017.
@@ -40,12 +48,12 @@ public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private DatabaseReference myRef;
 
     public static final String TAG = RegisterActivity.class.getSimpleName();
 
-    String name;
-    String email;
-    int age;
+    Person person = new Person();
+    String oldKey;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,11 +65,13 @@ public class RegisterActivity extends AppCompatActivity {
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
         mAuth = FirebaseAuth.getInstance();
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("Person");
 
         buttonRegister = (TextView) findViewById(R.id.buttonSave);
         editTextName = (TextInputLayout) findViewById(R.id.tilName);
         editTextAge = (TextInputLayout) findViewById(R.id.tilAge);
-        editTextEmail = (TextInputLayout) findViewById(R.id.tilEmail);
+        editTextEmail = (TextInputLayout) findViewById(tilEmail);
         editTextConfirmEmail = (TextInputLayout) findViewById(R.id.tilConfirmEmail);
         editTextPassword= (TextInputLayout) findViewById(R.id.tilPassword);
         editTextConfirmPassword= (TextInputLayout) findViewById(R.id.tilConfirmPassword);
@@ -78,18 +88,15 @@ public class RegisterActivity extends AppCompatActivity {
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
                     DatabaseReference myRef = database.getReference("Person/");
 
+                    // Remove old entry of user (if exists)
+                    if (oldKey != null && !oldKey.isEmpty()){
+                        myRef.child(oldKey).removeValue();
+                    }
+
                     // Creating new user node, which returns the unique key value
                     // new user node would be /User/$userid/
                     String userId = user.getUid();
 
-                    //Creating Person object
-                    Person person = new Person();
-
-                    //Adding values
-                    person.setName(name);
-                    person.setEmail(email);
-                    person.setAge(age);
-//
                     myRef.child(userId).setValue(person);
 
                     SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -97,8 +104,17 @@ public class RegisterActivity extends AppCompatActivity {
                     editor.putString(getString(R.string.user_id_SharedPref), user.getUid());
                     editor.commit();
 
-                    Intent intent = new Intent(RegisterActivity.this, MainMenuActivity.class);
-                    RegisterActivity.this.startActivity(intent);
+                    final MessageDialog dialog = new MessageDialog(RegisterActivity.this, "user registered with success", R.string.dialog_edit_ok_text, -1, -1);
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(RegisterActivity.this, MainMenuActivity.class);
+                            RegisterActivity.this.startActivity(intent);
+                            dialog.cancel();
+                        }
+                    });
 
                 } else {
                     // User is signed out
@@ -114,36 +130,7 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View v) {
                 hideKeyboard();
                 if (validateInfo()) {
-
-//              Getting values to store
-                    email = editTextEmail.getEditText().getText().toString().trim();
-                    String password = editTextPassword.getEditText().getText().toString().trim();
-                    name = editTextName.getEditText().getText().toString().trim();
-                    age = Integer.parseInt(editTextAge.getEditText().getText().toString().trim());
-
-                    mAuth.createUserWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-
-                                    // If sign in fails, display a message to the user. If sign in succeeds
-                                    // the auth state listener will be notified and logic to handle the
-                                    // signed in user can be handled in the listener.
-                                    if (!task.isSuccessful()) {
-                                        final MessageDialog dialog = new MessageDialog(RegisterActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
-                                        dialog.setCancelable(false);
-                                        dialog.show();
-                                        dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                mAuth.signOut();
-                                                dialog.cancel();
-                                            }
-                                        });
-                                    }
-                                }
-                            });
+                    gettingExtraValues();
                 }
 
             }
@@ -215,6 +202,69 @@ public class RegisterActivity extends AppCompatActivity {
         }
         return validated;
 
+    }
+
+    public void gettingExtraValues() {
+
+        // Read from the database
+        myRef.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                person.setEmail(editTextEmail.getEditText().getText().toString().trim());
+
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    if (dsp.getValue(Person.class).getEmail().equals(person.getEmail())) {
+                        person = dsp.getValue(Person.class);
+                        oldKey = dsp.getKey();
+
+                        // update values
+                        person.setName(editTextName.getEditText().getText().toString().trim());
+                        person.setAge(Integer.parseInt(editTextAge.getEditText().getText().toString().trim()));
+                    }
+                }
+                storeValues();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+
+        });
+    }
+
+    public void storeValues() {
+
+        // Getting values to store
+        person.setEmail(editTextEmail.getEditText().getText().toString().trim());
+        String password = editTextPassword.getEditText().getText().toString().trim();
+
+        mAuth.createUserWithEmailAndPassword(person.getEmail(), password)
+                .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            final MessageDialog dialog = new MessageDialog(RegisterActivity.this, task.getException().getMessage(), R.string.dialog_edit_ok_text, -1, -1);
+                            dialog.setCancelable(false);
+                            dialog.show();
+                            dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    mAuth.signOut();
+                                    dialog.cancel();
+                                }
+                            });
+                        }
+                    }
+                });
     }
 
 }

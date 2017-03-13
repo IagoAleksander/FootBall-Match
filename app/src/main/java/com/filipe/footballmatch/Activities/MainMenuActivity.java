@@ -1,4 +1,4 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,9 +8,11 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
+import com.filipe.footballmatch.Utilities.MessageDialog;
+import com.filipe.footballmatch.Models.Person;
+import com.filipe.footballmatch.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -72,7 +74,7 @@ public class MainMenuActivity extends AppCompatActivity {
         createMatchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainMenuActivity.this, PlacePickerActivity.class);
+                Intent intent = new Intent(MainMenuActivity.this, CreateMatchActivity.class);
                 MainMenuActivity.this.startActivity(intent);
             }
         });

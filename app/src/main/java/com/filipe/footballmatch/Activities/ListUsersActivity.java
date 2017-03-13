@@ -1,18 +1,22 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.filipe.footballmatch.Models.Person;
+import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Adapters.UsersAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,19 +39,21 @@ public class ListUsersActivity extends AppCompatActivity {
     UsersAdapter adapter;
     Context context;
 
-    LinearLayout searchUserLayout;
+    CardView searchUserLayout;
     LinearLayout showFilterLayout;
+    CardView addNewPlayerLayout;
 
     TextInputLayout userNameLayout;
     TextInputLayout userAgeLayout;
 
     TextView searchUserButton;
+    TextView addnewPlayerButton;
     TextView showFilterButton;
 
     String userName;
     int userAge;
 
-    boolean isfromCreateMatch = false;
+    public boolean isfromCreateMatch = false;
 
     public static final String TAG = ListUsersActivity.class.getSimpleName();
 
@@ -65,12 +71,14 @@ public class ListUsersActivity extends AppCompatActivity {
 
         isfromCreateMatch = getIntent().getBooleanExtra("isFromCreateMatch", false);
 
-        searchUserLayout = (LinearLayout) findViewById(R.id.search_user_layout);
+        searchUserLayout = (CardView) findViewById(R.id.search_user_layout);
+        addNewPlayerLayout = (CardView) findViewById(R.id.add_new_player_layout);
         showFilterLayout = (LinearLayout) findViewById(R.id.search_user_showFilter);
 
         userNameLayout = (TextInputLayout) findViewById(R.id.tilName);
         userAgeLayout = (TextInputLayout) findViewById(R.id.tilAge);
         searchUserButton = (TextView) findViewById(R.id.search_button);
+        addnewPlayerButton = (TextView) findViewById(R.id.add_new_player_button);
         showFilterButton = (TextView) findViewById(R.id.show_filter_button);
         mRecyclerView = (RecyclerView) findViewById(R.id.users_recycler_view);
 
@@ -131,6 +139,18 @@ public class ListUsersActivity extends AppCompatActivity {
                 });
             }
         });
+
+        if (isfromCreateMatch) {
+            addNewPlayerLayout.setVisibility(View.VISIBLE);
+
+            addnewPlayerButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ListUsersActivity.this, AddPlayerActivity.class);
+                    ListUsersActivity.this.startActivity(intent);
+                }
+            });
+        }
 
         showFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -26,7 +26,7 @@
             android:value="@integer/google_play_services_version"/>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Activities.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,13 +35,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name=".Activities.LoginActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".RegisterActivity"
+            android:name=".Activities.RegisterActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".MainMenuActivity"
+            android:name=".Activities.MainMenuActivity"
             android:screenOrientation="portrait"/>
         <activity android:name="com.facebook.FacebookActivity"
             android:configChanges=
@@ -60,23 +60,31 @@
         </activity>
 
         <activity
-            android:name=".PlacePickerActivity"
+            android:name=".Activities.CreateMatchActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".ListAvailableEventsActivity"
+            android:name=".Activities.ListAvailableEventsActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".ListUsersActivity"
+            android:name=".Activities.ListUsersActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".ViewProfileActivity"
+            android:name=".Activities.ViewProfileActivity"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".EditProfileActivity"
+            android:name=".Activities.EditProfileActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name=".Activities.AddPlayerActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name=".Activities.ViewMatchActivity"
             android:screenOrientation="portrait">
         </activity>
 

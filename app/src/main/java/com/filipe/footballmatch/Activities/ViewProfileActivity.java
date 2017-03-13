@@ -1,14 +1,12 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Activities;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +16,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.filipe.footballmatch.Models.Person;
+import com.filipe.footballmatch.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,15 +29,12 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import org.parceler.Parcels;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import static android.R.attr.id;
 import static android.R.attr.value;
 
 /**
@@ -51,14 +48,13 @@ public class ViewProfileActivity extends AppCompatActivity {
     private TextView tvAge;
     private TextView tvPreferredPosition;
     private TextView tvContactNumber;
+    private TextView tvEmail;
 
     private TextView buttonEditProfile;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     StorageReference profileImageRef;
-
-    final static int REQUEST_IMAGE_CAPTURE = 1001;
 
     public static final String TAG = ViewProfileActivity.class.getSimpleName();
 
@@ -82,14 +78,20 @@ public class ViewProfileActivity extends AppCompatActivity {
         tvAge = (TextView) findViewById(R.id.user_age);
         tvPreferredPosition = (TextView) findViewById(R.id.user_preferred_position);
         tvContactNumber = (TextView) findViewById(R.id.user_contact_number);
+        tvEmail = (TextView) findViewById(R.id.user_email);
 
         buttonEditProfile = (TextView) findViewById(R.id.buttonEditProfile);
 
-        id = getIntent().getStringExtra("userKey");
+        SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
 
-        if (id == null || id.isEmpty()) {
-            SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
+        if (getIntent().getStringExtra("userKey") == null
+                || getIntent().getStringExtra("userKey").equals(id)) {
+
+            buttonEditProfile.setVisibility(View.VISIBLE);
+        }
+        else {
+            id = getIntent().getStringExtra("userKey");
         }
 
         // Get instance of Storage
@@ -142,6 +144,8 @@ public class ViewProfileActivity extends AppCompatActivity {
                     tvAge.setText(Integer.toString(person.getAge()));
                     tvPreferredPosition.setText(person.getPreferredPosition());
                     tvContactNumber.setText(person.getContactNumber());
+                    tvEmail.setText(person.getEmail());
+
                 }
 
                 @Override
@@ -150,17 +154,18 @@ public class ViewProfileActivity extends AppCompatActivity {
                     Log.w(TAG, "Failed to read value.", error.toException());
                 }
             });
-        }
 
-        buttonEditProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ViewProfileActivity.this, EditProfileActivity.class);
-                intent.putExtra("person", Parcels.wrap(person));
-                ViewProfileActivity.this.startActivity(intent);
-                finish();
-            }
-        });
+            buttonEditProfile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ViewProfileActivity.this, EditProfileActivity.class);
+                    intent.putExtra("person", Parcels.wrap(person));
+                    ViewProfileActivity.this.startActivity(intent);
+                    finish();
+                }
+            });
+
+        }
 
     }
 

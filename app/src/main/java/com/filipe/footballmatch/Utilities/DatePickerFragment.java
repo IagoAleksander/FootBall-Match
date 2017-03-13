@@ -1,4 +1,4 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Utilities;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -6,6 +6,8 @@ import android.app.DialogFragment;
 import android.os.Bundle;
 import android.widget.DatePicker;
 import android.widget.TextView;
+
+import com.filipe.footballmatch.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

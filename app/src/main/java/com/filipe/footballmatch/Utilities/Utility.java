@@ -1,4 +1,4 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Utilities;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

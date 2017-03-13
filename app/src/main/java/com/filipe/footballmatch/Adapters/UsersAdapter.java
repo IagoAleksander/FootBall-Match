@@ -1,4 +1,4 @@
-package com.filipe.footballmatch;
+package com.filipe.footballmatch.Adapters;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,7 +11,10 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.parceler.Parcels;
+import com.filipe.footballmatch.Activities.ListUsersActivity;
+import com.filipe.footballmatch.Activities.ViewProfileActivity;
+import com.filipe.footballmatch.Models.Person;
+import com.filipe.footballmatch.R;
 
 import java.util.ArrayList;
 
@@ -68,7 +71,6 @@ public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
                 Intent intent = new Intent(activity, ViewProfileActivity.class);
                 intent.putExtra("userKey", users.get(position).getUserKey());
-//                intent.putExtra("person", Parcels.wrap(users.get(position)));
                 activity.startActivity(intent);
             }
         });
