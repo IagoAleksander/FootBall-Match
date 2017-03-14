@@ -39,13 +39,16 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        // The content layout of screen is set
         setContentView(R.layout.activity_list_available_events);
 
+        // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
         context = this;
+
+        // An instance of FirebaseAuth is set
         mAuth = FirebaseAuth.getInstance();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.available_event_recycler_view);

@@ -70,11 +70,14 @@ public class EditProfileActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // The content layout of screen is set
         setContentView(R.layout.activity_edit_profile);
 
+        // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        // An instance of FirebaseAuth is set
         mAuth = FirebaseAuth.getInstance();
         person = Parcels.unwrap(getIntent().getExtras().getParcelable("person"));
 

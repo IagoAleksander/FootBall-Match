@@ -49,14 +49,16 @@ import java.util.regex.Pattern;
 
 import static com.facebook.internal.CallbackManagerImpl.RequestCodeOffset.Login;
 
+/**
+ * Created by Filipe on 23/01/2017.
+ * This is the login activity. Here, the user can insert the login info,
+ * login with google, login with facebook or register a new account
+ */
+
 public class LoginActivity extends AppCompatActivity implements  GoogleApiClient.OnConnectionFailedListener{
 
     private TextInputLayout login_et;
     private TextInputLayout password_et;
-    private TextView buttonRegister;
-    private TextView buttonLogin;
-    private TextView buttonGoogleLogin;
-    private TextView buttonFacebookLogin;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -71,12 +73,14 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        // The content layout of screen is set
         setContentView(R.layout.activity_login);
 
+        // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        // An instance of FirebaseAuth is set
         mAuth = FirebaseAuth.getInstance();
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -93,13 +97,13 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
                     final DatabaseReference myRef = database.getReference("Person/");
 
-                    // Check if user already exists
+                    // Check if info about the user already exists in the database
                     myRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
 
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot){
 
-                            // If user still does not exist, create a new entry in the database
+                            // If there is no info, create a new entry in the database
                             if (!dataSnapshot.exists()) {
 
                                 Log.d(TAG, "New User");
@@ -111,17 +115,20 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                                 // Creating Person object
                                 Person person = new Person();
 
-                                // Adding values
+                                // Populating person
                                 person.setName(user.getDisplayName());
 
+                                // Storing values to the database
                                 myRef.child(newUserId).setValue(person);
                             }
 
+                            // The userId is then saved to Shared Preferences (locally, in the device)
                             SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                             SharedPreferences.Editor editor=saved_values.edit();
                             editor.putString(getString(R.string.user_id_SharedPref), user.getUid());
                             editor.commit();
 
+                            // And the user is redirected to the MainMenuActivity, now logged in
                             Intent intent = new Intent(LoginActivity.this, MainMenuActivity.class);
                             LoginActivity.this.startActivity(intent);
 
@@ -142,18 +149,24 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
             }
         };
 
+        // The layout is now built
+        // First, the TextViews that will act as LoginActivity screen buttons are set
+        TextView buttonLogin = (TextView) findViewById(R.id.buttonLogin);
+        TextView buttonGoogleLogin = (TextView) findViewById(R.id.google_login);
+        TextView buttonFacebookLogin = (TextView) findViewById(R.id.facebook_login);
+        TextView buttonRegister = (TextView) findViewById(R.id.buttonRegister);
 
-        buttonLogin = (TextView) findViewById(R.id.buttonLogin);
-        buttonGoogleLogin = (TextView) findViewById(R.id.google_login);
-        buttonFacebookLogin = (TextView) findViewById(R.id.facebook_login);
-        buttonRegister = (TextView) findViewById(R.id.buttonRegister);
+        // And then, the TextInputLayout fields that will collect the login inputs
         login_et = (TextInputLayout) findViewById(R.id.tilLogin);
         password_et = (TextInputLayout) findViewById(R.id.tilPassword);
 
+        // Hints are added to the fields to help the user insert the right info
         login_et.setHint(getString(R.string.prompt_login));
         password_et.setHint(getString(R.string.prompt_password));
 
-        //Click Listener for button
+        // The Listeners for the buttons are now set
+
+        //Click Listener for button register
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -164,6 +177,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
             }
         });
 
+        //Click Listener for button login
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -171,7 +185,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                 if (validateInfo()) {
                     if (Utility.isConnectedToNet(LoginActivity.this)) {
 
-                        // Getting values to store
+                        // Getting login input from the user
                         String email = login_et.getEditText().getText().toString().trim();
                         String password = password_et.getEditText().getText().toString().trim();
 
@@ -200,20 +214,13 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                                     }
                                 });
                     } else {
-                        final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
-                        dialog.setCancelable(false);
-                        dialog.show();
-                        dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                dialog.cancel();
-                            }
-                        });
+                        Utility.noNetworkError(LoginActivity.this);
                     }
                 }
             }
         });
 
+        //Click Listener for button google login
         buttonGoogleLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -222,19 +229,12 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                     signInWithGoogle();
                 }
                 else {
-                    final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
-                    dialog.setCancelable(false);
-                    dialog.show();
-                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.cancel();
-                        }
-                    });
+                    Utility.noNetworkError(LoginActivity.this);
                 }
             }
         });
 
+        //Click Listener for button facebook login
         buttonFacebookLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -242,58 +242,16 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                     signInWithFacebook();
                 }
                 else {
-                    final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
-                    dialog.setCancelable(false);
-                    dialog.show();
-                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.cancel();
-                        }
-                    });
+                    Utility.noNetworkError(LoginActivity.this);
                 }
             }
         });
 
         // Configure Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+        mGoogleApiClient = configureGoogleSignIn();
 
-        //facebook initialize
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(this);
-        callbackManager = CallbackManager.Factory.create();
-        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                handleFacebookAccessToken(loginResult.getAccessToken());
-            }
-
-            @Override
-            public void onCancel() {}
-
-            @Override
-            public void onError(FacebookException error) {
-                Log.d(TAG, "onFacebookConnectionFailed:" + error.getMessage());
-                final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
-                dialog.setCancelable(false);
-                dialog.show();
-                dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mAuth.signOut();
-                        dialog.cancel();
-                    }
-                });
-
-            }
-        });
+        // Configure Facebook Sign In
+        callbackManager = configureFacebookSignIn();
     }
 
     @Override
@@ -315,22 +273,8 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         // An unresolvable error has occurred and Google APIs (including Sign-In) will not
         // be available.
         Log.d(TAG, "onGoogleConnectionFailed:" + connectionResult);
-        final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_google, R.string.dialog_edit_ok_text, -1, -1);
-        dialog.setCancelable(false);
-        dialog.show();
-        dialog.okButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mAuth.signOut();
-                dialog.cancel();
-            }
-        });
-    }
-
-    private void signInWithGoogle() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, GOOGLE_SIGN_IN);
-
+        Utility.generalError(LoginActivity.this, this.getString(R.string.error_google));
+        mAuth.signOut();
     }
 
     @Override
@@ -340,7 +284,6 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         //facebook
         if(requestCode == Login.toRequestCode()){
             callbackManager.onActivityResult(requestCode, resultCode, data);
-
         }
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
@@ -357,6 +300,13 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         }
     }
 
+    // Create intent for google signIn tentative
+    private void signInWithGoogle() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, GOOGLE_SIGN_IN);
+
+    }
+
     private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGooogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -370,17 +320,8 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential", task.getException());
-                            final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
-                            dialog.setCancelable(false);
-                            dialog.show();
-                            dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    mAuth.signOut();
-                                    dialog.cancel();
-                                }
-                            });
+                            Utility.generalError(LoginActivity.this, null);
+                            mAuth.signOut();
                         }
                     }
                 });
@@ -405,16 +346,8 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            final MessageDialog dialog = new MessageDialog(LoginActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
-                            dialog.setCancelable(false);
-                            dialog.show();
-                            dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    mAuth.signOut();
-                                    dialog.cancel();
-                                }
-                            });
+                            Utility.generalError(LoginActivity.this, null);
+                            mAuth.signOut();
 
                         }
 
@@ -422,32 +355,78 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                 });
     }
 
+    // The login information provided by the user is validated here
     public boolean validateInfo() {
 
+        // Standard pattern for email
         final String EMAIL_PATTERN = "^[a-zA-Z0-9#_~!$&'()*+,;=:.\"(),:;<>@\\[\\]\\\\]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*$";
         Pattern pattern = Pattern.compile(EMAIL_PATTERN);
 
         boolean validated = true;
 
         String email = login_et.getEditText().getText().toString().trim();
+
+        // If email is not in agreement with pattern...
         if (!pattern.matcher(email).matches()) {
             login_et.setError("Please insert a valid email address");
             validated = false;
         }
         else {
+            // Login input is ok, remove error
             login_et.setErrorEnabled(false);
         }
 
+        // If password is not at least 5 character long...
         String password = password_et.getEditText().getText().toString().trim();
         if (password.length() <= 5) {
             password_et.setError("Please insert a valid password");
             validated = false;
         }
         else {
+            // Password input is ok, remove error
             password_et.setErrorEnabled(false);
         }
 
         return validated;
 
+    }
+
+    // Standard Google SignIn configuration
+    public GoogleApiClient configureGoogleSignIn() {
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        return new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+    }
+
+    // Standard Facebook SignIn configuration
+    public CallbackManager configureFacebookSignIn() {
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
+        CallbackManager callbackManager = CallbackManager.Factory.create();
+        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                handleFacebookAccessToken(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {}
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d(TAG, "onFacebookConnectionFailed:" + error.getMessage());
+                Utility.generalError(LoginActivity.this, error.getMessage());
+                mAuth.signOut();
+            }
+        });
+
+        return callbackManager;
     }
 }

@@ -61,12 +61,16 @@ public class ListUsersActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // The content layout of screen is set
         setContentView(R.layout.activity_list_users);
 
+        // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
         context = this;
+
+        // An instance of FirebaseAuth is set
         mAuth = FirebaseAuth.getInstance();
 
         isfromCreateMatch = getIntent().getBooleanExtra("isFromCreateMatch", false);

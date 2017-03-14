@@ -12,7 +12,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
- * Created by alks_ander on 23/01/2017.
+ * Created by Filipe on 23/01/2017.
+ * This is the first activity, here the program checks if the user is logged or not.
+ * In the first case, the program redirects the user to the MainMenuActivity, otherwise,
+ * the user is redirected to the LoginActivity
  */
 
 public class MainActivity extends AppCompatActivity {
@@ -27,9 +30,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        // An instance of FirebaseAuth is set
         mAuth = FirebaseAuth.getInstance();
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -43,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, MainMenuActivity.class);
                     MainActivity.this.startActivity(intent);
                 } else {
-                    // User is signed out
+                    // User is not signed in
                     Log.d(TAG, "onAuthStateChanged:signed_out");
 
                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);

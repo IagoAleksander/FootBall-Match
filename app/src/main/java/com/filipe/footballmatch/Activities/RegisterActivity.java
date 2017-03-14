@@ -44,7 +44,6 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputLayout editTextConfirmEmail;
     private TextInputLayout editTextPassword;
     private TextInputLayout editTextConfirmPassword;
-    private TextView buttonRegister;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -59,16 +58,25 @@ public class RegisterActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // The content layout of screen is set
         setContentView(R.layout.activity_register);
 
+        // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        // An instance of FirebaseAuth is set
         mAuth = FirebaseAuth.getInstance();
+
+        // An instance of FirebaseDatabase is set
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         myRef = database.getReference("Person");
 
-        buttonRegister = (TextView) findViewById(R.id.buttonSave);
+        // The layout is now built
+        // First, the TextViews that will act as LoginActivity screen buttons are set
+        TextView buttonRegister = (TextView) findViewById(R.id.buttonSave);
+
+        // Then, the TextInputLayout that will allow the user to insert data are set
         editTextName = (TextInputLayout) findViewById(R.id.tilName);
         editTextAge = (TextInputLayout) findViewById(R.id.tilAge);
         editTextEmail = (TextInputLayout) findViewById(tilEmail);
@@ -84,10 +92,6 @@ public class RegisterActivity extends AppCompatActivity {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
-//                     Write a message to the database
-                    FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    DatabaseReference myRef = database.getReference("Person/");
-
                     // Remove old entry of user (if exists)
                     if (oldKey != null && !oldKey.isEmpty()){
                         myRef.child(oldKey).removeValue();
@@ -97,13 +101,16 @@ public class RegisterActivity extends AppCompatActivity {
                     // new user node would be /User/$userid/
                     String userId = user.getUid();
 
+                    // Storing values to the database
                     myRef.child(userId).setValue(person);
 
+                    // The userId is then saved to Shared Preferences (locally, in the device)
                     SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     SharedPreferences.Editor editor = saved_values.edit();
                     editor.putString(getString(R.string.user_id_SharedPref), user.getUid());
                     editor.commit();
 
+                    // A message is then displayed, informing the user that the registration was successful
                     final MessageDialog dialog = new MessageDialog(RegisterActivity.this, "user registered with success", R.string.dialog_edit_ok_text, -1, -1);
                     dialog.setCancelable(false);
                     dialog.show();
@@ -124,7 +131,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         };
 
-        //Click Listener for button
+        // Click Listener for button register
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
