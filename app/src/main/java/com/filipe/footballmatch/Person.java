@@ -1,7 +1,7 @@
 package com.filipe.footballmatch;
  
 /**
- * Created by Belal on 2/23/2016.
+ * Created by Filipe on 2/23/2016.
  */
 public class Person {
     //name and address string 

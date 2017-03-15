@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "391583606721",
-    "firebase_url": "https://football-match-2c6aa.firebaseio.com",
-    "project_id": "football-match-2c6aa",
-    "storage_bucket": "football-match-2c6aa.appspot.com"
+    "project_number": "60394722805",
+    "firebase_url": "https://football-match-a60fb.firebaseio.com",
+    "project_id": "football-match-a60fb",
+    "storage_bucket": "football-match-a60fb.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:391583606721:android:6c041fb613719f8c",
+        "mobilesdk_app_id": "1:60394722805:android:6c041fb613719f8c",
         "android_client_info": {
           "package_name": "com.filipe.footballmatch"
         }
       },
       "oauth_client": [
         {
-          "client_id": "391583606721-fs4cjsf3478oi5a8tinf5hhng9h05gek.apps.googleusercontent.com",
+          "client_id": "60394722805-sqhn9ghqmhst752rqbb9hia6d2ttdia0.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyB9WlQLkXgeCog5jjDq53YppP3iIkuUOBo"
+          "current_key": "AIzaSyCraGwpXvNIdT5_ep6IhM_LvyOdj48maow"
         }
       ],
       "services": {

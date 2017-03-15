@@ -28,7 +28,7 @@ import static com.filipe.footballmatch.R.id.editTextAddress;
 import static com.filipe.footballmatch.R.id.editTextName;
 
 /**
- * Created by alks_ander on 21/01/2017.
+ * Created by Filipe on 21/01/2017.
  */
 
 public class RegisterActivity extends AppCompatActivity {

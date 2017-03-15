@@ -11,7 +11,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
- * Created by alks_ander on 23/01/2017.
+ * Created by Filipe on 23/01/2017.
  */
 
 public class MainActivity extends AppCompatActivity {

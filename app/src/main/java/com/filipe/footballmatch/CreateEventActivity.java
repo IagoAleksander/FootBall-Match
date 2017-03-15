@@ -30,7 +30,7 @@ import static com.filipe.footballmatch.R.id.editTextAddress;
 import static com.filipe.footballmatch.R.id.editTextName;
 
 /**
- * Created by alks_ander on 23/01/2017.
+ * Created by Filipe on 23/01/2017.
  */
 
 public class CreateEventActivity extends AppCompatActivity {

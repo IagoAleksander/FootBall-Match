@@ -3,7 +3,7 @@ package com.filipe.footballmatch;
 import android.support.v7.app.AppCompatActivity;
 
 /**
- * Created by alks_ander on 23/01/2017.
+ * Created by Filipe on 23/01/2017.
  */
 
 public class Event extends AppCompatActivity {
