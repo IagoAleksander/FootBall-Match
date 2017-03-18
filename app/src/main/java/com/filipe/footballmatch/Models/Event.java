@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Created by alks_ander on 23/01/2017.
+ * Created by Filipe on 23/01/2017.
  */
 
 @Parcel
@@ -32,15 +32,6 @@ public class Event {
     public void setName(String name) {
         this.name = name;
     }
-
-//    public Place getPlace() {
-//        return place;
-//    }
-
-//    public void setPlace(Place place) {
-//        this.place = place;
-//    }
-
 
     public String getAddress() {
         return address;

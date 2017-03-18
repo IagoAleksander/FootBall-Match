@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.filipe.footballmatch.Utilities.MessageDialog;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Utilities.Utility;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -33,7 +34,7 @@ import java.util.regex.Pattern;
 import static com.filipe.footballmatch.R.id.tilEmail;
 
 /**
- * Created by alks_ander on 21/01/2017.
+ * Created by Filipe on 21/01/2017.
  */
 
 public class RegisterActivity extends AppCompatActivity {
@@ -166,8 +167,10 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    // The inserted info is checked and validated
     public boolean validateInfo() {
 
+        // Email data must follow a pattern
         final String EMAIL_PATTERN = "^[a-zA-Z0-9#_~!$&'()*+,;=:.\"(),:;<>@\\[\\]\\\\]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*$";
         Pattern pattern = Pattern.compile(EMAIL_PATTERN);
 
@@ -211,6 +214,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
+    // If the person was created by another user in the app, when the real user creates an account,
+    // this account as extra info coming from the already registered user
     public void gettingExtraValues() {
 
         // Read from the database
@@ -238,6 +243,7 @@ public class RegisterActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
+                Utility.generalError(RegisterActivity.this, error.getMessage());
             }
 
         });
@@ -259,16 +265,8 @@ public class RegisterActivity extends AppCompatActivity {
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            final MessageDialog dialog = new MessageDialog(RegisterActivity.this, task.getException().getMessage(), R.string.dialog_edit_ok_text, -1, -1);
-                            dialog.setCancelable(false);
-                            dialog.show();
-                            dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    mAuth.signOut();
-                                    dialog.cancel();
-                                }
-                            });
+                            Utility.generalError(RegisterActivity.this, task.getException().getMessage());
+                            mAuth.signOut();
                         }
                     }
                 });

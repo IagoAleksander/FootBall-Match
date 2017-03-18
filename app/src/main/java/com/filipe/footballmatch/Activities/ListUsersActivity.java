@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
 import com.filipe.footballmatch.Adapters.UsersAdapter;
-import com.google.firebase.auth.FirebaseAuth;
+import com.filipe.footballmatch.Utilities.Utility;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,13 +27,11 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 /**
- * Created by alks_ander on 23/01/2017.
+ * Created by Filipe on 23/01/2017.
  */
 
 public class ListUsersActivity extends AppCompatActivity {
 
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
 
     RecyclerView mRecyclerView;
     UsersAdapter adapter;
@@ -53,7 +51,7 @@ public class ListUsersActivity extends AppCompatActivity {
     String userName;
     int userAge;
 
-    public boolean isfromCreateMatch = false;
+    public boolean isFromCreateMatch = false;
 
     public static final String TAG = ListUsersActivity.class.getSimpleName();
 
@@ -70,26 +68,35 @@ public class ListUsersActivity extends AppCompatActivity {
 
         context = this;
 
-        // An instance of FirebaseAuth is set
-        mAuth = FirebaseAuth.getInstance();
+        // A flag is set to check which flow the user is using
+        // (If it is from create match or directly from the main menu)
+        isFromCreateMatch = getIntent().getBooleanExtra("isFromCreateMatch", false);
 
-        isfromCreateMatch = getIntent().getBooleanExtra("isFromCreateMatch", false);
 
+        // The layout is now built
+        // First, the CardViews that will act as sections for the screen are set
         searchUserLayout = (CardView) findViewById(R.id.search_user_layout);
         addNewPlayerLayout = (CardView) findViewById(R.id.add_new_player_layout);
         showFilterLayout = (LinearLayout) findViewById(R.id.search_user_showFilter);
 
+        // Then, the TextInputLayout fields that will collect the user inputs to filter the list
         userNameLayout = (TextInputLayout) findViewById(R.id.tilName);
         userAgeLayout = (TextInputLayout) findViewById(R.id.tilAge);
+
+        // The TextViews that will act as ListUsersActivity screen buttons are set
         searchUserButton = (TextView) findViewById(R.id.search_button);
         addnewPlayerButton = (TextView) findViewById(R.id.add_new_player_button);
         showFilterButton = (TextView) findViewById(R.id.show_filter_button);
+
+        // And, finally, the RecyclerView, that will display the list of elements
         mRecyclerView = (RecyclerView) findViewById(R.id.users_recycler_view);
 
+        //Click Listener for button search user
         searchUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                // The filter section is hided, a show filter button is set and the list is displayed with the results
                 searchUserLayout.setVisibility(View.GONE);
                 showFilterLayout.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.VISIBLE);
@@ -101,8 +108,8 @@ public class ListUsersActivity extends AppCompatActivity {
                     userAge = Integer.parseInt(userAgeLayout.getEditText().getText().toString().trim());
                 }
 
+                // An instance of FirebaseDatabase is set
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
-
                 DatabaseReference myRef = database.getReference("Person/");
 
                 // Read from the database
@@ -113,6 +120,7 @@ public class ListUsersActivity extends AppCompatActivity {
 
                         ArrayList<Person> users = new ArrayList<>();
 
+                        // Recover all the items from the database that match with the filter
                         for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                             if ((userNameLayout.getEditText().getText().toString().trim().isEmpty()
                                     || dsp.getValue(Person.class).getName().equals(userName))
@@ -124,12 +132,14 @@ public class ListUsersActivity extends AppCompatActivity {
                             }
                         }
 
+                        // set the RecyclerView parameters
                         LinearLayoutManager llm = new LinearLayoutManager(context);
                         llm.setOrientation(LinearLayoutManager.VERTICAL);
 
                         mRecyclerView.setLayoutManager(llm);
                         mRecyclerView.setHasFixedSize(true);
 
+                        // Update the list with the results
                         adapter = new UsersAdapter(ListUsersActivity.this, users);
                         mRecyclerView.setAdapter(adapter);
 
@@ -139,23 +149,13 @@ public class ListUsersActivity extends AppCompatActivity {
                     public void onCancelled(DatabaseError error) {
                         // Failed to read value
                         Log.w(TAG, "Failed to read value.", error.toException());
+                        Utility.generalError(ListUsersActivity.this, error.getMessage());
                     }
                 });
             }
         });
 
-        if (isfromCreateMatch) {
-            addNewPlayerLayout.setVisibility(View.VISIBLE);
-
-            addnewPlayerButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(ListUsersActivity.this, AddPlayerActivity.class);
-                    ListUsersActivity.this.startActivity(intent);
-                }
-            });
-        }
-
+        //Click Listener for button show filter
         showFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -164,6 +164,19 @@ public class ListUsersActivity extends AppCompatActivity {
                 mRecyclerView.setVisibility(View.GONE);
             }
         });
+
+        // If the user reach this screen form the create match flow, a new option appears
+        // this option allows the user to add a new player to the match (not registered in the app)
+        if (isFromCreateMatch) {
+            addNewPlayerLayout.setVisibility(View.VISIBLE);
+            addnewPlayerButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ListUsersActivity.this, AddPlayerActivity.class);
+                    ListUsersActivity.this.startActivity(intent);
+                }
+            });
+        }
 
     }
 

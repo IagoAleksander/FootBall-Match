@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -54,9 +55,11 @@ import java.util.Date;
 
 import static android.R.attr.value;
 import static com.filipe.footballmatch.R.id.buttonCancel;
+import static com.filipe.footballmatch.R.id.pickerButton;
 
 public class CreateMatchActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener{
+
     private static final String TAG = "CreateMatchActivity";
     private static final int PLACE_PICKER_REQUEST = 1;
     private static final int GOOGLE_API_CLIENT_ID = 0;
@@ -70,17 +73,10 @@ public class CreateMatchActivity extends AppCompatActivity implements
     private TextView mName;
     private TextView mAddress;
     private TextView mPhone;
-    private TextView callButton;
     private Spinner mSpinner;
 
-    private TextView timePicker;
     private TextView mTime;
-    private TextView datePicker;
     private TextView mDate;
-
-    private TextView addPlayerButton;
-    private TextView createEventButton;
-    private TextView cancelButton;
 
     Place place;
     private String eventName;
@@ -101,37 +97,45 @@ public class CreateMatchActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        // The layout is now built
+        // First, the Layouts that will act as sections for the screen are set
         section2 = (LinearLayout) findViewById(R.id.section2);
         section3 = (RelativeLayout) findViewById(R.id.section3);
         playerListLayout = (LinearLayout) findViewById(R.id.event_players_list);
 
+        // Then, the TextViews that will display the info about the venue
         mName = (TextView) findViewById(R.id.venue_name);
         mAddress = (TextView) findViewById(R.id.venue_address);
         mPhone = (TextView) findViewById(R.id.venue_phone);
-        callButton = (TextView) findViewById(R.id.callButton);
-        TextView pickerButton = (TextView) findViewById(R.id.pickerButton);
 
-        datePicker = (TextView) findViewById(R.id.date_picker);
+        // The pickers that will allow the user to choose the date...
+        TextView datePicker = (TextView) findViewById(R.id.date_picker);
         mDate = (TextView) findViewById(R.id.event_date);
 
-        timePicker = (TextView) findViewById(R.id.time_picker);
+        // ... and the time of the match
+        TextView timePicker = (TextView) findViewById(R.id.time_picker);
         mTime = (TextView) findViewById(R.id.event_time);
 
-        addPlayerButton = (TextView) findViewById(R.id.buttonAddPlayer);
-        createEventButton = (TextView) findViewById(R.id.buttonCreateEvent);
-        cancelButton = (TextView) findViewById(buttonCancel);
-
+        // The spinner that will allow the user to select the number of players in the match
         mSpinner = (Spinner) findViewById(R.id.spinner);
         String[] items = new String[]{"10 (5x2)", "14 (7x2)", "22 (11x2)"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, items);
         mSpinner.setAdapter(adapter);
 
+        // And, finally, the TextViews that will act as LoginActivity screen buttons are set
+        TextView callButton = (TextView) findViewById(R.id.callButton);
+        TextView pickerButton = (TextView) findViewById(R.id.pickerButton);
+        TextView addPlayerButton = (TextView) findViewById(R.id.buttonAddPlayer);
+        TextView createEventButton = (TextView) findViewById(R.id.buttonCreateEvent);
+        TextView cancelButton = (TextView) findViewById(buttonCancel);
+
+        // Standard builder for google places API
         mGoogleApiClient = new GoogleApiClient.Builder(CreateMatchActivity.this)
                 .addApi(Places.PLACE_DETECTION_API)
                 .enableAutoManage(this, GOOGLE_API_CLIENT_ID, this)
                 .build();
 
-
+        // Click Listener for button choose match venue
         pickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -150,6 +154,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
             }
         });
 
+        // Click Listener for button call venue
         callButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,6 +162,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
             }
         });
 
+        // Click Listener for timePicker, opens time picker fragment
         timePicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -166,6 +172,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
             }
         });
 
+        // Click Listener for datePicker, opens date picker fragment
         datePicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -175,6 +182,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
             }
         });
 
+        // Click Listener for button add player
         addPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,6 +192,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
             }
         });
 
+        // Click Listener for button create event
         createEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -192,15 +201,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
                         registerMatch();
                     }
                     else {
-                        final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_no_network, R.string.dialog_edit_ok_text, -1, -1);
-                        dialog.setCancelable(false);
-                        dialog.show();
-                        dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                dialog.cancel();
-                            }
-                        });
+                        Utility.noNetworkError(CreateMatchActivity.this);
                     }
                 }
                 else {
@@ -209,6 +210,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
             }
         });
 
+        // Click Listener for button cancel
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -264,15 +266,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
             String userId = data.getStringExtra("userId");
 
             if (playerIdList.contains(userId)) {
-                final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_user_already_added, R.string.dialog_edit_ok_text, -1, -1);
-                dialog.setCancelable(false);
-                dialog.show();
-                dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.cancel();
-                    }
-                });
+                Utility.generalError(CreateMatchActivity.this, getString(R.string.error_user_already_added));
             }
             else {
                 playerIdList.add(userId);
@@ -284,6 +278,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
         }
     }
 
+    // Check if the permissions for google places API are granted
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -297,22 +292,17 @@ public class CreateMatchActivity extends AppCompatActivity implements
         }
     }
 
+    // On google places API connection fail
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.e(TAG, "Google Places API connection failed with error code: "
                 + connectionResult.getErrorCode());
 
-        final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
-        dialog.setCancelable(false);
-        dialog.show();
-        dialog.okButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.cancel();
-            }
-        });
+        Utility.generalError(CreateMatchActivity.this, connectionResult.getErrorMessage());
     }
 
+    // Setting google places API, the map will show the user surroundings when opened, first this method recover
+    // the likely coordinates of the user and then allow him to choose a place to create an event
     private void callPlaceDetectionApi() throws SecurityException {
         PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi
                 .getCurrentPlace(mGoogleApiClient, null);
@@ -342,20 +332,13 @@ public class CreateMatchActivity extends AppCompatActivity implements
                 } catch (GooglePlayServicesRepairableException
                         | GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
-                    final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
-                    dialog.setCancelable(false);
-                    dialog.show();
-                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.cancel();
-                        }
-                    });
+                    Utility.generalError(CreateMatchActivity.this, e.getMessage());
                 }
             }
         });
     }
 
+    // The create event data is validated before submitted to the database
     public boolean validateData() {
 
         boolean dataValidated = true;
@@ -386,15 +369,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
             } catch (ParseException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-                final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_general, R.string.dialog_edit_ok_text, -1, -1);
-                dialog.setCancelable(false);
-                dialog.show();
-                dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.cancel();
-                    }
-                });
+                Utility.generalError(CreateMatchActivity.this, e.getMessage());
             }
 
         }
@@ -402,55 +377,26 @@ public class CreateMatchActivity extends AppCompatActivity implements
         return dataValidated;
     }
 
+    // If there is any error, the user is informed
     public void displayErrorPopup() {
 
         if (eventName.isEmpty()) {
-            final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_invalid_venue, R.string.dialog_edit_ok_text, -1, -1);
-            dialog.setCancelable(false);
-            dialog.show();
-            dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dialog.cancel();
-                }
-            });
+            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_invalid_venue));
         }
         else if (mDate.getText().toString().trim().isEmpty()) {
-            final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_invalid_date, R.string.dialog_edit_ok_text, -1, -1);
-            dialog.setCancelable(false);
-            dialog.show();
-            dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dialog.cancel();
-                }
-            });
+            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_invalid_date));
         }
         else if (mTime.getText().toString().trim().isEmpty()) {
-            final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_invalid_time, R.string.dialog_edit_ok_text, -1, -1);
-            dialog.setCancelable(false);
-            dialog.show();
-            dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dialog.cancel();
-                }
-            });
+            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_invalid_time));
         }
         else {
-            final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.error_past_date, R.string.dialog_edit_ok_text, -1, -1);
-            dialog.setCancelable(false);
-            dialog.show();
-            dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dialog.cancel();
-                }
-            });
+            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_past_date));
         }
     }
 
+    // If the data is ok, the match is registered
     public void registerMatch() {
+
         //  Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("Event");
@@ -463,7 +409,6 @@ public class CreateMatchActivity extends AppCompatActivity implements
         Event event = new Event();
 
         // Adding values
-//        event.setPlace(place);
         event.setName(place.getName().toString());
         event.setAddress(place.getAddress().toString());
         if (mPhone.length() != 0) {
@@ -490,6 +435,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
         });
     }
 
+    // This method allows the user to call the venue to check for possible times for the event
     public static void callVenue(CreateMatchActivity activity, String number) {
 
         Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + number));
@@ -497,6 +443,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
     }
 
+    // For every player added to the event, the app search for its info in the database...
     public void getIdInfo(String id) {
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -518,10 +465,12 @@ public class CreateMatchActivity extends AppCompatActivity implements
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
+                Utility.generalError(CreateMatchActivity.this, error.getMessage());
             }
         });
     }
 
+    // ... and populate the layout with the player name and preferred position
     public void populatePlayerLayout() {
         View.inflate(this, R.layout.item_user_list, playerListLayout);
 

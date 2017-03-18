@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Utilities.Utility;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,7 +39,7 @@ import java.io.IOException;
 import static android.R.attr.value;
 
 /**
- * Created by alks_ander on 21/01/2017.
+ * Created by Filipe on 21/01/2017.
  */
 
 public class ViewProfileActivity extends AppCompatActivity {
@@ -50,10 +51,6 @@ public class ViewProfileActivity extends AppCompatActivity {
     private TextView tvContactNumber;
     private TextView tvEmail;
 
-    private TextView buttonEditProfile;
-
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     StorageReference profileImageRef;
 
     public static final String TAG = ViewProfileActivity.class.getSimpleName();
@@ -73,9 +70,8 @@ public class ViewProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
-        // An instance of FirebaseAuth is set
-        mAuth = FirebaseAuth.getInstance();
-
+        // The layout is now built
+        // First, the TextViews that will show the information to the user
         profilePicture = (ImageView) findViewById(R.id.profile_picture_iv);
         tvName = (TextView) findViewById(R.id.user_name);
         tvAge = (TextView) findViewById(R.id.user_age);
@@ -83,11 +79,16 @@ public class ViewProfileActivity extends AppCompatActivity {
         tvContactNumber = (TextView) findViewById(R.id.user_contact_number);
         tvEmail = (TextView) findViewById(R.id.user_email);
 
-        buttonEditProfile = (TextView) findViewById(R.id.buttonEditProfile);
+        // Then, the TextView that will act as ViewProfileActivity screen button is set
+        TextView buttonEditProfile = (TextView) findViewById(R.id.buttonEditProfile);
 
+        // The actual user id is recovered from the device local storage...
         SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
 
+        // ... and compared with the id that is coming with the intent. If they are equal or if the intent
+        //  is not bringing any info about the userKey, it means that the profile that are being shown
+        //  is the one of the actual user. It menas that the user can update this profile
         if (getIntent().getStringExtra("userKey") == null
                 || getIntent().getStringExtra("userKey").equals(id)) {
 
@@ -96,6 +97,8 @@ public class ViewProfileActivity extends AppCompatActivity {
         else {
             id = getIntent().getStringExtra("userKey");
         }
+
+        // Now, the app recovers the player image from the cloud storage
 
         // Get instance of Storage
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -107,6 +110,7 @@ public class ViewProfileActivity extends AppCompatActivity {
             // Create a reference to 'images/id.jpg'
             profileImageRef = storageRef.child("images/" + id + ".jpg");
 
+            // Try create a file with the recovered picture
             try {
                 localFile = File.createTempFile(id, "jpg");
             } catch (IOException e) {
@@ -125,13 +129,16 @@ public class ViewProfileActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
+                    Utility.generalError(ViewProfileActivity.this, exception.getMessage());
                 }
             });
         }
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+
 
         if (!id.isEmpty()) {
+            // An instance of FirebaseDatabase is set
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference myRef = database.getReference("Person/");
 
             // Read from the database
@@ -143,6 +150,8 @@ public class ViewProfileActivity extends AppCompatActivity {
                     // whenever data at this location is updated.
                     person = dataSnapshot.getValue(Person.class);
                     Log.d(TAG, "Value is: " + value);
+
+                    // The TextViews are, then, populated
                     tvName.setText(person.getName());
                     tvAge.setText(Integer.toString(person.getAge()));
                     tvPreferredPosition.setText(person.getPreferredPosition());
@@ -158,6 +167,9 @@ public class ViewProfileActivity extends AppCompatActivity {
                 }
             });
 
+            // If the chosen profile is the same as of the actual user of the app, it can be edited
+            // When the button edit profile is clicked, the data about the user is wrapped and sent
+            // to the EditProfileActivity
             buttonEditProfile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -172,22 +184,5 @@ public class ViewProfileActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    public void hideKeyboard() {
-        View view = getCurrentFocus();
-        if (view != null) {
-            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).
-                    hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        }
-    }
 
 }

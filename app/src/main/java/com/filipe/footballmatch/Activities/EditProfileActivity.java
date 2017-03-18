@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.filipe.footballmatch.Utilities.MessageDialog;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Utilities.Utility;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,7 +39,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by alks_ander on 21/01/2017.
+ * Created by Filipe on 21/01/2017.
  */
 
 public class EditProfileActivity extends AppCompatActivity {
@@ -52,8 +53,6 @@ public class EditProfileActivity extends AppCompatActivity {
     private TextView buttonConfirm;
     private TextView buttonCancel;
 
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     StorageReference profileImageRef;
 
     final static int REQUEST_IMAGE_CAPTURE = 1001;
@@ -77,19 +76,23 @@ public class EditProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
-        // An instance of FirebaseAuth is set
-        mAuth = FirebaseAuth.getInstance();
+        // Get the person data from the previous activity
         person = Parcels.unwrap(getIntent().getExtras().getParcelable("person"));
 
+        // The layout is now built
+        // First, the TextInputLayouts, the ImageView and the Spinner, that
+        // will allow the user to update the profile info are set
         profilePicture = (ImageView) findViewById(R.id.profile_picture_iv);
         tilName = (TextInputLayout) findViewById(R.id.tilName);
         tilAge = (TextInputLayout) findViewById(R.id.tilAge);
         spPreferredPosition = (Spinner) findViewById(R.id.spPreferredPosition);
         tilContactNumber = (TextInputLayout) findViewById(R.id.tilContactNumber);
 
+        // Then, the TextViews that will act as LoginActivity screen buttons
         buttonConfirm = (TextView) findViewById(R.id.buttonConfirm);
         buttonCancel = (TextView) findViewById(R.id.buttonCancel);
 
+        // If the person data recovered from the intent is not null, then the fields are populated
         if (person != null) {
             if (person.getName() != null)
                 tilName.getEditText().setText(person.getName());
@@ -100,8 +103,11 @@ public class EditProfileActivity extends AppCompatActivity {
             tilAge.getEditText().setText(Integer.toString(person.getAge()));
         }
 
+        // The actual user id is recovered from the device local storage...
         SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
+
+        // Now, the app recovers the player image from the cloud storage
 
         // Get instance of Storage
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -113,6 +119,7 @@ public class EditProfileActivity extends AppCompatActivity {
             // Create a reference to 'images/id.jpg'
             profileImageRef = storageRef.child("images/" + id + ".jpg");
 
+            // Try create a file with the recovered picture
             try {
                 localFile = File.createTempFile(id, "jpg");
             } catch (IOException e) {
@@ -131,19 +138,12 @@ public class EditProfileActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
-                    final MessageDialog dialog = new MessageDialog(EditProfileActivity.this, exception.getMessage(), R.string.dialog_edit_ok_text, -1, -1);
-                    dialog.setCancelable(false);
-                    dialog.show();
-                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.cancel();
-                        }
-                    });
+                    Utility.generalError(EditProfileActivity.this, exception.getMessage());
                 }
             });
         }
 
+        // Click Listener for button update picture
         profilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -154,6 +154,7 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
+        // Click Listener for button confirm
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -166,6 +167,7 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
+        // Click Listener for button cancel
         buttonCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -191,6 +193,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     }
 
+    // If the picture was updated, the old one is updated by the new one in the storage
     public void addPictureToStorage() {
         // Get the data from an ImageView as bytes
         profilePicture.setDrawingCacheEnabled(true);
@@ -227,6 +230,7 @@ public class EditProfileActivity extends AppCompatActivity {
         });
     }
 
+    // If the profile data was changed, the info in the database is updated
     public void updateProfileData() {
         Person editedInfo = new Person();
 
@@ -264,6 +268,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    // The preferred position spinner data is set here
     public void setSpinner() {
         String[] positions = new String[]{"Goalkeeper",
                 "Center-back",
@@ -318,16 +323,6 @@ public class EditProfileActivity extends AppCompatActivity {
 
         }
         spPreferredPosition.setSelection(position);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
 }

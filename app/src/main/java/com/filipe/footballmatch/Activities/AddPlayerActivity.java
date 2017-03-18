@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.filipe.footballmatch.Utilities.MessageDialog;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Utilities.Utility;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -20,7 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 /**
- * Created by alks_ander on 21/01/2017.
+ * Created by Filipe on 21/01/2017.
  */
 
 public class AddPlayerActivity extends AppCompatActivity {
@@ -31,15 +32,11 @@ public class AddPlayerActivity extends AppCompatActivity {
     private TextInputLayout tilContactNumber;
     private TextInputLayout tilEmail;
 
-    private TextView buttonConfirm;
-    private TextView buttonCancel;
-
     private DatabaseReference myRef;
     ValueEventListener myEventListener;
 
     public static final String TAG = AddPlayerActivity.class.getSimpleName();
 
-    Person person;
     String id;
 
     @Override
@@ -53,20 +50,27 @@ public class AddPlayerActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        // An instance of FirebaseDatabase is set
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         myRef = database.getReference("Person");
 
+        // The layout is now built
+        // First, the TextInputLayouts, the ImageView and the Spinner, that
+        // will allow the user to create a new player are set
         tilName = (TextInputLayout) findViewById(R.id.tilName);
         tilAge = (TextInputLayout) findViewById(R.id.tilAge);
         spPreferredPosition = (Spinner) findViewById(R.id.spPreferredPosition);
         tilContactNumber = (TextInputLayout) findViewById(R.id.tilContactNumber);
         tilEmail = (TextInputLayout) findViewById(R.id.tilEmail);
 
-        buttonConfirm = (TextView) findViewById(R.id.buttonConfirm);
-        buttonCancel = (TextView) findViewById(R.id.buttonCancel);
+        // Then, the TextViews that will act as LoginActivity screen buttons
+        TextView buttonConfirm = (TextView) findViewById(R.id.buttonConfirm);
+        TextView buttonCancel = (TextView) findViewById(R.id.buttonCancel);
 
+        // And finally, the preferred position spinner data is set here
         setSpinner();
 
+        // Click Listener for button confirm
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,6 +79,7 @@ public class AddPlayerActivity extends AppCompatActivity {
             }
         });
 
+        // Click Listener for button cancel
         buttonCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,6 +103,7 @@ public class AddPlayerActivity extends AppCompatActivity {
 
     }
 
+    // The user cannot create a new player if it already exists in the database
     public void checkIfPlayerExists() {
 
         myEventListener = new ValueEventListener() {
@@ -108,6 +114,7 @@ public class AddPlayerActivity extends AppCompatActivity {
                 boolean userExists = false;
                 String email = tilEmail.getEditText().getText().toString().trim();
 
+                // Check the database for the user existence
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                     if (dsp.getValue(Person.class).getEmail().equals(email)) {
                         userExists = true;
@@ -133,6 +140,7 @@ public class AddPlayerActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
+                Utility.generalError(AddPlayerActivity.this, error.getMessage());
             }
 
         };
@@ -142,6 +150,7 @@ public class AddPlayerActivity extends AppCompatActivity {
 
     }
 
+    // If the player did not exists previously and all the info is ok, the new player is added to the database
     public void addNewPlayer() {
 
         myRef.removeEventListener(myEventListener);
@@ -169,6 +178,7 @@ public class AddPlayerActivity extends AppCompatActivity {
         });
     }
 
+    // The preferred position spinner data is set here
     public void setSpinner() {
         String[] positions = new String[]{"Goalkeeper",
                 "Center-back",
@@ -183,16 +193,6 @@ public class AddPlayerActivity extends AppCompatActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, positions);
         spPreferredPosition.setAdapter(adapter);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
 }

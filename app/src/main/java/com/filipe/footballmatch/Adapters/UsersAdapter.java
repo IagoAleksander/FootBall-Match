@@ -19,7 +19,7 @@ import com.filipe.footballmatch.R;
 import java.util.ArrayList;
 
 /**
- * Created by alks_ander on 27/02/2017.
+ * Created by Filipe on 27/02/2017.
  */
 public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -48,7 +48,7 @@ public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         holder.name.setText(users.get(position).getName());
         holder.email.setText(users.get(position).getEmail());
 
-        if (activity.isfromCreateMatch) {
+        if (activity.isFromCreateMatch) {
             holder.checkbox.setVisibility(View.VISIBLE);
 
             holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

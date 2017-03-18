@@ -20,7 +20,7 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 
 /**
- * Created by alks_ander on 27/02/2017.
+ * Created by Filipe on 27/02/2017.
  */
 public class AvailableEventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 

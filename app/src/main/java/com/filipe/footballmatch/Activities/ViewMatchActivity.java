@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.filipe.footballmatch.Models.Event;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Utilities.Utility;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.vision.text.Line;
@@ -50,13 +51,12 @@ import static com.google.android.gms.analytics.internal.zzy.c;
 import static com.google.android.gms.analytics.internal.zzy.i;
 
 /**
- * Created by alks_ander on 21/01/2017.
+ * Created by Filipe on 21/01/2017.
  */
 
 public class ViewMatchActivity extends AppCompatActivity {
 
     private TextView tvName;
-    private LinearLayout lAddress;
     private TextView tvAddress;
     private RelativeLayout lPhone;
     private TextView tvPhone;
@@ -68,7 +68,6 @@ public class ViewMatchActivity extends AppCompatActivity {
     private TextView callButton;
     private TextView buttonEditEvent;
 
-    private FirebaseAuth mAuth;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
     public static final String TAG = ViewMatchActivity.class.getSimpleName();
@@ -88,9 +87,8 @@ public class ViewMatchActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
-        // An instance of FirebaseAuth is set
-        mAuth = FirebaseAuth.getInstance();
-
+        // The layout is now built
+        // First, the TextViews that will show the information to the user
         tvName = (TextView) findViewById(R.id.venue_name);
         tvAddress = (TextView) findViewById(R.id.venue_address);
         tvNumberOfPlayers = (TextView) findViewById(R.id.event_number_of_players);
@@ -98,18 +96,21 @@ public class ViewMatchActivity extends AppCompatActivity {
         tvEventDate= (TextView) findViewById(R.id.event_date);
         tvEventTime = (TextView) findViewById(R.id.event_time);
 
-        lAddress = (LinearLayout) findViewById(R.id.section2);
+        // Then, the layout that will only appears if the info exists
         lPhone = (RelativeLayout) findViewById(R.id.section3);
 
+        // The list of players in the match will increase dynamically,
+        // during app execution
         lEventPlayers = (LinearLayout) findViewById(R.id.event_players_list);
 
+        // Finally, the TextViews that will act as ViewMatchActivity screen buttons are set
         callButton = (TextView) findViewById(R.id.callButton);
         buttonEditEvent = (TextView) findViewById(R.id.buttonEditEvent);
 
-
-
+        // An instance of FirebaseDatabase is set
         DatabaseReference myRef = database.getReference("Event/");
 
+        // The eventId is recovered and depends on the item clicked by the user on the ListAvailableEventsActivity
         eventId = getIntent().getStringExtra("eventKey");
 
         // Read from the database
@@ -122,12 +123,14 @@ public class ViewMatchActivity extends AppCompatActivity {
                 // whenever data at this location is updated.
                 event = dataSnapshot.getValue(Event.class);
                 Log.d(TAG, "Value is: " + value);
+
+                // The TextViews are, then, populated
                 tvName.setText(event.getName());
                 tvAddress.setText(event.getAddress());
 
-                if (event.getPhone() != null && !event.getPhone().toString().isEmpty()) {
+                if (event.getPhone() != null && !event.getPhone().isEmpty()) {
                     lPhone.setVisibility(View.VISIBLE);
-                    tvPhone.setText(event.getPhone().toString());
+                    tvPhone.setText(event.getPhone());
 
                     callButton.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -191,14 +194,7 @@ public class ViewMatchActivity extends AppCompatActivity {
 
     }
 
-    public void hideKeyboard() {
-        View view = getCurrentFocus();
-        if (view != null) {
-            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).
-                    hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        }
-    }
-
+    // The player layout is then built through information recovered from the database by the playerId
     public void populatePlayerLayout() {
 
         DatabaseReference myRef = database.getReference("Person/");
@@ -237,6 +233,7 @@ public class ViewMatchActivity extends AppCompatActivity {
                 public void onCancelled(DatabaseError error) {
                     // Failed to read value
                     Log.w(TAG, "Failed to read value.", error.toException());
+                    Utility.generalError(ViewMatchActivity.this, error.getMessage());
                 }
             });
         }

@@ -3,12 +3,12 @@ package com.filipe.footballmatch.Models;
 import org.parceler.Parcel;
 
 /**
- * Created by Belal on 2/23/2016.
+ * Created by Filipe on 2/23/2016.
  */
 
 @Parcel
 public class Person {
-    //name and address string 
+
     private String name;
     private String email;
     private int age;

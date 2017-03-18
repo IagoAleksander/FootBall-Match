@@ -11,6 +11,7 @@ import android.util.Log;
 import com.filipe.footballmatch.Adapters.AvailableEventsAdapter;
 import com.filipe.footballmatch.Models.Event;
 import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Utilities.Utility;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,13 +22,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 /**
- * Created by alks_ander on 23/01/2017.
+ * Created by Filipe on 23/01/2017.
  */
 
 public class ListAvailableEventsActivity extends AppCompatActivity {
-
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
 
     RecyclerView mRecyclerView;
     AvailableEventsAdapter adapter;
@@ -48,13 +46,11 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
 
         context = this;
 
-        // An instance of FirebaseAuth is set
-        mAuth = FirebaseAuth.getInstance();
-
+        // The RecyclerView, that will display the list of elements, is set
         mRecyclerView = (RecyclerView) findViewById(R.id.available_event_recycler_view);
 
+        // An instance of FirebaseDatabase is set
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-
         DatabaseReference myRef = database.getReference("Event/");
 
         // Read from the database
@@ -65,16 +61,19 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
 
                 ArrayList<Event> events = new ArrayList<>();
 
+                // Recover all the items from the database
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                     events.add(dsp.getValue(Event.class));
                 }
 
+                // set the RecyclerView parameters
                 LinearLayoutManager llm = new LinearLayoutManager(context);
                 llm.setOrientation(LinearLayoutManager.VERTICAL);
 
                 mRecyclerView.setLayoutManager(llm);
                 mRecyclerView.setHasFixedSize(true);
 
+                // Update the list with the results
                 adapter = new AvailableEventsAdapter(ListAvailableEventsActivity.this, events);
                 mRecyclerView.setAdapter(adapter);
 
@@ -84,6 +83,7 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError error){
                 // Failed to read value
                 Log.w(TAG,"Failed to read value.",error.toException());
+                Utility.generalError(ListAvailableEventsActivity.this, error.getMessage());
             }
         });
 

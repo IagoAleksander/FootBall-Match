@@ -12,7 +12,7 @@ import com.filipe.footballmatch.R;
 import static android.R.id.message;
 
 /**
- * Created by alks_ander on 25/02/2017.
+ * Created by Filipe on 25/02/2017.
  */
 
 public class Utility {
