@@ -1,20 +1,12 @@
 package com.filipe.footballmatch.Activities;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,32 +15,16 @@ import com.filipe.footballmatch.Models.Event;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
 import com.filipe.footballmatch.Utilities.Utility;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.vision.text.Line;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.android.gms.location.places.Place;
-import com.google.firebase.storage.FileDownloadTask;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import org.parceler.Parcels;
-
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import static android.R.attr.value;
-import static com.filipe.footballmatch.R.id.buttonEditProfile;
-import static com.filipe.footballmatch.R.id.callButton;
-import static com.google.android.gms.analytics.internal.zzy.c;
-import static com.google.android.gms.analytics.internal.zzy.i;
 
 /**
  * Created by Filipe on 21/01/2017.
@@ -151,7 +127,10 @@ public class ViewMatchActivity extends AppCompatActivity {
 
                 tvEventTime.setText(formattedTime);
 
-                playerIdList = event.getPlayersIdList();
+                if (event.getPlayersIdList() != null
+                        && !event.getPlayersIdList().isEmpty()) {
+                    playerIdList = event.getPlayersIdList();
+                }
 
                 populatePlayerLayout();
 

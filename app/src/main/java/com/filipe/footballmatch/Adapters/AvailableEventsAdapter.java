@@ -11,12 +11,10 @@ import android.widget.TextView;
 
 import com.filipe.footballmatch.Activities.ListAvailableEventsActivity;
 import com.filipe.footballmatch.Activities.ViewMatchActivity;
-import com.filipe.footballmatch.Activities.ViewProfileActivity;
 import com.filipe.footballmatch.Models.Event;
 import com.filipe.footballmatch.R;
 
-import org.parceler.Parcels;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -24,8 +22,8 @@ import java.util.ArrayList;
  */
 public class AvailableEventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    ArrayList<Event> events = new ArrayList<>();
-    ListAvailableEventsActivity activity;
+    private ArrayList<Event> events = new ArrayList<>();
+    private ListAvailableEventsActivity activity;
 
     public AvailableEventsAdapter(Activity activity, ArrayList<Event> events) {
 
@@ -46,9 +44,12 @@ public class AvailableEventsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public void onBindViewHolder(RecyclerView.ViewHolder holder_, final int position) {
 
         final MyViewHolder holder = (MyViewHolder) holder_;
-        holder.name.setText(events.get(position).getName());
-        holder.address.setText(events.get(position).getAddress());
-        holder.date.setText(events.get(position).getDate().toString());
+        holder.eventName.setText(events.get(position).getEventName());
+        holder.placeName.setText(events.get(position).getName());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String formattedDate = sdf.format(events.get(position).getDate());
+        holder.date.setText(formattedDate);
 
         holder.eventLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,16 +64,16 @@ public class AvailableEventsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView name;
-        TextView address;
+        TextView eventName;
+        TextView placeName;
         TextView date;
         LinearLayout eventLayout;
 
         public MyViewHolder(View v) {
             super(v);
 
-            name = (TextView) v.findViewById(R.id.textViewName);
-            address = (TextView) v.findViewById(R.id.textViewPlace);
+            eventName = (TextView) v.findViewById(R.id.textViewName);
+            placeName = (TextView) v.findViewById(R.id.textViewPlace);
             date = (TextView) v.findViewById(R.id.textViewDate);
             eventLayout = (LinearLayout) v.findViewById(R.id.layoutEvent);
 

@@ -12,8 +12,8 @@ import java.util.Date;
 @Parcel
 public class Event {
 
+    private String eventName;
     private String name;
-//    private Place place;
     private String address;
     private String phone;
     private Date date;
@@ -23,6 +23,14 @@ public class Event {
 
     public Event() {
       /*Blank default constructor essential for Firebase*/
+    }
+
+    public String getEventName() {
+        return eventName;
+    }
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
     }
 
     public String getName() {

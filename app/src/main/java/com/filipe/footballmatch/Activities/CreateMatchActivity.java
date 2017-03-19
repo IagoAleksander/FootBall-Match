@@ -5,9 +5,11 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -15,7 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -33,11 +34,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
@@ -55,7 +53,6 @@ import java.util.Date;
 
 import static android.R.attr.value;
 import static com.filipe.footballmatch.R.id.buttonCancel;
-import static com.filipe.footballmatch.R.id.pickerButton;
 
 public class CreateMatchActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener{
@@ -74,18 +71,21 @@ public class CreateMatchActivity extends AppCompatActivity implements
     private TextView mAddress;
     private TextView mPhone;
     private Spinner mSpinner;
+    TextView pickerButton;
 
     private TextView mTime;
     private TextView mDate;
 
     Place place;
+    TextInputLayout eventNameLayout;
     private String eventName;
+    private String placeName;
     private Date eventDate;
     private ArrayList<String> playerIdList = new ArrayList<>();
     private ArrayList<Person> playerList = new ArrayList<>();
 
     private int index;
- 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,7 +103,10 @@ public class CreateMatchActivity extends AppCompatActivity implements
         section3 = (RelativeLayout) findViewById(R.id.section3);
         playerListLayout = (LinearLayout) findViewById(R.id.event_players_list);
 
-        // Then, the TextViews that will display the info about the venue
+        // Then, the TextInputLayout field that the user to give a name for the event
+        eventNameLayout = (TextInputLayout) findViewById(R.id.tilEventName);
+
+        // The TextViews that will display the info about the venue
         mName = (TextView) findViewById(R.id.venue_name);
         mAddress = (TextView) findViewById(R.id.venue_address);
         mPhone = (TextView) findViewById(R.id.venue_phone);
@@ -124,7 +127,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
         // And, finally, the TextViews that will act as LoginActivity screen buttons are set
         TextView callButton = (TextView) findViewById(R.id.callButton);
-        TextView pickerButton = (TextView) findViewById(R.id.pickerButton);
+        pickerButton = (TextView) findViewById(R.id.pickerButton);
         TextView addPlayerButton = (TextView) findViewById(R.id.buttonAddPlayer);
         TextView createEventButton = (TextView) findViewById(R.id.buttonCreateEvent);
         TextView cancelButton = (TextView) findViewById(buttonCancel);
@@ -132,6 +135,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
         // Standard builder for google places API
         mGoogleApiClient = new GoogleApiClient.Builder(CreateMatchActivity.this)
                 .addApi(Places.PLACE_DETECTION_API)
+                .addApi(LocationServices.API)
                 .enableAutoManage(this, GOOGLE_API_CLIENT_ID, this)
                 .build();
 
@@ -232,14 +236,14 @@ public class CreateMatchActivity extends AppCompatActivity implements
             }
         });
     }
- 
+
     @Override
     protected void onActivityResult(int requestCode,
                                     int resultCode, Intent data) {
- 
+
         if (requestCode == PLACE_PICKER_REQUEST
                 && resultCode == Activity.RESULT_OK) {
- 
+
             place = PlacePicker.getPlace(this, data);
             final CharSequence name = place.getName();
             final CharSequence address = place.getAddress();
@@ -259,19 +263,9 @@ public class CreateMatchActivity extends AppCompatActivity implements
                 mPhone.setText(phone);
                 section3.setVisibility(View.VISIBLE);
             }
- 
-        }
-        else if (requestCode == ADD_PLAYER_REQUEST_CODE
-                && resultCode == Activity.RESULT_OK){
-            String userId = data.getStringExtra("userId");
 
-            if (playerIdList.contains(userId)) {
-                Utility.generalError(CreateMatchActivity.this, getString(R.string.error_user_already_added));
-            }
-            else {
-                playerIdList.add(userId);
-                getIdInfo(userId);
-            }
+            pickerButton.setText("Change Match Venue");
+
         }
         else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -303,23 +297,14 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
     // Setting google places API, the map will show the user surroundings when opened, first this method recover
     // the likely coordinates of the user and then allow him to choose a place to create an event
-    private void callPlaceDetectionApi() throws SecurityException {
-        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi
-                .getCurrentPlace(mGoogleApiClient, null);
-        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
-            @Override
-            public void onResult(PlaceLikelihoodBuffer likelyPlaces) {
-                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    Log.i(TAG, String.format("Place '%s' with " +
-                                    "likelihood: %g",
-                            placeLikelihood.getPlace().getName(),
-                            placeLikelihood.getLikelihood()));
-                }
+    private void callPlaceDetectionApi() {
+        try {
 
-                LatLngBounds LIKELY_PLACE = new LatLngBounds(new LatLng(likelyPlaces.get(0).getPlace().getLatLng().latitude-0.003, likelyPlaces.get(0).getPlace().getLatLng().longitude-0.003)
-                                                , new LatLng(likelyPlaces.get(0).getPlace().getLatLng().latitude+0.003, likelyPlaces.get(0).getPlace().getLatLng().longitude+0.003));
+            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation != null) {
 
-                likelyPlaces.release();
+                LatLngBounds LIKELY_PLACE = new LatLngBounds(new LatLng(mLastLocation.getLatitude()-0.003, mLastLocation.getLongitude()-0.003)
+                        , new LatLng(mLastLocation.getLatitude()+0.003, mLastLocation.getLongitude()+0.003));
 
                 try {
 
@@ -334,8 +319,11 @@ public class CreateMatchActivity extends AppCompatActivity implements
                     e.printStackTrace();
                     Utility.generalError(CreateMatchActivity.this, e.getMessage());
                 }
+
             }
-        });
+        } catch (SecurityException e) {
+            Utility.generalError(CreateMatchActivity.this, e.getMessage());
+        }
     }
 
     // The create event data is validated before submitted to the database
@@ -343,15 +331,14 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
         boolean dataValidated = true;
 
-        eventName = mName.getText().toString().trim();
+        eventName = eventNameLayout.getEditText().getText().toString().trim();
+        placeName = mName.getText().toString().trim();
 
-        if (eventName.isEmpty()) {
-            dataValidated = false;
-        }
-        if (mDate.getText().toString().trim().isEmpty()) {
-            dataValidated = false;
-        }
-        if (mTime.getText().toString().trim().isEmpty()) {
+
+        if (eventName.isEmpty()
+                || placeName.isEmpty()
+                || mDate.getText().toString().trim().isEmpty()
+                || mTime.getText().toString().trim().isEmpty()) {
             dataValidated = false;
         }
 
@@ -381,6 +368,9 @@ public class CreateMatchActivity extends AppCompatActivity implements
     public void displayErrorPopup() {
 
         if (eventName.isEmpty()) {
+            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_invalid_event_name));
+        }
+        else if (placeName.isEmpty()) {
             Utility.generalError(CreateMatchActivity.this, getString(R.string.error_invalid_venue));
         }
         else if (mDate.getText().toString().trim().isEmpty()) {
@@ -409,7 +399,8 @@ public class CreateMatchActivity extends AppCompatActivity implements
         Event event = new Event();
 
         // Adding values
-        event.setName(place.getName().toString());
+        event.setEventName(eventName);
+        event.setName(placeName);
         event.setAddress(place.getAddress().toString());
         if (mPhone.length() != 0) {
             event.setPhone(place.getPhoneNumber().toString());

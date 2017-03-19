@@ -286,41 +286,46 @@ public class EditProfileActivity extends AppCompatActivity {
 
         int position;
 
-        switch (person.getPreferredPosition()) {
-            case "Goalkeeper":
-                position = 0;
-                break;
-            case "Center-back":
-                position = 1;
-                break;
-            case "Full-back":
-                position = 2;
-                break;
-            case "Wing-back":
-                position = 3;
-                break;
-            case "Holding midfielder":
-                position = 4;
-                break;
-            case "Central":
-                position = 5;
-                break;
-            case "Attacking midfielder":
-                position = 6;
-                break;
-            case "Wide midfielders":
-                position = 7;
-                break;
-            case "Center-forward":
-                position = 8;
-                break;
-            case "Withdrawn striker":
-                position = 9;
-                break;
-            default:
-                position = 0;
-                break;
+        if (person.getPreferredPosition() == null) {
+            position = 0;
+        }
+        else {
+            switch (person.getPreferredPosition()) {
+                case "Goalkeeper":
+                    position = 0;
+                    break;
+                case "Center-back":
+                    position = 1;
+                    break;
+                case "Full-back":
+                    position = 2;
+                    break;
+                case "Wing-back":
+                    position = 3;
+                    break;
+                case "Holding midfielder":
+                    position = 4;
+                    break;
+                case "Central":
+                    position = 5;
+                    break;
+                case "Attacking midfielder":
+                    position = 6;
+                    break;
+                case "Wide midfielders":
+                    position = 7;
+                    break;
+                case "Center-forward":
+                    position = 8;
+                    break;
+                case "Withdrawn striker":
+                    position = 9;
+                    break;
+                default:
+                    position = 0;
+                    break;
 
+            }
         }
         spPreferredPosition.setSelection(position);
     }

@@ -8,7 +8,7 @@ Primary Actor: Mobile user(player).
 Precondition: The user is not logged.
 Trigger: The mobile user clicks into: Sign up (as a player)
 Basic Flow:
-	1: The register screen/interface is showed to complete with the options(name, e-mail, password,city, 
+	1: The register screen/interface is showed to complete with the options(name, e-mail, password,city,
 									        checkboxes of "usual avaiable free time to play"/"position"/"level as player",etc).
 
 	2: The user completes the register fields and confirms the cadastre.The info is checked and proves to be valid .
@@ -43,7 +43,7 @@ Primary Actor: Mobile user(pitch manager/worker).
 Precondition: There's no manager registered to this football pitch.
 Trigger: The mobile user clicks into: Sign up (as a pitch manager/worker)
 Basic Flow:
-	1: The register screen/interface is showed to complete with the options(name, e-mail, password,pitch city,pitch address, pitch ID in the app,etc) 
+	1: The register screen/interface is showed to complete with the options(name, e-mail, password,pitch city,pitch address, pitch ID in the app,etc)
 									    
 	2: The user completes the register fields and confirms the cadastre.The info is checked and proves to match pitch caught in the GPS system.
 
