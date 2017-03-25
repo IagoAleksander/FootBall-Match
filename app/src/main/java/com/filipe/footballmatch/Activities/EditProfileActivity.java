@@ -49,6 +49,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private TextInputLayout tilAge;
     private Spinner spPreferredPosition;
     private TextInputLayout tilContactNumber;
+    private TextInputLayout tilEmail;
 
     private TextView buttonConfirm;
     private TextView buttonCancel;
@@ -87,6 +88,7 @@ public class EditProfileActivity extends AppCompatActivity {
         tilAge = (TextInputLayout) findViewById(R.id.tilAge);
         spPreferredPosition = (Spinner) findViewById(R.id.spPreferredPosition);
         tilContactNumber = (TextInputLayout) findViewById(R.id.tilContactNumber);
+        tilEmail = (TextInputLayout) findViewById(R.id.tilEmail);
 
         // Then, the TextViews that will act as LoginActivity screen buttons
         buttonConfirm = (TextView) findViewById(R.id.buttonConfirm);
@@ -238,6 +240,7 @@ public class EditProfileActivity extends AppCompatActivity {
         editedInfo.setAge(Integer.parseInt(tilAge.getEditText().getText().toString().trim()));
         editedInfo.setPreferredPosition(spPreferredPosition.getSelectedItem().toString());
         editedInfo.setContactNumber(tilContactNumber.getEditText().getText().toString().trim());
+        editedInfo.setEmail(tilEmail.getEditText().getText().toString().trim());
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("Person");

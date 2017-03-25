@@ -28,6 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import static com.google.android.gms.analytics.internal.zzy.v;
+
 /**
  * Created by Filipe on 23/01/2017.
  */
@@ -96,9 +98,8 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
                 showFilterLayout.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.VISIBLE);
 
-                if (!eventNameLayout.getEditText().getText().toString().trim().isEmpty()) {
-                    eventName = eventNameLayout.getEditText().getText().toString().trim();
-                }
+                eventName = eventNameLayout.getEditText().getText().toString().trim();
+                venueName = venueNameLayout.getEditText().getText().toString().trim();
 
                 searchDatabase();
             }

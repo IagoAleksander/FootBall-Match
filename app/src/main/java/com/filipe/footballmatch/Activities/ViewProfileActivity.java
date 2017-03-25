@@ -129,7 +129,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
-                    Utility.generalError(ViewProfileActivity.this, exception.getMessage());
+//                    Utility.generalError(ViewProfileActivity.this, exception.getMessage());
                 }
             });
         }
