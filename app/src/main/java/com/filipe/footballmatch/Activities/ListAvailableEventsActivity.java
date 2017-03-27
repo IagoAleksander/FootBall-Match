@@ -2,7 +2,9 @@ package com.filipe.footballmatch.Activities;
 
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -28,6 +31,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import static android.R.attr.id;
 import static com.google.android.gms.analytics.internal.zzy.v;
 
 /**
@@ -45,12 +49,16 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
     TextInputLayout eventNameLayout;
     TextInputLayout venueNameLayout;
     private TextView mDate;
+    CheckBox created_by_checkBox;
+    CheckBox joined_checkBox;
 
     TextView searchEventButton;
     TextView showFilterButton;
 
     String eventName;
     String venueName;
+
+    String id;
 
     public static final String TAG = ListAvailableEventsActivity.class.getSimpleName();
 
@@ -65,6 +73,10 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        // The id of the user is recovered from the Shared Preferences
+        SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
+
         // The layout is now built
         // First, the CardViews that will act as sections for the screen are set
         searchEventLayout = (CardView) findViewById(R.id.search_event_layout);
@@ -77,6 +89,10 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
         // The pickers that will allow the user to choose the date...
         TextView datePicker = (TextView) findViewById(R.id.date_picker);
         mDate = (TextView) findViewById(R.id.event_date);
+
+        // The checkboxes that will allow the user to filter only matches created or joined by him
+        created_by_checkBox = (CheckBox) findViewById(R.id.created_by_checkBox);
+        joined_checkBox = (CheckBox) findViewById(R.id.joined_checkBox);
 
         // The TextViews that will act as ListUsersActivity screen buttons are set
         searchEventButton = (TextView) findViewById(R.id.search_button);
@@ -145,13 +161,17 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
                 // Recover all the items from the database that match with the filter
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
 
+                    Event temp = dsp.getValue(Event.class);
                     if ((eventNameLayout.getEditText().getText().toString().trim().isEmpty()
-                            || dsp.getValue(Event.class).getEventName().equals(eventName))
+                            || temp.getEventName().equals(eventName))
                             && (venueNameLayout.getEditText().getText().toString().trim().isEmpty()
-                            || dsp.getValue(Event.class).getName().contains(venueName))
+                            || temp.getName().contains(venueName))
                             && (mDate.getText().toString().trim().isEmpty()
-                            || sdf.format(dsp.getValue(Event.class).getDate()).trim().equals(mDate.getText().toString().trim()))) {
-                        events.add(dsp.getValue(Event.class));
+                            || sdf.format(temp.getDate()).trim().equals(mDate.getText().toString().trim()))
+                            && (!created_by_checkBox.isChecked() || temp.getCreator().equals(id))
+                            && (!joined_checkBox.isChecked()
+                            || (temp.getPlayersIdList() != null && temp.getPlayersIdList().contains(id)))) {
+                        events.add(temp);
                     }
                 }
 

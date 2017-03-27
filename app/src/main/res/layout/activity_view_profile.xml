@@ -7,15 +7,16 @@
 
 
     <ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_centerInParent="true">
 
         <android.support.v7.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            card_view:cardCornerRadius="4dp">
+            card_view:cardCornerRadius="4dp"
+            android:padding="16dp"
+            android:layout_gravity="center">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -111,9 +112,29 @@
                         android:textStyle="bold"/>
 
                     <TextView
+                        android:id="@+id/user_contact_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/callButton"
+                        style="?android:textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/user_contact_number"/>
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@color/colorPrimary"
+                        android:elevation="1dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:minWidth="100dp"
+                        android:padding="8dp"
+                        android:text="Call"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
+                        android:visibility="gone"/>
 
                 </LinearLayout>
 

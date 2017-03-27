@@ -51,9 +51,6 @@ public class EditProfileActivity extends AppCompatActivity {
     private TextInputLayout tilContactNumber;
     private TextInputLayout tilEmail;
 
-    private TextView buttonConfirm;
-    private TextView buttonCancel;
-
     StorageReference profileImageRef;
 
     final static int REQUEST_IMAGE_CAPTURE = 1001;
@@ -91,8 +88,8 @@ public class EditProfileActivity extends AppCompatActivity {
         tilEmail = (TextInputLayout) findViewById(R.id.tilEmail);
 
         // Then, the TextViews that will act as LoginActivity screen buttons
-        buttonConfirm = (TextView) findViewById(R.id.buttonConfirm);
-        buttonCancel = (TextView) findViewById(R.id.buttonCancel);
+        TextView buttonConfirm = (TextView) findViewById(R.id.buttonConfirm);
+        TextView buttonCancel = (TextView) findViewById(R.id.buttonCancel);
 
         // If the person data recovered from the intent is not null, then the fields are populated
         if (person != null) {

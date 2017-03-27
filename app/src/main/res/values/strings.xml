@@ -33,10 +33,19 @@
     <string name="error_user_already_added">This player is already added to the event.</string>
     <string name="success_register_match">Match registered successfully in the system.</string>
     <string name="cancel_register_match_message">If you confirm, the event will be lost. Do you want to continue?</string>
+    <string name="error_player_max_number_exceeded">The number of players was exceeded for the venue. Please change the number of players for the event if you want to add more players</string>
+
+    <!-- Edit Match Activity -->
+    <string name="cancel_edit_match_message">If you confirm, the changes in the event will be lost. Do you want to continue?</string>
+
+    <!-- View Match Activity -->
+    <string name="success_join_match">You are now registered in the match</string>
+    <string name="error_join_match">The number of players was exceeded for the venue.</string>
+    <string name="leave_match_confirmation_message">Are you sure that you want to leave the match?</string>
+    <string name="success_leave_match">You left the match successfully</string>
 
     <!-- EditProfile Activity -->
     <string name="success_update_profile">Profile updated successfully.</string>
     <string name="cancel_profile_update_message">If you confirm, any changes made in the profile will be lost. Do you want to continue?</string>
-
 
 </resources>

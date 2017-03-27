@@ -1,5 +1,6 @@
 package com.filipe.footballmatch.Activities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -51,6 +52,9 @@ public class ViewProfileActivity extends AppCompatActivity {
     private TextView tvContactNumber;
     private TextView tvEmail;
 
+    TextView buttonCallPlayer;
+    TextView buttonEditProfile;
+
     StorageReference profileImageRef;
 
     public static final String TAG = ViewProfileActivity.class.getSimpleName();
@@ -58,6 +62,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     String id;
     File localFile = null;
     Person person;
+    Boolean isFromViewMatch;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,6 +75,10 @@ public class ViewProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        // A flag is set to check which flow the user is using
+        // (If it is from view match or directly from the main menu)
+        isFromViewMatch = getIntent().getBooleanExtra("isFromViewMatch", false);
+
         // The layout is now built
         // First, the TextViews that will show the information to the user
         profilePicture = (ImageView) findViewById(R.id.profile_picture_iv);
@@ -80,7 +89,8 @@ public class ViewProfileActivity extends AppCompatActivity {
         tvEmail = (TextView) findViewById(R.id.user_email);
 
         // Then, the TextView that will act as ViewProfileActivity screen button is set
-        TextView buttonEditProfile = (TextView) findViewById(R.id.buttonEditProfile);
+        buttonEditProfile = (TextView) findViewById(R.id.buttonEditProfile);
+        buttonCallPlayer = (TextView) findViewById(R.id.callButton);
 
         // The actual user id is recovered from the device local storage...
         SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -93,6 +103,19 @@ public class ViewProfileActivity extends AppCompatActivity {
                 || getIntent().getStringExtra("userKey").equals(id)) {
 
             buttonEditProfile.setVisibility(View.VISIBLE);
+
+            // If the chosen profile is the same as of the actual user of the app, it can be edited
+            // When the button edit profile is clicked, the data about the user is wrapped and sent
+            // to the EditProfileActivity
+            buttonEditProfile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ViewProfileActivity.this, EditProfileActivity.class);
+                    intent.putExtra("person", Parcels.wrap(person));
+                    ViewProfileActivity.this.startActivity(intent);
+                    finish();
+                }
+            });
         }
         else {
             id = getIntent().getStringExtra("userKey");
@@ -129,7 +152,6 @@ public class ViewProfileActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
-//                    Utility.generalError(ViewProfileActivity.this, exception.getMessage());
                 }
             });
         }
@@ -145,7 +167,7 @@ public class ViewProfileActivity extends AppCompatActivity {
             myRef.child(id).addValueEventListener(new ValueEventListener() {
 
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+                public void onDataChange(final DataSnapshot dataSnapshot) {
                     // This method is called once with the initial value and again
                     // whenever data at this location is updated.
                     person = dataSnapshot.getValue(Person.class);
@@ -155,8 +177,42 @@ public class ViewProfileActivity extends AppCompatActivity {
                     tvName.setText(person.getName());
                     tvAge.setText(Integer.toString(person.getAge()));
                     tvPreferredPosition.setText(person.getPreferredPosition());
-                    tvContactNumber.setText(person.getContactNumber());
+
+                    // If the contact number exists, then the field is populated...
+                    if (person.getContactNumber() != null
+                        && !person.getContactNumber().isEmpty()) {
+                        tvContactNumber.setText(person.getContactNumber());
+
+                        // and, if the user is not seeing its own profile, a button call appears,
+                        // allowing the player to be contacted
+                        if (buttonEditProfile.getVisibility() == View.GONE) {
+                            buttonCallPlayer.setVisibility(View.VISIBLE);
+                            buttonCallPlayer.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Utility.call(ViewProfileActivity.this, person.getContactNumber());
+                                }
+                            });
+                        }
+                    }
+
                     tvEmail.setText(person.getEmail());
+
+                    // If the user reach this screen from the view match flow, a new option appears
+                    // this option allows the user to remove the player from the match
+                    if (isFromViewMatch && buttonEditProfile.getVisibility() == View.GONE) {
+                        buttonEditProfile.setText("Remove from Match");
+                        buttonEditProfile.setVisibility(View.VISIBLE);
+                        buttonEditProfile.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent returnIntent = new Intent(ViewProfileActivity.this, ViewMatchActivity.class);
+                                returnIntent.putExtra("playerId",dataSnapshot.getKey());
+                                setResult(Activity.RESULT_OK,returnIntent);
+                                finish();
+                            }
+                        });
+                    }
 
                 }
 
@@ -167,18 +223,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 }
             });
 
-            // If the chosen profile is the same as of the actual user of the app, it can be edited
-            // When the button edit profile is clicked, the data about the user is wrapped and sent
-            // to the EditProfileActivity
-            buttonEditProfile.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(ViewProfileActivity.this, EditProfileActivity.class);
-                    intent.putExtra("person", Parcels.wrap(person));
-                    ViewProfileActivity.this.startActivity(intent);
-                    finish();
-                }
-            });
+
 
         }
 

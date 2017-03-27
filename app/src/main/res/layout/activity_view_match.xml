@@ -44,7 +44,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/venue_name"
+                        android:id="@+id/event_name"
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:layout_marginBottom="10dp"/>
@@ -60,17 +60,27 @@
 
                 </LinearLayout>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:id="@+id/venue_name"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:layout_marginBottom="10dp"/>
+
                 <LinearLayout
                     android:id="@+id/section2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="12dp"
                     android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Address: "/>
+                        android:text="Address: "
+                        android:textStyle="bold"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -134,7 +144,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Number of players: "/>
+                    android:text="Number of players: "
+                    android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/event_number_of_players"
@@ -177,7 +188,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Date: "/>
+                            android:text="Date: "
+                            android:textStyle="bold"/>
                         <TextView
                             android:id="@+id/event_date"
                             android:layout_width="wrap_content"
@@ -200,7 +212,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Time: "/>
+                            android:text="Time: "
+                            android:textStyle="bold"/>
                         <TextView
                             android:id="@+id/event_time"
                             android:layout_width="wrap_content"
@@ -217,6 +230,7 @@
                 android:layout_height="1dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
                 android:background="@color/colorPrimaryDark"
                 android:orientation="horizontal" />
 
@@ -224,7 +238,6 @@
                 android:id="@+id/event_players_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:orientation="vertical"/>
 
             <LinearLayout

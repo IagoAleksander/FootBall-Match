@@ -2,10 +2,13 @@ package com.filipe.footballmatch.Utilities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.view.View;
 
+import com.filipe.footballmatch.Activities.CreateMatchActivity;
 import com.filipe.footballmatch.Activities.LoginActivity;
 import com.filipe.footballmatch.R;
 
@@ -22,6 +25,14 @@ public class Utility {
                 (Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
+    // This method allows the user to call the venue to check for possible times for the event
+    public static void call(Activity activity, String number) {
+
+        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + number));
+        activity.startActivity(intent);
+
     }
 
     public static void noNetworkError(Activity activity) {

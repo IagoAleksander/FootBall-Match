@@ -1,5 +1,6 @@
 package com.filipe.footballmatch.Activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
@@ -23,13 +24,12 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.Manifest;
 
-import com.filipe.footballmatch.Utilities.DatePickerFragment;
 import com.filipe.footballmatch.Models.Event;
-import com.filipe.footballmatch.Utilities.MessageDialog;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Utilities.DatePickerFragment;
+import com.filipe.footballmatch.Utilities.MessageDialog;
 import com.filipe.footballmatch.Utilities.TimePickerFragment;
 import com.filipe.footballmatch.Utilities.Utility;
 import com.google.android.gms.common.ConnectionResult;
@@ -48,19 +48,22 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.parceler.Parcels;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static android.R.attr.switchMinWidth;
+import static android.R.attr.name;
 import static android.R.attr.value;
 import static com.filipe.footballmatch.R.id.buttonCancel;
+import static com.filipe.footballmatch.Utilities.Utility.call;
 
-public class CreateMatchActivity extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener {
+public class EditMatchActivity extends AppCompatActivity implements
+        GoogleApiClient.OnConnectionFailedListener{
 
-    private static final String TAG = "CreateMatchActivity";
+    private static final String TAG = "EditMatchActivity";
     private static final int PLACE_PICKER_REQUEST = 1;
     private static final int GOOGLE_API_CLIENT_ID = 0;
     private GoogleApiClient mGoogleApiClient;
@@ -81,14 +84,13 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
     Place place;
     TextInputLayout eventNameLayout;
-    private String eventName;
-    private String placeName;
-    private Date eventDate;
     private ArrayList<String> playerIdList = new ArrayList<>();
     private ArrayList<Person> playerList = new ArrayList<>();
 
+    private int index;
     private int maxPlayers = 0;
     private String id;
+    private Event event;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +102,13 @@ public class CreateMatchActivity extends AppCompatActivity implements
         // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
+
+        // Get the event data from the previous activity
+        event = Parcels.unwrap(getIntent().getExtras().getParcelable("event"));
+
+        // The actual user id is recovered from the device local storage...
+        SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
 
         // The layout is now built
         // First, the Layouts that will act as sections for the screen are set
@@ -129,6 +138,8 @@ public class CreateMatchActivity extends AppCompatActivity implements
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, items);
         mSpinner.setAdapter(adapter);
 
+
+
         // And, finally, the TextViews that will act as LoginActivity screen buttons are set
         TextView callButton = (TextView) findViewById(R.id.callButton);
         pickerButton = (TextView) findViewById(R.id.pickerButton);
@@ -136,12 +147,39 @@ public class CreateMatchActivity extends AppCompatActivity implements
         TextView createEventButton = (TextView) findViewById(R.id.buttonCreateEvent);
         TextView cancelButton = (TextView) findViewById(buttonCancel);
 
-        // The actual user id is recovered from the device local storage...
-        SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
+        // If the event data recovered from the intent is not null, then the fields are populated
+        if (event != null) {
+            if (event.getEventName() != null)
+                eventNameLayout.getEditText().setText(event.getEventName());
+            if (event.getName() != null)
+                mName.setText(event.getName());
+            if (event.getAddress() != null) {
+                mAddress.setText(event.getAddress());
+            }
+            if (event.getPhone() != null)
+                mPhone.setText(event.getPhone());
+
+            setSpinner();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+            String formattedDate = sdf.format(event.getDate());
+            mDate.setText(formattedDate);
+
+            sdf = new SimpleDateFormat("hh:mm a");
+            String formattedTime = sdf.format(event.getDate());
+            mTime.setText(formattedTime);
+
+            if (event.getPlayersIdList() != null) {
+                playerIdList = event.getPlayersIdList();
+            }
+
+            for (String playerId : playerIdList) {
+                getIdInfo(playerId);
+            }
+        }
 
         // Standard builder for google places API
-        mGoogleApiClient = new GoogleApiClient.Builder(CreateMatchActivity.this)
+        mGoogleApiClient = new GoogleApiClient.Builder(EditMatchActivity.this)
                 .addApi(Places.PLACE_DETECTION_API)
                 .addApi(LocationServices.API)
                 .enableAutoManage(this, GOOGLE_API_CLIENT_ID, this)
@@ -152,10 +190,10 @@ public class CreateMatchActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 if (mGoogleApiClient.isConnected()) {
-                    if (ContextCompat.checkSelfPermission(CreateMatchActivity.this,
+                    if (ContextCompat.checkSelfPermission(EditMatchActivity.this,
                             Manifest.permission.ACCESS_FINE_LOCATION)
                             != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(CreateMatchActivity.this,
+                        ActivityCompat.requestPermissions(EditMatchActivity.this,
                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 PERMISSION_REQUEST_CODE);
                     } else {
@@ -170,7 +208,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
         callButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Utility.call(CreateMatchActivity.this, place.getPhoneNumber().toString());
+                Utility.call(EditMatchActivity.this, event.getPhone());
             }
         });
 
@@ -198,9 +236,9 @@ public class CreateMatchActivity extends AppCompatActivity implements
         addPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(CreateMatchActivity.this, ListUsersActivity.class);
+                Intent intent = new Intent(EditMatchActivity.this, ListUsersActivity.class);
                 intent.putExtra("isFromCreateMatch", true);
-                CreateMatchActivity.this.startActivityForResult(intent, ADD_PLAYER_REQUEST_CODE);
+                EditMatchActivity.this.startActivityForResult(intent, ADD_PLAYER_REQUEST_CODE);
             }
         });
 
@@ -209,12 +247,14 @@ public class CreateMatchActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 if (validateData()) {
-                    if (Utility.isConnectedToNet(CreateMatchActivity.this)) {
+                    if (Utility.isConnectedToNet(EditMatchActivity.this)) {
                         registerMatch();
-                    } else {
-                        Utility.noNetworkError(CreateMatchActivity.this);
                     }
-                } else {
+                    else {
+                        Utility.noNetworkError(EditMatchActivity.this);
+                    }
+                }
+                else {
                     displayErrorPopup();
                 }
             }
@@ -224,7 +264,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.cancel_register_match_message, -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
+                final MessageDialog dialog = new MessageDialog(EditMatchActivity.this, R.string.cancel_edit_match_message, -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
                 dialog.setCancelable(false);
                 dialog.show();
                 dialog.noButton.setOnClickListener(new View.OnClickListener() {
@@ -251,38 +291,41 @@ public class CreateMatchActivity extends AppCompatActivity implements
                 && resultCode == Activity.RESULT_OK) {
 
             place = PlacePicker.getPlace(this, data);
-            final CharSequence name = place.getName();
-            final CharSequence address = place.getAddress();
-            final CharSequence phone = place.getPhoneNumber();
+            event.setName(place.getName().toString());
+            event.setAddress(place.getAddress().toString());
+            event.setPhone(place.getPhoneNumber().toString());
 
-            if (name.length() != 0) {
-                mName.setText(name);
+            if (event.getName().length() != 0) {
+                mName.setText(event.getName());
                 mName.setVisibility(View.VISIBLE);
             }
 
-            if (address.length() != 0) {
-                mAddress.setText(address);
+            if (event.getAddress().length() != 0) {
+                mAddress.setText(event.getAddress());
                 section2.setVisibility(View.VISIBLE);
             }
 
-            if (phone.length() != 0) {
-                mPhone.setText(phone);
+            if (event.getPhone().length() != 0) {
+                mPhone.setText(event.getPhone());
                 section3.setVisibility(View.VISIBLE);
             }
 
             pickerButton.setText("Change Match Venue");
 
-        } else if (requestCode == ADD_PLAYER_REQUEST_CODE
-                && resultCode == Activity.RESULT_OK) {
+        }
+        else if (requestCode == ADD_PLAYER_REQUEST_CODE
+                && resultCode == Activity.RESULT_OK){
             String userId = data.getStringExtra("userId");
 
-            if (playerIdList.contains(userId)) {
-                Utility.generalError(CreateMatchActivity.this, getString(R.string.error_user_already_added));
-            } else {
+            if (playerIdList != null && playerIdList.contains(userId)) {
+                Utility.generalError(EditMatchActivity.this, getString(R.string.error_user_already_added));
+            }
+            else {
                 playerIdList.add(userId);
                 getIdInfo(userId);
             }
-        } else {
+        }
+        else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -307,7 +350,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
         Log.e(TAG, "Google Places API connection failed with error code: "
                 + connectionResult.getErrorCode());
 
-        Utility.generalError(CreateMatchActivity.this, connectionResult.getErrorMessage());
+        Utility.generalError(EditMatchActivity.this, connectionResult.getErrorMessage());
     }
 
     // Setting google places API, the map will show the user surroundings when opened, first this method recover
@@ -318,26 +361,26 @@ public class CreateMatchActivity extends AppCompatActivity implements
             Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mLastLocation != null) {
 
-                LatLngBounds LIKELY_PLACE = new LatLngBounds(new LatLng(mLastLocation.getLatitude() - 0.003, mLastLocation.getLongitude() - 0.003)
-                        , new LatLng(mLastLocation.getLatitude() + 0.003, mLastLocation.getLongitude() + 0.003));
+                LatLngBounds LIKELY_PLACE = new LatLngBounds(new LatLng(mLastLocation.getLatitude()-0.003, mLastLocation.getLongitude()-0.003)
+                        , new LatLng(mLastLocation.getLatitude()+0.003, mLastLocation.getLongitude()+0.003));
 
                 try {
 
                     PlacePicker.IntentBuilder intentBuilder =
                             new PlacePicker.IntentBuilder();
                     intentBuilder.setLatLngBounds(LIKELY_PLACE);
-                    Intent intent = intentBuilder.build(CreateMatchActivity.this);
+                    Intent intent = intentBuilder.build(EditMatchActivity.this);
                     startActivityForResult(intent, PLACE_PICKER_REQUEST);
 
                 } catch (GooglePlayServicesRepairableException
                         | GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
-                    Utility.generalError(CreateMatchActivity.this, e.getMessage());
+                    Utility.generalError(EditMatchActivity.this, e.getMessage());
                 }
 
             }
         } catch (SecurityException e) {
-            Utility.generalError(CreateMatchActivity.this, e.getMessage());
+            Utility.generalError(EditMatchActivity.this, e.getMessage());
         }
     }
 
@@ -346,12 +389,12 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
         boolean dataValidated = true;
 
-        eventName = eventNameLayout.getEditText().getText().toString().trim();
-        placeName = mName.getText().toString().trim();
+        event.setEventName(eventNameLayout.getEditText().getText().toString().trim());
+        event.setName(mName.getText().toString().trim());
 
 
-        if (eventName.isEmpty()
-                || placeName.isEmpty()
+        if (event.getEventName().isEmpty()
+                || event.getName().isEmpty()
                 || mDate.getText().toString().trim().isEmpty()
                 || mTime.getText().toString().trim().isEmpty()) {
             dataValidated = false;
@@ -364,33 +407,33 @@ public class CreateMatchActivity extends AppCompatActivity implements
                 Date date = format.parse(dtStart);
                 if (date.before(new Date())) {
                     dataValidated = false;
-                } else {
-                    eventDate = date;
+                }
+                else {
+                    event.setDate(date);
                 }
             } catch (ParseException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-                Utility.generalError(CreateMatchActivity.this, e.getMessage());
+                Utility.generalError(EditMatchActivity.this, e.getMessage());
+            }
+
+            switch(mSpinner.getSelectedItemPosition()) {
+                case 0:
+                    maxPlayers = 10;
+                    break;
+                case 1:
+                    maxPlayers = 14;
+                    break;
+                case 2:
+                    maxPlayers = 22;
+                    break;
+            }
+
+            if (playerIdList.size() > maxPlayers) {
+                dataValidated = false;
             }
 
         }
-
-        switch(mSpinner.getSelectedItemPosition()) {
-            case 0:
-                maxPlayers = 10;
-                break;
-            case 1:
-                maxPlayers = 14;
-                break;
-            case 2:
-                maxPlayers = 22;
-                break;
-        }
-
-        if (playerIdList.size() > maxPlayers) {
-            dataValidated = false;
-        }
-
 
         return dataValidated;
     }
@@ -398,18 +441,22 @@ public class CreateMatchActivity extends AppCompatActivity implements
     // If there is any error, the user is informed
     public void displayErrorPopup() {
 
-        if (eventName.isEmpty()) {
-            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_invalid_event_name));
-        } else if (placeName.isEmpty()) {
-            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_invalid_venue));
-        } else if (mDate.getText().toString().trim().isEmpty()) {
-            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_invalid_date));
-        } else if (mTime.getText().toString().trim().isEmpty()) {
-            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_invalid_time));
+        if (event.getEventName().isEmpty()) {
+            Utility.generalError(EditMatchActivity.this, getString(R.string.error_invalid_event_name));
+        }
+        else if (event.getName().isEmpty()) {
+            Utility.generalError(EditMatchActivity.this, getString(R.string.error_invalid_venue));
+        }
+        else if (mDate.getText().toString().trim().isEmpty()) {
+            Utility.generalError(EditMatchActivity.this, getString(R.string.error_invalid_date));
+        }
+        else if (mTime.getText().toString().trim().isEmpty()) {
+            Utility.generalError(EditMatchActivity.this, getString(R.string.error_invalid_time));
         } else if (playerIdList.size() > maxPlayers) {
-            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_player_max_number_exceeded));
-        } else {
-            Utility.generalError(CreateMatchActivity.this, getString(R.string.error_past_date));
+            Utility.generalError(EditMatchActivity.this, getString(R.string.error_player_max_number_exceeded));
+        }
+        else {
+            Utility.generalError(EditMatchActivity.this, getString(R.string.error_past_date));
         }
     }
 
@@ -422,34 +469,26 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
         // Creating new event node, which returns the unique key value
         // new event node would be /Event/$eventid/
-        String eventId = myRef.push().getKey();
-
-        // Creating Event object
-        Event event = new Event();
+        if (event.getEventKey() == null) {
+            event.setEventKey(myRef.push().getKey());
+        }
 
         // Adding values
-        event.setEventName(eventName);
-        event.setName(placeName);
-        event.setAddress(place.getAddress().toString());
-        if (mPhone.length() != 0) {
-            event.setPhone(place.getPhoneNumber().toString());
-        }
         event.setNumberOfPlayers(mSpinner.getSelectedItem().toString());
-        event.setDate(eventDate);
         event.setPlayersIdList(playerIdList);
-        event.setEventKey(eventId);
+        event.setEventKey(event.getEventKey());
         event.setCreator(id);
 
-        myRef.child(eventId).setValue(event);
+        myRef.child(event.getEventKey()).setValue(event);
 
-        final MessageDialog dialog = new MessageDialog(CreateMatchActivity.this, R.string.success_register_match, R.string.dialog_edit_ok_text, -1, -1);
+        final MessageDialog dialog = new MessageDialog(EditMatchActivity.this, R.string.success_register_match, R.string.dialog_edit_ok_text, -1, -1);
         dialog.setCancelable(false);
         dialog.show();
         dialog.okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(CreateMatchActivity.this, MainMenuActivity.class);
-                CreateMatchActivity.this.startActivity(intent);
+                Intent intent = new Intent(EditMatchActivity.this, MainMenuActivity.class);
+                EditMatchActivity.this.startActivity(intent);
 
                 dialog.cancel();
             }
@@ -469,10 +508,8 @@ public class CreateMatchActivity extends AppCompatActivity implements
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                Person temp = dataSnapshot.getValue(Person.class);
-                temp.setUserKey(dataSnapshot.getKey());
-                playerList.add(temp);
-                populatePlayerLayout();
+                playerList.add(dataSnapshot.getValue(Person.class));
+                constructPlayerLayout();
                 Log.d(TAG, "Value is: " + value);
             }
 
@@ -480,32 +517,61 @@ public class CreateMatchActivity extends AppCompatActivity implements
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
-                Utility.generalError(CreateMatchActivity.this, error.getMessage());
+                Utility.generalError(EditMatchActivity.this, error.getMessage());
             }
         });
     }
 
     // ... and populate the layout with the player name and preferred position
-    public void populatePlayerLayout() {
+    public void constructPlayerLayout() {
         View.inflate(this, R.layout.item_user_list, playerListLayout);
 
-        int i = playerList.size() - 1;
-        View view = playerListLayout.getChildAt(i);
-        view.setTag(playerList.get(i).getUserKey());
-        TextView playerName = (TextView) view.findViewById(R.id.user_name);
-        TextView playerPreferredPosition = (TextView) view.findViewById(R.id.user_preferred_position);
-        playerName.setText(playerList.get(i).getName());
-        playerPreferredPosition.setText(" (" + playerList.get(i).getPreferredPosition() + ")");
+        for (int i = 0; i < playerListLayout.getChildCount(); i++) {
+            View view = playerListLayout.getChildAt(i);
+            TextView playerName = (TextView) view.findViewById(R.id.user_name);
+            TextView playerPreferredPosition = (TextView) view.findViewById(R.id.user_preferred_position);
+            playerName.setText(playerList.get(i).getName());
+            playerPreferredPosition.setText(" (" +playerList.get(i).getPreferredPosition() +")");
 
+            index = i;
 
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(CreateMatchActivity.this, ViewProfileActivity.class);
-                intent.putExtra("userKey", v.getTag().toString());
-                CreateMatchActivity.this.startActivity(intent);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(EditMatchActivity.this, ViewProfileActivity.class);
+                    intent.putExtra("userId",playerList.get(index).getUserKey());
+                    EditMatchActivity.this.startActivity(intent);
+                }
+            });
+        }
+    }
+
+    // The number of players spinner data is set here
+    public void setSpinner() {
+
+        int position;
+
+        if (event.getNumberOfPlayers() == null) {
+            position = 0;
+        }
+        else {
+            switch (event.getNumberOfPlayers()) {
+
+                case "10 (5x2)":
+                    position = 0;
+                    break;
+                case "14 (7x2)":
+                    position = 1;
+                    break;
+                case "22 (11x2)":
+                    position = 2;
+                    break;
+                default:
+                    position = 0;
+                    break;
+
             }
-        });
-
+        }
+        mSpinner.setSelection(position);
     }
 }

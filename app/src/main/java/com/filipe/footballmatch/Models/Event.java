@@ -20,6 +20,7 @@ public class Event {
     private String numberOfPlayers;
     private ArrayList<String> playersIdList;
     private String eventKey;
+    private String creator;
 
     public Event() {
       /*Blank default constructor essential for Firebase*/
@@ -87,5 +88,13 @@ public class Event {
 
     public void setEventKey(String eventKey) {
         this.eventKey = eventKey;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 }
