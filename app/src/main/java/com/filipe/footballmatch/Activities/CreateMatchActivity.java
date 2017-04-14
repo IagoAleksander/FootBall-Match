@@ -270,7 +270,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
                 section3.setVisibility(View.VISIBLE);
             }
 
-            pickerButton.setText("Change Match Venue");
+            pickerButton.setText(getString(R.string.change_match_venue_button));
 
         } else if (requestCode == ADD_PLAYER_REQUEST_CODE
                 && resultCode == Activity.RESULT_OK) {

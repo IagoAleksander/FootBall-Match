@@ -310,7 +310,7 @@ public class EditMatchActivity extends AppCompatActivity implements
                 section3.setVisibility(View.VISIBLE);
             }
 
-            pickerButton.setText("Change Match Venue");
+            pickerButton.setText(getString(R.string.change_match_venue_button));
 
         }
         else if (requestCode == ADD_PLAYER_REQUEST_CODE

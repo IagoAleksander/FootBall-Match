@@ -1,4 +1,5 @@
 <resources>
+
     <string name="app_name">FootballMatch</string>
 
     <string name="facebook_app_id">1840847389518927</string>
@@ -21,8 +22,14 @@
     <!-- Login Activity -->
     <string name="prompt_login">Login</string>
     <string name="prompt_password">Password</string>
+    <string name="error_login_invalid_email">Please insert a valid email address</string>
+    <string name="error_login_invalid_password">Please insert a valid password</string>
+
+    <!-- Login Layout -->
+    <string name="action_sign_in">Login</string>
     <string name="action_google_sign_in">Login with Google</string>
     <string name="action_facebook_sign_in">Login with Facebook</string>
+    <string name="action_register">Register</string>
 
     <!-- Create Match Activity -->
     <string name="error_invalid_event_name">Please give the event a name to continue.</string>
@@ -34,18 +41,95 @@
     <string name="success_register_match">Match registered successfully in the system.</string>
     <string name="cancel_register_match_message">If you confirm, the event will be lost. Do you want to continue?</string>
     <string name="error_player_max_number_exceeded">The number of players was exceeded for the venue. Please change the number of players for the event if you want to add more players</string>
+    <string name="change_match_venue_button">Change Match Venue</string>
+    <string name="change_match_date_button">Change Date</string>
+    <string name="change_match_time_button">Change Time</string>
+
+    <!-- Create Match Layout -->
+    <string name="event_name_hint">Event Name</string>
+    <string name="choose_match_venue_button">Choose Match Venue</string>
+    <string name="event_address_header">"Address: "</string>
+    <string name="event_phone_header">"Phone: "</string>
+    <string name="match_venue_call_button">Call</string>
+    <string name="event_number_of_players_header">"Number of players in each team: "</string>
+    <string name="event_date_header">"Date: "</string>
+    <string name="event_time_header">"Time: "</string>
+    <string name="pick_match_date_button">Pick Date</string>
+    <string name="pick_match_time_button">Pick Time</string>
+    <string name="match_add_player_button">Add Player</string>
+    <string name="confirm_create_match_button">Create Event</string>
+    <string name="cancel_create_match_button">Cancel</string>
 
     <!-- Edit Match Activity -->
     <string name="cancel_edit_match_message">If you confirm, the changes in the event will be lost. Do you want to continue?</string>
 
-    <!-- View Match Activity -->
+    <!-- EditProfile Activity -->
+    <string name="success_update_profile">Profile updated successfully.</string>
+    <string name="cancel_profile_update_message">If you confirm, any changes made in the profile will be lost. Do you want to continue?</string>
+    <string name="error_invalid_name">Please insert a valid name to continue.</string>
+    <string name="error_invalid_age">Please insert a valid age to continue.</string>
+    <string name="error_invalid_email">Please insert a valid email to continue.</string>
+
+    <!-- EditProfile Layout -->
+    <string name="user_name_hint">Name</string>
+    <string name="user_age_hint">Age</string>
+    <string name="user_preferred_position_header">Preferred Position</string>
+    <string name="user_contact_number_hint">Contact Number</string>
+    <string name="user_email_hint">Email</string>
+    <string name="confirm_edit_profile_button">Confirm</string>
+    <string name="cancel_edit_profile_button">Cancel</string>
+
+    <!-- ListAvailableEvents Layout -->
+    <string name="list_available_events_filter_header">Search for event by:</string>
+    <string name="list_available_events_filter_event_name_hint">Event Name</string>
+    <string name="list_available_events_filter_event_venue_hint">Venue Name</string>
+    <string name="list_available_events_filter_created_matches">Show only matches created by me</string>
+    <string name="list_available_events_filter_joined_matches">Show only matches joined by me</string>
+    <string name="list_available_events_filter_search_button">Search!</string>
+    <string name="list_available_events_filter_show_filter_button">Show Filter</string>
+
+    <!-- ListUsers Layout -->
+    <string name="list_users_filter_header">Search for user by:</string>
+    <string name="list_users_filter_name_hint">Name</string>
+    <string name="list_users_filter_age_hint">Age</string>
+    <string name="list_users_filter_search_button">Search!</string>
+    <string name="list_users_filter_show_filter_button">Show Filter</string>
+    <string name="list_users_filter_add_new_player_button">Add new Player</string>
+
+    <!-- MainMenu Layout -->
+    <string name="main_menu_view_profile_button">View Profile</string>
+    <string name="main_menu_search_user_button">Search User</string>
+    <string name="main_menu_create_match_button">Create Match</string>
+    <string name="main_menu_list_available_matches_button">List Available Matches</string>
+    <string name="main_menu_logout_button">Logout</string>
+
+    <!-- Register Activity -->
+    <string name="error_different_email">Email differs from the previous one!</string>
+    <string name="error_invalid_password">Not a valid password!</string>
+    <string name="error_different_password">Password differs from the previous one!</string>
+    <string name="success_register_user">User registered with success</string>
+
+    <!-- Register Layout -->
+    <string name="user_confirm_email_hint">Confirm Email</string>
+    <string name="user_confirm_password_hint">Confirm Password</string>
+
+    <!-- ViewMatch Activity -->
+    <string name="join_match_button">Join Match</string>
+    <string name="leave_event_button">Leave Event</string>
     <string name="success_join_match">You are now registered in the match</string>
     <string name="error_join_match">The number of players was exceeded for the venue.</string>
     <string name="leave_match_confirmation_message">Are you sure that you want to leave the match?</string>
     <string name="success_leave_match">You left the match successfully</string>
 
-    <!-- EditProfile Activity -->
-    <string name="success_update_profile">Profile updated successfully.</string>
-    <string name="cancel_profile_update_message">If you confirm, any changes made in the profile will be lost. Do you want to continue?</string>
+    <!-- ViewMatch Layout -->
+    <string name="number_of_players_header">"Number of players: "</string>
+    <string name="edit_event_button">Edit Event</string>
+
+    <!-- ViewProfile Activity -->
+    <string name="remove_player_button">Remove from Match</string>
+
+    <!-- ViewProfile Layout -->
+    <string name="player_call_button">Call</string>
+    <string name="edit_profile_button">Edit Profile</string>
 
 </resources>

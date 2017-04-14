@@ -201,7 +201,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                     // If the user reach this screen from the view match flow, a new option appears
                     // this option allows the user to remove the player from the match
                     if (isFromViewMatch && buttonEditProfile.getVisibility() == View.GONE) {
-                        buttonEditProfile.setText("Remove from Match");
+                        buttonEditProfile.setText(getString(R.string.remove_player_button));
                         buttonEditProfile.setVisibility(View.VISIBLE);
                         buttonEditProfile.setOnClickListener(new View.OnClickListener() {
                             @Override

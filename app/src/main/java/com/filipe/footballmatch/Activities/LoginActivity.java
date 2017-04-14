@@ -368,7 +368,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
 
         // If email is not in agreement with pattern...
         if (!pattern.matcher(email).matches()) {
-            login_et.setError("Please insert a valid email address");
+            login_et.setError(getString(R.string.error_login_invalid_email));
             validated = false;
         }
         else {
@@ -379,7 +379,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         // If password is not at least 5 character long...
         String password = password_et.getEditText().getText().toString().trim();
         if (password.length() <= 5) {
-            password_et.setError("Please insert a valid password");
+            password_et.setError(getString(R.string.error_login_invalid_password));
             validated = false;
         }
         else {

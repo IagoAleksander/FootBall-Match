@@ -186,7 +186,7 @@ public class ViewMatchActivity extends AppCompatActivity {
                 } else {
 //                    buttonEditEvent.setVisibility(GONE);
                     if (!playerIdList.contains(id)) {
-                        buttonEditEvent.setText("Join Match");
+                        buttonEditEvent.setText(getString(R.string.join_match_button));
                         buttonEditEvent.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -218,7 +218,7 @@ public class ViewMatchActivity extends AppCompatActivity {
                             }
                         });
                     } else {
-                        buttonEditEvent.setText("Leave Event");
+                        buttonEditEvent.setText(getString(R.string.leave_event_button));
                         buttonEditEvent.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {

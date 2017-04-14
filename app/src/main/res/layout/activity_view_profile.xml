@@ -48,7 +48,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Name"
+                        android:text="@string/user_name_hint"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -68,7 +68,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Age"
+                        android:text="@string/user_age_hint"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -88,7 +88,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Preferred Position"
+                        android:text="@string/user_preferred_position_header"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -108,7 +108,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Contact Number"
+                        android:text="@string/user_contact_number_hint"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -131,7 +131,7 @@
                         android:gravity="center"
                         android:minWidth="100dp"
                         android:padding="8dp"
-                        android:text="Call"
+                        android:text="@string/player_call_button"
                         android:textColor="@android:color/white"
                         android:textSize="14sp"
                         android:visibility="gone"/>
@@ -148,7 +148,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Email"
+                        android:text="@string/user_email_hint"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -167,7 +167,7 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
-                    android:text="Edit Profile"
+                    android:text="@string/edit_profile_button"
                     android:minWidth="196dp"
                     android:padding="8dp"
                     android:gravity="center"

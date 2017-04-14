@@ -14,8 +14,6 @@ import java.util.Calendar;
 
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
-    private TextView eventDate;
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the current date as the default date in the picker
@@ -36,7 +34,9 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         String formattedDate = sdf.format(c.getTime());
 
-        eventDate = (TextView) getActivity().findViewById(R.id.event_date);
+        TextView eventDate = (TextView) getActivity().findViewById(R.id.event_date);
         eventDate.setText(formattedDate);
+        TextView setDateButton = (TextView) getActivity().findViewById(R.id.date_picker);
+        setDateButton.setText(getString(R.string.change_match_date_button));
     }
 }

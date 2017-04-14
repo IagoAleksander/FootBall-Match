@@ -32,7 +32,8 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:scaleType="centerCrop"
-                    android:layout_gravity="center"/>
+                    android:layout_gravity="center"
+                    android:src="@drawable/com_facebook_profile_picture_blank_square"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/tilName"
@@ -47,7 +48,7 @@
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Name"
+                        android:hint="@string/user_name_hint"
                         android:textSize="14sp"
                         android:textColor="@color/black"
                         android:fontFamily="sans-serif"
@@ -69,7 +70,7 @@
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Age"
+                        android:hint="@string/user_age_hint"
                         android:textSize="14sp"
                         android:textColor="@color/black"
                         android:fontFamily="sans-serif"
@@ -90,7 +91,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Preferred Position"
+                        android:text="@string/user_preferred_position_header"
                         android:textSize="15sp"
                         android:textColor="@color/grey_500"/>
 
@@ -114,7 +115,7 @@
                     <android.support.design.widget.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Contact Number"
+                        android:hint="@string/user_contact_number_hint"
                         android:textSize="14sp"
                         android:textColor="@color/black"
                         android:fontFamily="sans-serif"
@@ -139,7 +140,7 @@
                         android:layout_height="wrap_content"
                         android:alpha="0.6"
                         android:fontFamily="sans-serif"
-                        android:hint="Email"
+                        android:hint="@string/user_email_hint"
                         android:inputType="text"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
@@ -155,7 +156,7 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
-                    android:text="Confirm"
+                    android:text="@string/confirm_edit_profile_button"
                     android:minWidth="196dp"
                     android:padding="8dp"
                     android:gravity="center"
@@ -174,7 +175,7 @@
                     android:layout_marginRight="16dp"
                     android:layout_marginLeft="16dp"
                     android:layout_marginBottom="8dp"
-                    android:text="Cancel"
+                    android:text="@string/cancel_edit_profile_button"
                     android:minWidth="196dp"
                     android:padding="8dp"
                     android:gravity="center"

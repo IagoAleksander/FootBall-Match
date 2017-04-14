@@ -31,6 +31,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.regex.Pattern;
 
+import static com.filipe.footballmatch.R.id.tilAge;
 import static com.filipe.footballmatch.R.id.tilEmail;
 
 /**
@@ -79,7 +80,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Then, the TextInputLayout that will allow the user to insert data are set
         editTextName = (TextInputLayout) findViewById(R.id.tilName);
-        editTextAge = (TextInputLayout) findViewById(R.id.tilAge);
+        editTextAge = (TextInputLayout) findViewById(tilAge);
         editTextEmail = (TextInputLayout) findViewById(tilEmail);
         editTextConfirmEmail = (TextInputLayout) findViewById(R.id.tilConfirmEmail);
         editTextPassword= (TextInputLayout) findViewById(R.id.tilPassword);
@@ -112,7 +113,7 @@ public class RegisterActivity extends AppCompatActivity {
                     editor.commit();
 
                     // A message is then displayed, informing the user that the registration was successful
-                    final MessageDialog dialog = new MessageDialog(RegisterActivity.this, "user registered with success", R.string.dialog_edit_ok_text, -1, -1);
+                    final MessageDialog dialog = new MessageDialog(RegisterActivity.this, R.string.success_register_user, R.string.dialog_edit_ok_text, -1, -1);
                     dialog.setCancelable(false);
                     dialog.show();
                     dialog.okButton.setOnClickListener(new View.OnClickListener() {
@@ -138,7 +139,12 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View v) {
                 hideKeyboard();
                 if (validateInfo()) {
-                    gettingExtraValues();
+                    if (Utility.isConnectedToNet(RegisterActivity.this)) {
+                        gettingExtraValues();
+                    }
+                    else {
+                        Utility.noNetworkError(RegisterActivity.this);
+                    }
                 }
 
             }
@@ -178,7 +184,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         String email = editTextEmail.getEditText().getText().toString().trim();
         if (!pattern.matcher(email).matches()) {
-            editTextEmail.setError("Not a valid email address!");
+            editTextEmail.setError(getString(R.string.error_invalid_email));
             validated = false;
         }
         else {
@@ -186,7 +192,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         if (!email.equals(editTextConfirmEmail.getEditText().getText().toString().trim())) {
-            editTextConfirmEmail.setError("Email differs from the previous one!");
+            editTextConfirmEmail.setError(getString(R.string.error_different_email));
             validated = false;
         }
         else {
@@ -195,7 +201,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         String password = editTextPassword.getEditText().getText().toString().trim();
         if (password.length() <= 5) {
-            editTextPassword.setError("Not a valid password!");
+            editTextPassword.setError(getString(R.string.error_invalid_password));
             validated = false;
         }
         else {
@@ -204,12 +210,21 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         if (!password.equals(editTextConfirmPassword.getEditText().getText().toString().trim())) {
-            editTextConfirmPassword.setError("Password differs from the previous one!");
+            editTextConfirmPassword.setError(getString(R.string.error_different_password));
             validated = false;
         }
         else {
             editTextConfirmPassword.setErrorEnabled(false);
         }
+
+        try {
+            Integer.parseInt(editTextAge.getEditText().getText().toString().trim());
+            editTextAge.setErrorEnabled(false);
+        } catch (NumberFormatException e) {
+            editTextAge.setError(getString(R.string.error_invalid_age));
+            validated = false;
+        }
+
         return validated;
 
     }
@@ -225,15 +240,13 @@ public class RegisterActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 person.setEmail(editTextEmail.getEditText().getText().toString().trim());
+                person.setName(editTextName.getEditText().getText().toString().trim());
+                person.setAge(Integer.parseInt(editTextAge.getEditText().getText().toString().trim()));
 
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                     if (dsp.getValue(Person.class).getEmail().equals(person.getEmail())) {
                         person = dsp.getValue(Person.class);
                         oldKey = dsp.getKey();
-
-                        // update values
-                        person.setName(editTextName.getEditText().getText().toString().trim());
-                        person.setAge(Integer.parseInt(editTextAge.getEditText().getText().toString().trim()));
                     }
                 }
                 storeValues();
@@ -252,7 +265,7 @@ public class RegisterActivity extends AppCompatActivity {
     public void storeValues() {
 
         // Getting values to store
-        person.setEmail(editTextEmail.getEditText().getText().toString().trim());
+//        person.setEmail(editTextEmail.getEditText().getText().toString().trim());
         String password = editTextPassword.getEditText().getText().toString().trim();
 
         mAuth.createUserWithEmailAndPassword(person.getEmail(), password)
@@ -265,7 +278,8 @@ public class RegisterActivity extends AppCompatActivity {
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Utility.generalError(RegisterActivity.this, task.getException().getMessage());
+                            //TODO
+//                            Utility.generalError(RegisterActivity.this, task.getException().getMessage());
                             mAuth.signOut();
                         }
                     }

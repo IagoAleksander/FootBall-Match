@@ -37,6 +37,10 @@ import org.parceler.Parcels;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
+
+import static android.R.attr.password;
+import static com.filipe.footballmatch.R.id.tilEmail;
 
 /**
  * Created by Filipe on 21/01/2017.
@@ -49,7 +53,6 @@ public class EditProfileActivity extends AppCompatActivity {
     private TextInputLayout tilAge;
     private Spinner spPreferredPosition;
     private TextInputLayout tilContactNumber;
-    private TextInputLayout tilEmail;
 
     StorageReference profileImageRef;
 
@@ -60,6 +63,8 @@ public class EditProfileActivity extends AppCompatActivity {
     File localFile = null;
     Person person;
     String id;
+
+    Person editedInfo = new Person();
 
     boolean wasPictureChanged = false;
 
@@ -85,7 +90,10 @@ public class EditProfileActivity extends AppCompatActivity {
         tilAge = (TextInputLayout) findViewById(R.id.tilAge);
         spPreferredPosition = (Spinner) findViewById(R.id.spPreferredPosition);
         tilContactNumber = (TextInputLayout) findViewById(R.id.tilContactNumber);
-        tilEmail = (TextInputLayout) findViewById(R.id.tilEmail);
+
+        // the email field will not be used in the edit profile flow
+        TextInputLayout tilEmail = (TextInputLayout) findViewById(R.id.tilEmail);
+        tilEmail.setVisibility(View.GONE);
 
         // Then, the TextViews that will act as LoginActivity screen buttons
         TextView buttonConfirm = (TextView) findViewById(R.id.buttonConfirm);
@@ -137,7 +145,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
-                    Utility.generalError(EditProfileActivity.this, exception.getMessage());
+//                    Utility.generalError(EditProfileActivity.this, exception.getMessage());
                 }
             });
         }
@@ -158,10 +166,12 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if (wasPictureChanged)
-                    addPictureToStorage();
-                else
-                    updateProfileData();
+                if (validateInfo()) {
+                    if (wasPictureChanged)
+                        addPictureToStorage();
+                    else
+                        updateProfileData();
+                }
 
             }
         });
@@ -231,13 +241,9 @@ public class EditProfileActivity extends AppCompatActivity {
 
     // If the profile data was changed, the info in the database is updated
     public void updateProfileData() {
-        Person editedInfo = new Person();
 
-        editedInfo.setName(tilName.getEditText().getText().toString().trim());
-        editedInfo.setAge(Integer.parseInt(tilAge.getEditText().getText().toString().trim()));
-        editedInfo.setPreferredPosition(spPreferredPosition.getSelectedItem().toString());
-        editedInfo.setContactNumber(tilContactNumber.getEditText().getText().toString().trim());
-        editedInfo.setEmail(tilEmail.getEditText().getText().toString().trim());
+
+
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("Person");
@@ -266,6 +272,36 @@ public class EditProfileActivity extends AppCompatActivity {
             profilePicture.setImageBitmap(imageBitmap);
             wasPictureChanged = true;
         }
+    }
+
+    // The inserted info is checked and validated
+    public boolean validateInfo() {
+
+        boolean validated = true;
+
+        // A new instance of person is populated with the inserted info
+        editedInfo.setName(tilName.getEditText().getText().toString().trim());
+        try {
+            editedInfo.setAge(Integer.parseInt(tilAge.getEditText().getText().toString().trim()));
+            tilAge.setErrorEnabled(false);
+        } catch (NumberFormatException e) {
+            tilAge.setError(getString(R.string.error_invalid_age));
+            validated = false;
+        }
+        editedInfo.setPreferredPosition(spPreferredPosition.getSelectedItem().toString());
+        editedInfo.setContactNumber(tilContactNumber.getEditText().getText().toString().trim());
+        editedInfo.setEmail(person.getEmail());
+
+        if (editedInfo.getName().isEmpty()) {
+            tilName.setError(getString(R.string.error_invalid_name));
+            validated = false;
+        }
+        else {
+            tilName.setErrorEnabled(false);
+        }
+
+        return validated;
+
     }
 
     // The preferred position spinner data is set here

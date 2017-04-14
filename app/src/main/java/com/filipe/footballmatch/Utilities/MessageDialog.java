@@ -15,16 +15,15 @@ public class MessageDialog {
 
     public static final String TAG = MessageDialog.class.getSimpleName();
 
-    private AlertDialog.Builder builder;
     private AlertDialog dialog;
 
-    Activity activity;
+    private Activity activity;
 
-    String dialogLabelText = null;
-    SpannableStringBuilder dialogLabelTextSpannable = null;
-    String dialogOkBtnText = null;
-    String dialogNoBtnText = null;
-    String dialogYesBtnText = null;
+    private String dialogLabelText = null;
+    private SpannableStringBuilder dialogLabelTextSpannable = null;
+    private String dialogOkBtnText = null;
+    private String dialogNoBtnText = null;
+    private String dialogYesBtnText = null;
 
     TextView dialogLabel;
     public Button okButton;
@@ -79,7 +78,7 @@ public class MessageDialog {
             if (dialogYesBtnText != null) dialogYesBtnText = dialogYesBtnText.toUpperCase();
         }
 
-        builder = new AlertDialog.Builder(activity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         if(!isSpannable) {
             builder.setMessage(dialogLabelText);
