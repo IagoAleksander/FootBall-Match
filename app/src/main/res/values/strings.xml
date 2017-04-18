@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">FootballMatch</string>
+    <string name="app_name">C13 Football Events</string>
 
     <string name="facebook_app_id">1840847389518927</string>
     <string name="fb_login_protocol_scheme">fb1840847389518927</string>

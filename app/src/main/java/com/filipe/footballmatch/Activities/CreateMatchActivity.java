@@ -7,13 +7,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -36,6 +35,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
@@ -53,19 +54,20 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static android.R.attr.switchMinWidth;
 import static android.R.attr.value;
 import static com.filipe.footballmatch.R.id.buttonCancel;
 
 public class CreateMatchActivity extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = "CreateMatchActivity";
     private static final int PLACE_PICKER_REQUEST = 1;
     private static final int GOOGLE_API_CLIENT_ID = 0;
-    private GoogleApiClient mGoogleApiClient;
     private static final int PERMISSION_REQUEST_CODE = 100;
     private static final int ADD_PLAYER_REQUEST_CODE = 1002;
+
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
 
     private LinearLayout section2;
     private RelativeLayout section3;
@@ -89,6 +91,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
     private int maxPlayers = 0;
     private String id;
+    private boolean pickerClicked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,29 +143,12 @@ public class CreateMatchActivity extends AppCompatActivity implements
         SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
 
-        // Standard builder for google places API
-        mGoogleApiClient = new GoogleApiClient.Builder(CreateMatchActivity.this)
-                .addApi(Places.PLACE_DETECTION_API)
-                .addApi(LocationServices.API)
-                .enableAutoManage(this, GOOGLE_API_CLIENT_ID, this)
-                .build();
-
         // Click Listener for button choose match venue
         pickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mGoogleApiClient.isConnected()) {
-                    if (ContextCompat.checkSelfPermission(CreateMatchActivity.this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(CreateMatchActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                PERMISSION_REQUEST_CODE);
-                    } else {
-                        callPlaceDetectionApi();
-                    }
-
-                }
+                pickerClicked = true;
+                getLocation();
             }
         });
 
@@ -258,16 +244,25 @@ public class CreateMatchActivity extends AppCompatActivity implements
             if (name.length() != 0) {
                 mName.setText(name);
                 mName.setVisibility(View.VISIBLE);
+            } else {
+                mName.setText("");
+                mName.setVisibility(View.GONE);
             }
 
             if (address.length() != 0) {
                 mAddress.setText(address);
                 section2.setVisibility(View.VISIBLE);
+            } else {
+                mAddress.setText("");
+                section2.setVisibility(View.GONE);
             }
 
             if (phone.length() != 0) {
                 mPhone.setText(phone);
                 section3.setVisibility(View.VISIBLE);
+            } else {
+                mPhone.setText("");
+                section3.setVisibility(View.GONE);
             }
 
             pickerButton.setText(getString(R.string.change_match_venue_button));
@@ -295,9 +290,49 @@ public class CreateMatchActivity extends AppCompatActivity implements
             case PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    callPlaceDetectionApi();
+                    getLocation();
                 }
                 break;
+        }
+    }
+
+    // Standard builder for google places API
+    private void getLocation() {
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(10000);
+
+        if (mGoogleApiClient == null) {
+
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .enableAutoManage(this, GOOGLE_API_CLIENT_ID, this)
+                    .build();
+
+            mGoogleApiClient.connect();
+        } else {
+            mGoogleApiClient.disconnect();
+            mGoogleApiClient.connect();
+        }
+
+    }
+
+    // When the google Places API is connected, it checks for user permissions and request the actual location of the phone.
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+        if (pickerClicked) {
+            pickerClicked = false;
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(CreateMatchActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                        PERMISSION_REQUEST_CODE);
+            }
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
 
@@ -310,34 +345,36 @@ public class CreateMatchActivity extends AppCompatActivity implements
         Utility.generalError(CreateMatchActivity.this, connectionResult.getErrorMessage());
     }
 
-    // Setting google places API, the map will show the user surroundings when opened, first this method recover
-    // the likely coordinates of the user and then allow him to choose a place to create an event
-    private void callPlaceDetectionApi() {
-        try {
+    @Override
+    public void onConnectionSuspended(int i) {
 
-            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if (mLastLocation != null) {
+    }
 
-                LatLngBounds LIKELY_PLACE = new LatLngBounds(new LatLng(mLastLocation.getLatitude() - 0.003, mLastLocation.getLongitude() - 0.003)
-                        , new LatLng(mLastLocation.getLatitude() + 0.003, mLastLocation.getLongitude() + 0.003));
+    // When google places API returns a location, the map will show the user surroundings when opened,
+    // allowing him to choose a place to create an event
+    @Override
+    public void onLocationChanged(Location location) {
+        if (location != null) {
 
-                try {
+            LatLngBounds LIKELY_PLACE = new LatLngBounds(new LatLng(location.getLatitude() - 0.003, location.getLongitude() - 0.003)
+                    , new LatLng(location.getLatitude() + 0.003, location.getLongitude() + 0.003));
 
-                    PlacePicker.IntentBuilder intentBuilder =
-                            new PlacePicker.IntentBuilder();
-                    intentBuilder.setLatLngBounds(LIKELY_PLACE);
-                    Intent intent = intentBuilder.build(CreateMatchActivity.this);
-                    startActivityForResult(intent, PLACE_PICKER_REQUEST);
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, CreateMatchActivity.this);
 
-                } catch (GooglePlayServicesRepairableException
-                        | GooglePlayServicesNotAvailableException e) {
-                    e.printStackTrace();
-                    Utility.generalError(CreateMatchActivity.this, e.getMessage());
-                }
+            try {
 
+                PlacePicker.IntentBuilder intentBuilder =
+                        new PlacePicker.IntentBuilder();
+                intentBuilder.setLatLngBounds(LIKELY_PLACE);
+                Intent intent = intentBuilder.build(CreateMatchActivity.this);
+                startActivityForResult(intent, PLACE_PICKER_REQUEST);
+
+            } catch (GooglePlayServicesRepairableException
+                    | GooglePlayServicesNotAvailableException e) {
+                e.printStackTrace();
+                Utility.generalError(CreateMatchActivity.this, e.getMessage());
             }
-        } catch (SecurityException e) {
-            Utility.generalError(CreateMatchActivity.this, e.getMessage());
+
         }
     }
 
@@ -375,7 +412,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
         }
 
-        switch(mSpinner.getSelectedItemPosition()) {
+        switch (mSpinner.getSelectedItemPosition()) {
             case 0:
                 maxPlayers = 10;
                 break;
@@ -508,4 +545,6 @@ public class CreateMatchActivity extends AppCompatActivity implements
         });
 
     }
+
+
 }

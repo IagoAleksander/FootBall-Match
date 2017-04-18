@@ -127,7 +127,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         FirebaseStorage storage = FirebaseStorage.getInstance();
 
         // Create a storage reference from our app
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://football-match-2c6aa.appspot.com");
+        StorageReference storageRef = storage.getReferenceFromUrl("gs://football-match-a60fb.appspot.com");
 
         if (!id.isEmpty()) {
             // Create a reference to 'images/id.jpg'

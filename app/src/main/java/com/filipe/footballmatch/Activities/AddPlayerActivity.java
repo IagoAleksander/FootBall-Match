@@ -116,7 +116,8 @@ public class AddPlayerActivity extends AppCompatActivity {
 
                 // Check the database for the user existence
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    if (dsp.getValue(Person.class).getEmail().equals(email)) {
+                    if (dsp.getValue(Person.class).getEmail() != null
+                            && dsp.getValue(Person.class).getEmail().equals(email)) {
                         userExists = true;
                     }
                 }
