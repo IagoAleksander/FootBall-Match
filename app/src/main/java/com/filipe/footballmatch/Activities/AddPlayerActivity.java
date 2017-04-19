@@ -147,7 +147,7 @@ public class AddPlayerActivity extends AppCompatActivity {
         };
 
         // Read from the database
-        myRef.addValueEventListener(myEventListener);
+        myRef.addListenerForSingleValueEvent(myEventListener);
 
     }
 

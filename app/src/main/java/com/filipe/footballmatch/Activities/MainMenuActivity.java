@@ -64,7 +64,7 @@ public class MainMenuActivity extends AppCompatActivity {
             DatabaseReference myRef = database.getReference("Person/");
 
             // Read from the database
-            myRef.child(id).addValueEventListener(new ValueEventListener() {
+            myRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
 
                 // The TextView that will show the user greeting in the screen is set
                 TextView nameTextView = (TextView) findViewById(R.id.activity_main_menu_name);

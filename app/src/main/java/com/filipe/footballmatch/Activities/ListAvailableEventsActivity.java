@@ -150,7 +150,7 @@ public class ListAvailableEventsActivity extends AppCompatActivity {
         DatabaseReference myRef = database.getReference("Event/");
 
         // Read from the database
-        myRef.addValueEventListener(new ValueEventListener() {
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

@@ -113,7 +113,7 @@ public class ListUsersActivity extends AppCompatActivity {
                 DatabaseReference myRef = database.getReference("Person/");
 
                 // Read from the database
-                myRef.addValueEventListener(new ValueEventListener() {
+                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {

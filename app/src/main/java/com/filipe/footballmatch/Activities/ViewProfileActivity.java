@@ -1,7 +1,6 @@
 package com.filipe.footballmatch.Activities;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -13,7 +12,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,7 +20,6 @@ import com.filipe.footballmatch.R;
 import com.filipe.footballmatch.Utilities.Utility;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -164,7 +161,7 @@ public class ViewProfileActivity extends AppCompatActivity {
             DatabaseReference myRef = database.getReference("Person/");
 
             // Read from the database
-            myRef.child(id).addValueEventListener(new ValueEventListener() {
+            myRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
 
                 @Override
                 public void onDataChange(final DataSnapshot dataSnapshot) {
@@ -215,6 +212,8 @@ public class ViewProfileActivity extends AppCompatActivity {
                     }
 
                 }
+
+
 
                 @Override
                 public void onCancelled(DatabaseError error) {

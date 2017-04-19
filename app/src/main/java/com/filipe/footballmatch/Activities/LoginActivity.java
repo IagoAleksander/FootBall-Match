@@ -118,6 +118,10 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
                                 // Populating person
                                 person.setName(user.getDisplayName());
 
+                                if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
+                                    person.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                                }
+
                                 // Storing values to the database
                                 myRef.child(newUserId).setValue(person);
                             }
@@ -334,7 +338,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
 
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override

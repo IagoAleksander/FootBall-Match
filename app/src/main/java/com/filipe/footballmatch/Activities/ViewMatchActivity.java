@@ -118,7 +118,7 @@ public class ViewMatchActivity extends AppCompatActivity {
         eventId = getIntent().getStringExtra("eventKey");
 
         // Read from the database
-        myRef.child(eventId).addValueEventListener(new ValueEventListener() {
+        myRef.child(eventId).addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -260,22 +260,34 @@ public class ViewMatchActivity extends AppCompatActivity {
     }
 
     // For every player added to the event, the app search for its info in the database...
-    public void getIdInfo(String id) {
+    public void getIdInfo(final String id) {
 
         DatabaseReference myRef = database.getReference("Person/");
 
         // Read from the database
-        myRef.child(id).addValueEventListener(new ValueEventListener() {
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                Person temp = dataSnapshot.getValue(Person.class);
-                temp.setUserKey(dataSnapshot.getKey());
-                playerList.add(temp);
-                populatePlayerLayout();
-                Log.d(TAG, "Value is: " + value);
+
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    if (dsp.getKey() != null
+                            && dsp.getKey().equals(id)) {
+                        Person temp = dsp.getValue(Person.class);
+                        temp.setUserKey(dsp.getKey());
+                        playerList.add(temp);
+                        populatePlayerLayout();
+                        Log.d(TAG, "Value is: " + value);
+                    }
+                    else if (dsp.getValue(Person.class).getOldKey() != null
+                                && dsp.getValue(Person.class).getOldKey().equals(id)) {
+                        Person temp = dsp.getValue(Person.class);
+                        temp.setUserKey(dsp.getKey());
+                        playerList.add(temp);
+                        populatePlayerLayout();
+                        Log.d(TAG, "Value is: " + value);
+                    }
+                }
             }
 
             @Override
@@ -284,6 +296,7 @@ public class ViewMatchActivity extends AppCompatActivity {
                 Log.w(TAG, "Failed to read value.", error.toException());
                 Utility.generalError(ViewMatchActivity.this, error.getMessage());
             }
+
         });
 
     }

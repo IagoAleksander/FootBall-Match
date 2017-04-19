@@ -156,6 +156,8 @@ public class EditMatchActivity extends AppCompatActivity implements
 
         // If the event data recovered from the intent is not null, then the fields are populated
         if (event != null) {
+
+            createEventButton.setText(R.string.confirm_update_match_button);
             if (event.getEventName() != null)
                 eventNameLayout.getEditText().setText(event.getEventName());
             if (event.getName() != null)
@@ -533,21 +535,35 @@ public class EditMatchActivity extends AppCompatActivity implements
     }
 
     // For every player added to the event, the app search for its info in the database...
-    public void getIdInfo(String id) {
+    public void getIdInfo(final String id) {
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("Person/");
 
         // Read from the database
-        myRef.child(id).addValueEventListener(new ValueEventListener() {
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                playerList.add(dataSnapshot.getValue(Person.class));
-                constructPlayerLayout();
-                Log.d(TAG, "Value is: " + value);
+
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    if (dsp.getKey() != null
+                            && dsp.getKey().equals(id)) {
+                        Person temp = dsp.getValue(Person.class);
+                        temp.setUserKey(dsp.getKey());
+                        playerList.add(temp);
+                        constructPlayerLayout();
+                        Log.d(TAG, "Value is: " + value);
+                    }
+                    else if (dsp.getValue(Person.class).getOldKey() != null
+                            && dsp.getValue(Person.class).getOldKey().equals(id)) {
+                        Person temp = dsp.getValue(Person.class);
+                        temp.setUserKey(dsp.getKey());
+                        playerList.add(temp);
+                        constructPlayerLayout();
+                        Log.d(TAG, "Value is: " + value);
+                    }
+                }
             }
 
             @Override
@@ -556,6 +572,7 @@ public class EditMatchActivity extends AppCompatActivity implements
                 Log.w(TAG, "Failed to read value.", error.toException());
                 Utility.generalError(EditMatchActivity.this, error.getMessage());
             }
+
         });
     }
 
@@ -563,24 +580,23 @@ public class EditMatchActivity extends AppCompatActivity implements
     public void constructPlayerLayout() {
         View.inflate(this, R.layout.item_user_list, playerListLayout);
 
-        for (int i = 0; i < playerListLayout.getChildCount(); i++) {
-            View view = playerListLayout.getChildAt(i);
-            TextView playerName = (TextView) view.findViewById(R.id.user_name);
-            TextView playerPreferredPosition = (TextView) view.findViewById(R.id.user_preferred_position);
-            playerName.setText(playerList.get(i).getName());
-            playerPreferredPosition.setText(" (" +playerList.get(i).getPreferredPosition() +")");
+        int i = playerList.size() - 1;
+        View view = playerListLayout.getChildAt(i);
+        view.setTag(playerList.get(i).getUserKey());
+        TextView playerName = (TextView) view.findViewById(R.id.user_name);
+        TextView playerPreferredPosition = (TextView) view.findViewById(R.id.user_preferred_position);
+        playerName.setText(playerList.get(i).getName());
+        playerPreferredPosition.setText(" (" + playerList.get(i).getPreferredPosition() + ")");
 
-            index = i;
 
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(EditMatchActivity.this, ViewProfileActivity.class);
-                    intent.putExtra("userId",playerList.get(index).getUserKey());
-                    EditMatchActivity.this.startActivity(intent);
-                }
-            });
-        }
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(EditMatchActivity.this, ViewProfileActivity.class);
+                intent.putExtra("userKey", v.getTag().toString());
+                EditMatchActivity.this.startActivity(intent);
+            }
+        });
     }
 
     // The number of players spinner data is set here

@@ -234,7 +234,7 @@ public class RegisterActivity extends AppCompatActivity {
     public void gettingExtraValues() {
 
         // Read from the database
-        myRef.addValueEventListener(new ValueEventListener() {
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -246,6 +246,7 @@ public class RegisterActivity extends AppCompatActivity {
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                     if (dsp.getValue(Person.class).getEmail().equals(person.getEmail())) {
                         person = dsp.getValue(Person.class);
+                        person.setOldKey(dsp.getKey());
                         oldKey = dsp.getKey();
                     }
                 }

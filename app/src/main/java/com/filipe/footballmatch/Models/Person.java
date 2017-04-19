@@ -15,6 +15,7 @@ public class Person {
     private String preferredPosition;
     private String contactNumber;
     private String userKey;
+    private String oldKey;
  
     public Person() {
       /*Blank default constructor essential for Firebase*/
@@ -66,5 +67,13 @@ public class Person {
 
     public void setUserKey(String userKey) {
         this.userKey = userKey;
+    }
+
+    public String getOldKey() {
+        return oldKey;
+    }
+
+    public void setOldKey(String oldKey) {
+        this.oldKey = oldKey;
     }
 }
