@@ -201,11 +201,7 @@ public class AddPlayerActivity extends AppCompatActivity {
 
         myRef.removeEventListener(myEventListener);
 
-        player.setName(tilName.getEditText().getText().toString().trim());
-        player.setAge(Integer.parseInt(tilAge.getEditText().getText().toString().trim()));
         player.setPreferredPosition(spPreferredPosition.getSelectedItem().toString());
-        player.setContactNumber(tilContactNumber.getEditText().getText().toString().trim());
-        player.setEmail(tilEmail.getEditText().getText().toString().trim());
 
         id = myRef.push().getKey();
 
@@ -229,8 +225,10 @@ public class AddPlayerActivity extends AppCompatActivity {
                 "Right Back",
                 "Centre Back",
                 "Left Back",
-                "Right Wing Midfielder",
-                "Left Wing Striker"};
+                "Right Wing",
+                "Left Wing",
+                "Midfielder",
+                "Striker"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, positions);
         spPreferredPosition.setAdapter(adapter);

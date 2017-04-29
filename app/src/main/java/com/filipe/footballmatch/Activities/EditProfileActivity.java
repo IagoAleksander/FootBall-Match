@@ -292,7 +292,7 @@ public class EditProfileActivity extends AppCompatActivity {
         editedInfo.setContactNumber(tilContactNumber.getEditText().getText().toString().trim());
         editedInfo.setEmail(person.getEmail());
 
-        if (editedInfo.getName().isEmpty()) {
+        if (editedInfo.getName() == null || editedInfo.getName().isEmpty()) {
             tilName.setError(getString(R.string.error_invalid_name));
             validated = false;
         }
@@ -310,8 +310,10 @@ public class EditProfileActivity extends AppCompatActivity {
                 "Right Back",
                 "Centre Back",
                 "Left Back",
-                "Right Wing Midfielder",
-                "Left Wing Striker"};
+                "Right Wing",
+                "Left Wing",
+                "Midfielder",
+                "Striker"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, positions);
         spPreferredPosition.setAdapter(adapter);
@@ -335,11 +337,17 @@ public class EditProfileActivity extends AppCompatActivity {
                 case "Left Back":
                     position = 3;
                     break;
-                case "Right Wing Midfielder":
+                case "Right Wing":
                     position = 4;
                     break;
-                case "Left Wing Striker":
+                case "Left Wing":
                     position = 5;
+                    break;
+                case "Midfielder":
+                    position = 6;
+                    break;
+                case "Striker":
+                    position = 7;
                     break;
                 default:
                     position = 0;
