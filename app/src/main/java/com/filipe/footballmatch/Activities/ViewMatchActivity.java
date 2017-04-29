@@ -35,12 +35,14 @@ import org.parceler.Parcels;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import static android.R.attr.switchMinWidth;
 import static android.R.attr.value;
 import static android.view.View.GONE;
 import static com.filipe.footballmatch.R.id.pickerButton;
 import static com.filipe.footballmatch.R.id.section2;
 import static com.filipe.footballmatch.R.id.section3;
 import static com.filipe.footballmatch.Utilities.Utility.call;
+import static com.google.android.gms.analytics.internal.zzy.c;
 import static com.google.android.gms.analytics.internal.zzy.i;
 
 /**
@@ -180,121 +182,12 @@ public class ViewMatchActivity extends AppCompatActivity {
                 // When the button edit match is clicked, the data about the match is wrapped and sent
                 // to the EditMatchActivity
                 if (event.getCreator() != null && event.getCreator().equals(id)) {
-                    buttonEditEvent.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (ActivityCompat.checkSelfPermission(ViewMatchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                                    || ActivityCompat.checkSelfPermission(ViewMatchActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                                //Can add more as per requirement  
-
-                                ActivityCompat.requestPermissions(ViewMatchActivity.this,
-                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 121);
-                            } else {
-                                Intent intent = new Intent(ViewMatchActivity.this, EditMatchActivity.class);
-                                intent.putExtra("event", Parcels.wrap(event));
-                                ViewMatchActivity.this.startActivity(intent);
-                            }
-                        }
-                    });
-                    buttonCancelEvent.setVisibility(View.VISIBLE);
-                    buttonCancelEvent.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            final MessageDialog dialog = new MessageDialog(ViewMatchActivity.this, R.string.cancel_event_confirmation_message,
-                                    -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
-                            dialog.setCancelable(false);
-                            dialog.show();
-                            dialog.noButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    dialog.dismiss();
-                                }
-                            });
-                            dialog.yesButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-
-                                    // remove the current event from the database
-                                    myRef.child(eventId).removeValue();
-
-                                    dialog.dismiss();
-
-                                    final MessageDialog dialog = new MessageDialog(ViewMatchActivity.this, R.string.success_cancel_match, R.string.dialog_edit_ok_text, -1, -1);
-                                    dialog.setCancelable(false);
-                                    dialog.show();
-                                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View view) {
-                                            Intent intent = new Intent(ViewMatchActivity.this, MainMenuActivity.class);
-                                            ViewMatchActivity.this.startActivity(intent);
-
-                                            dialog.cancel();
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
+                    changeButton(0);
                 } else {
-//                    buttonEditEvent.setVisibility(GONE);
                     if (!playerIdList.contains(id)) {
-                        buttonEditEvent.setText(getString(R.string.join_match_button));
-                        buttonEditEvent.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                int maxPlayers = 0;
-                                switch (event.getNumberOfPlayers()) {
-                                    case "10 (5x2)":
-                                        maxPlayers = 10;
-                                        break;
-                                    case "14 (7x2)":
-                                        maxPlayers = 14;
-                                        break;
-                                    case "22 (11x2)":
-                                        maxPlayers = 22;
-                                        break;
-                                }
-
-                                if (playerIdList.size() > maxPlayers) {
-                                    Utility.generalError(ViewMatchActivity.this, getString(R.string.error_join_match));
-                                } else {
-                                    // add the current user to the match players list
-                                    playerIdList.add(id);
-                                    getIdInfo(id);
-
-                                    //update the database
-                                    updateMatch(getString(R.string.success_join_match));
-                                }
-                            }
-                        });
+                        changeButton(1);
                     } else {
-                        buttonEditEvent.setText(getString(R.string.leave_event_button));
-                        buttonEditEvent.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                final MessageDialog dialog = new MessageDialog(ViewMatchActivity.this, R.string.leave_match_confirmation_message,
-                                        -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
-                                dialog.setCancelable(false);
-                                dialog.show();
-                                dialog.noButton.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                                dialog.yesButton.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-
-                                        // remove the current user from the match players id list
-                                        removePlayer(id);
-                                        dialog.dismiss();
-
-                                    }
-                                });
-                            }
-                        });
+                        changeButton(2);
                     }
 
                 }
@@ -430,6 +323,137 @@ public class ViewMatchActivity extends AppCompatActivity {
                 updateMatch(getString(R.string.success_leave_match));
             }
 
+    }
+
+    public void changeButton(int option) {
+        switch(option) {
+            // case 0: user is the creator of the event
+            case 0:
+                buttonEditEvent.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (ActivityCompat.checkSelfPermission(ViewMatchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                                || ActivityCompat.checkSelfPermission(ViewMatchActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            //Can add more as per requirement  
+
+                            ActivityCompat.requestPermissions(ViewMatchActivity.this,
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 121);
+                        } else {
+                            Intent intent = new Intent(ViewMatchActivity.this, EditMatchActivity.class);
+                            intent.putExtra("event", Parcels.wrap(event));
+                            ViewMatchActivity.this.startActivity(intent);
+                        }
+                    }
+                });
+                buttonCancelEvent.setVisibility(View.VISIBLE);
+                buttonCancelEvent.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final MessageDialog dialog = new MessageDialog(ViewMatchActivity.this, R.string.cancel_event_confirmation_message,
+                                -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
+                        dialog.setCancelable(false);
+                        dialog.show();
+                        dialog.noButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.yesButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                // remove the current event from the database
+                                myRef.child(eventId).removeValue();
+
+                                dialog.dismiss();
+
+                                final MessageDialog dialog = new MessageDialog(ViewMatchActivity.this, R.string.success_cancel_match, R.string.dialog_edit_ok_text, -1, -1);
+                                dialog.setCancelable(false);
+                                dialog.show();
+                                dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        Intent intent = new Intent(ViewMatchActivity.this, MainMenuActivity.class);
+                                        ViewMatchActivity.this.startActivity(intent);
+
+                                        dialog.cancel();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+                break;
+            // case 1: player is not registered in the event
+            case 1:
+                buttonEditEvent.setText(getString(R.string.join_match_button));
+                buttonEditEvent.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        int maxPlayers = 0;
+                        switch (event.getNumberOfPlayers()) {
+                            case "10 (5x2)":
+                                maxPlayers = 10;
+                                break;
+                            case "14 (7x2)":
+                                maxPlayers = 14;
+                                break;
+                            case "22 (11x2)":
+                                maxPlayers = 22;
+                                break;
+                        }
+
+                        if (playerIdList.size() > maxPlayers) {
+                            Utility.generalError(ViewMatchActivity.this, getString(R.string.error_join_match));
+                        } else {
+                            // add the current user to the match players list
+                            playerIdList.add(id);
+                            getIdInfo(id);
+
+                            //update the database
+                            updateMatch(getString(R.string.success_join_match));
+                            changeButton(2);
+
+
+                        }
+
+
+                    }
+                });
+                break;
+            // case 2: player is already registered in the event
+            case 2:
+                buttonEditEvent.setText(getString(R.string.leave_event_button));
+                buttonEditEvent.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final MessageDialog dialog = new MessageDialog(ViewMatchActivity.this, R.string.leave_match_confirmation_message,
+                                -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
+                        dialog.setCancelable(false);
+                        dialog.show();
+                        dialog.noButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.yesButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                // remove the current user from the match players id list
+                                removePlayer(id);
+                                dialog.dismiss();
+                                changeButton(1);
+
+                            }
+                        });
+                    }
+                });
+                break;
+        }
     }
 
 }
