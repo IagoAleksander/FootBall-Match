@@ -250,7 +250,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         myRef.child(id).setValue(editedInfo);
 
-        final MessageDialog dialog = new MessageDialog(EditProfileActivity.this, R.string.success_update_profile, R.string.dialog_edit_ok_text, -1, -1);
+        final MessageDialog dialog = new MessageDialog(this, R.string.success_update_profile, R.string.dialog_edit_ok_text, -1, -1);
         dialog.setCancelable(false);
         dialog.show();
         dialog.okButton.setOnClickListener(new View.OnClickListener() {
