@@ -322,8 +322,24 @@ public class EditMatchActivity extends AppCompatActivity implements
                 Utility.generalError(EditMatchActivity.this, getString(R.string.error_general));
             }
             else if (playerIdList != null) {
+
+                int maxPlayers = 0;
+                switch (event.getNumberOfPlayers()) {
+                    case "10 (5x2)":
+                        maxPlayers = 10;
+                        break;
+                    case "14 (7x2)":
+                        maxPlayers = 14;
+                        break;
+                    case "22 (11x2)":
+                        maxPlayers = 22;
+                        break;
+                }
+
                 if (playerIdList.contains(userId)) {
                     Utility.generalError(EditMatchActivity.this, getString(R.string.error_user_already_added));
+                } else if (playerIdList.size() >= maxPlayers) {
+                    Utility.generalError(EditMatchActivity.this, getString(R.string.error_join_match));
                 } else {
                     playerIdList.add(userId);
                     getIdInfo(userId);

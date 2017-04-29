@@ -405,7 +405,7 @@ public class ViewMatchActivity extends AppCompatActivity {
                                 break;
                         }
 
-                        if (playerIdList.size() > maxPlayers) {
+                        if (playerIdList.size() >= maxPlayers) {
                             Utility.generalError(ViewMatchActivity.this, getString(R.string.error_join_match));
                         } else {
                             // add the current user to the match players list

@@ -277,6 +277,8 @@ public class CreateMatchActivity extends AppCompatActivity implements
             else if (playerIdList != null) {
                 if (playerIdList.contains(userId)) {
                     Utility.generalError(CreateMatchActivity.this, getString(R.string.error_user_already_added));
+                } else if (playerIdList.size() >= maxPlayers) {
+                    Utility.generalError(CreateMatchActivity.this, getString(R.string.error_join_match));
                 } else {
                     playerIdList.add(userId);
                     getIdInfo(userId);
