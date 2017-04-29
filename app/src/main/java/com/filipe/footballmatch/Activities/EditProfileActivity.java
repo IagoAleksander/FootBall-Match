@@ -307,15 +307,11 @@ public class EditProfileActivity extends AppCompatActivity {
     // The preferred position spinner data is set here
     public void setSpinner() {
         String[] positions = new String[]{"Goalkeeper",
-                "Center-back",
-                "Full-back",
-                "Wing-back",
-                "Holding midfielder",
-                "Central",
-                "Attacking midfielder",
-                "Wide midfielders",
-                "Center-forward",
-                "Withdrawn striker"};
+                "Right Back",
+                "Centre Back",
+                "Left Back",
+                "Right Wing Midfielder",
+                "Left Wing Striker"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, positions);
         spPreferredPosition.setAdapter(adapter);
@@ -330,32 +326,20 @@ public class EditProfileActivity extends AppCompatActivity {
                 case "Goalkeeper":
                     position = 0;
                     break;
-                case "Center-back":
+                case "Right Back":
                     position = 1;
                     break;
-                case "Full-back":
+                case "Centre Back":
                     position = 2;
                     break;
-                case "Wing-back":
+                case "Left Back":
                     position = 3;
                     break;
-                case "Holding midfielder":
+                case "Right Wing Midfielder":
                     position = 4;
                     break;
-                case "Central":
+                case "Left Wing Striker":
                     position = 5;
-                    break;
-                case "Attacking midfielder":
-                    position = 6;
-                    break;
-                case "Wide midfielders":
-                    position = 7;
-                    break;
-                case "Center-forward":
-                    position = 8;
-                    break;
-                case "Withdrawn striker":
-                    position = 9;
                     break;
                 default:
                     position = 0;

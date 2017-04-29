@@ -12,6 +12,7 @@
 
     <!-- Dialog Messages -->
     <string name="logout_confirmation_message">Are you sure that you want to logout?</string>
+    <string name="cancel_event_confirmation_message">Are you sure that you want to cancel this event?</string>
     <string name="dialog_edit_no_text">No</string>
     <string name="dialog_edit_yes_text">Yes</string>
     <string name="dialog_edit_ok_text">Ok</string>
@@ -121,10 +122,12 @@
     <string name="error_join_match">The number of players was exceeded for the venue.</string>
     <string name="leave_match_confirmation_message">Are you sure that you want to leave the match?</string>
     <string name="success_leave_match">You left the match successfully</string>
+    <string name="success_cancel_match">The match was removed successfully from the system</string>
 
     <!-- ViewMatch Layout -->
     <string name="number_of_players_header">"Number of players: "</string>
     <string name="edit_event_button">Edit Event</string>
+    <string name="cancel_event_button">Cancel Event</string>
 
     <!-- ViewProfile Activity -->
     <string name="remove_player_button">Remove from Match</string>

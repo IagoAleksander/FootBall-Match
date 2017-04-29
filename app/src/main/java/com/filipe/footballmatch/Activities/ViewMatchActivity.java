@@ -1,11 +1,14 @@
 package com.filipe.footballmatch.Activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -61,8 +64,10 @@ public class ViewMatchActivity extends AppCompatActivity {
 
     private TextView callButton;
     private TextView buttonEditEvent;
+    private TextView buttonCancelEvent;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef;
 
     public static final String TAG = ViewMatchActivity.class.getSimpleName();
 
@@ -106,9 +111,9 @@ public class ViewMatchActivity extends AppCompatActivity {
         // Finally, the TextViews that will act as ViewMatchActivity screen buttons are set
         callButton = (TextView) findViewById(R.id.callButton);
         buttonEditEvent = (TextView) findViewById(R.id.buttonEditEvent);
-
+        buttonCancelEvent = (TextView) findViewById(R.id.buttonCancelEvent);
         // An instance of FirebaseDatabase is set
-        DatabaseReference myRef = database.getReference("Event/");
+        myRef = database.getReference("Event/");
 
         // The actual user id is recovered from the device local storage...
         SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -178,9 +183,56 @@ public class ViewMatchActivity extends AppCompatActivity {
                     buttonEditEvent.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Intent intent = new Intent(ViewMatchActivity.this, EditMatchActivity.class);
-                            intent.putExtra("event", Parcels.wrap(event));
-                            ViewMatchActivity.this.startActivity(intent);
+                            if (ActivityCompat.checkSelfPermission(ViewMatchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                                    || ActivityCompat.checkSelfPermission(ViewMatchActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                //Can add more as per requirement  
+
+                                ActivityCompat.requestPermissions(ViewMatchActivity.this,
+                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 121);
+                            } else {
+                                Intent intent = new Intent(ViewMatchActivity.this, EditMatchActivity.class);
+                                intent.putExtra("event", Parcels.wrap(event));
+                                ViewMatchActivity.this.startActivity(intent);
+                            }
+                        }
+                    });
+                    buttonCancelEvent.setVisibility(View.VISIBLE);
+                    buttonCancelEvent.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            final MessageDialog dialog = new MessageDialog(ViewMatchActivity.this, R.string.cancel_event_confirmation_message,
+                                    -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
+                            dialog.setCancelable(false);
+                            dialog.show();
+                            dialog.noButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            dialog.yesButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+
+                                    // remove the current event from the database
+                                    myRef.child(eventId).removeValue();
+
+                                    dialog.dismiss();
+
+                                    final MessageDialog dialog = new MessageDialog(ViewMatchActivity.this, R.string.success_cancel_match, R.string.dialog_edit_ok_text, -1, -1);
+                                    dialog.setCancelable(false);
+                                    dialog.show();
+                                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            Intent intent = new Intent(ViewMatchActivity.this, MainMenuActivity.class);
+                                            ViewMatchActivity.this.startActivity(intent);
+
+                                            dialog.cancel();
+                                        }
+                                    });
+                                }
+                            });
                         }
                     });
                 } else {
@@ -192,7 +244,7 @@ public class ViewMatchActivity extends AppCompatActivity {
                             public void onClick(View v) {
 
                                 int maxPlayers = 0;
-                                switch(event.getNumberOfPlayers()) {
+                                switch (event.getNumberOfPlayers()) {
                                     case "10 (5x2)":
                                         maxPlayers = 10;
                                         break;
@@ -206,8 +258,7 @@ public class ViewMatchActivity extends AppCompatActivity {
 
                                 if (playerIdList.size() > maxPlayers) {
                                     Utility.generalError(ViewMatchActivity.this, getString(R.string.error_join_match));
-                                }
-                                else {
+                                } else {
                                     // add the current user to the match players list
                                     playerIdList.add(id);
                                     getIdInfo(id);
@@ -278,9 +329,8 @@ public class ViewMatchActivity extends AppCompatActivity {
                         playerList.add(temp);
                         populatePlayerLayout();
                         Log.d(TAG, "Value is: " + value);
-                    }
-                    else if (dsp.getValue(Person.class).getOldKey() != null
-                                && dsp.getValue(Person.class).getOldKey().equals(id)) {
+                    } else if (dsp.getValue(Person.class).getOldKey() != null
+                            && dsp.getValue(Person.class).getOldKey().equals(id)) {
                         Person temp = dsp.getValue(Person.class);
                         temp.setUserKey(dsp.getKey());
                         playerList.add(temp);

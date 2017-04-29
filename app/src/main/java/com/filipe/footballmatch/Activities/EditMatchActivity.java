@@ -318,13 +318,23 @@ public class EditMatchActivity extends AppCompatActivity implements
                 && resultCode == Activity.RESULT_OK){
             String userId = data.getStringExtra("userId");
 
-            if (playerIdList != null && playerIdList.contains(userId)) {
-                Utility.generalError(EditMatchActivity.this, getString(R.string.error_user_already_added));
+            if (userId == null || userId.isEmpty()) {
+                Utility.generalError(EditMatchActivity.this, getString(R.string.error_general));
+            }
+            else if (playerIdList != null) {
+                if (playerIdList.contains(userId)) {
+                    Utility.generalError(EditMatchActivity.this, getString(R.string.error_user_already_added));
+                } else {
+                    playerIdList.add(userId);
+                    getIdInfo(userId);
+                }
             }
             else {
+                playerIdList = new ArrayList<>();
                 playerIdList.add(userId);
                 getIdInfo(userId);
             }
+
         }
         else {
             super.onActivityResult(requestCode, resultCode, data);

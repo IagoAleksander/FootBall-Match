@@ -1,9 +1,12 @@
 package com.filipe.footballmatch.Activities;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -112,6 +115,13 @@ public class MainMenuActivity extends AppCompatActivity {
         createMatchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (ActivityCompat.checkSelfPermission(MainMenuActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(MainMenuActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    //Can add more as per requirement  
+
+                    ActivityCompat.requestPermissions(MainMenuActivity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 121);
+                }
                 Intent intent = new Intent(MainMenuActivity.this, CreateMatchActivity.class);
                 MainMenuActivity.this.startActivity(intent);
             }
@@ -145,6 +155,7 @@ public class MainMenuActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         FirebaseAuth.getInstance().signOut();
+                        dialog.dismiss();
 
                         // The user is then redirected to the LoginActivity
                         Intent intent = new Intent(MainMenuActivity.this, LoginActivity.class);

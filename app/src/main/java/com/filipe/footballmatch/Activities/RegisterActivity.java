@@ -182,6 +182,15 @@ public class RegisterActivity extends AppCompatActivity {
 
         boolean validated = true;
 
+        String name = editTextName.getEditText().getText().toString().trim();
+        if (name.isEmpty()) {
+            editTextName.setError(getString(R.string.error_invalid_name));
+            validated = false;
+        }
+        else {
+            editTextName.setErrorEnabled(false);
+        }
+
         String email = editTextEmail.getEditText().getText().toString().trim();
         if (!pattern.matcher(email).matches()) {
             editTextEmail.setError(getString(R.string.error_invalid_email));
@@ -244,7 +253,9 @@ public class RegisterActivity extends AppCompatActivity {
                 person.setAge(Integer.parseInt(editTextAge.getEditText().getText().toString().trim()));
 
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    if (dsp.getValue(Person.class).getEmail().equals(person.getEmail())) {
+                    if (dsp.getValue(Person.class) != null
+                            && dsp.getValue(Person.class).getEmail() != null
+                            && dsp.getValue(Person.class).getEmail().equals(person.getEmail())) {
                         person = dsp.getValue(Person.class);
                         person.setOldKey(dsp.getKey());
                         oldKey = dsp.getKey();
@@ -279,8 +290,12 @@ public class RegisterActivity extends AppCompatActivity {
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            //TODO
-//                            Utility.generalError(RegisterActivity.this, task.getException().getMessage());
+                            try {
+                                Utility.generalError(RegisterActivity.this, task.getException().getMessage());
+                            }
+                            catch (NullPointerException e) {
+                                Utility.generalError(RegisterActivity.this, getString(R.string.error_general));
+                            }
                             mAuth.signOut();
                         }
                     }

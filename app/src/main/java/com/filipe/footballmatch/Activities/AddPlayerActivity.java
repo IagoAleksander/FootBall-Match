@@ -20,6 +20,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.regex.Pattern;
+
 /**
  * Created by Filipe on 21/01/2017.
  */
@@ -37,6 +39,7 @@ public class AddPlayerActivity extends AppCompatActivity {
 
     public static final String TAG = AddPlayerActivity.class.getSimpleName();
 
+    Person player = new Person();
     String id;
 
     @Override
@@ -74,8 +77,8 @@ public class AddPlayerActivity extends AppCompatActivity {
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (validateInfo())
                     checkIfPlayerExists();
-
             }
         });
 
@@ -100,6 +103,48 @@ public class AddPlayerActivity extends AppCompatActivity {
                 });
             }
         });
+
+    }
+
+    // The inserted info is checked and validated
+    public boolean validateInfo() {
+
+        // Email data must follow a pattern
+        final String EMAIL_PATTERN = "^[a-zA-Z0-9#_~!$&'()*+,;=:.\"(),:;<>@\\[\\]\\\\]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*$";
+        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+
+        boolean validated = true;
+
+        // A new instance of person is populated with the inserted info
+        player.setName(tilName.getEditText().getText().toString().trim());
+        try {
+            player.setAge(Integer.parseInt(tilAge.getEditText().getText().toString().trim()));
+            tilAge.setErrorEnabled(false);
+        } catch (NumberFormatException e) {
+            tilAge.setError(getString(R.string.error_invalid_age));
+            validated = false;
+        }
+        player.setPreferredPosition(spPreferredPosition.getSelectedItem().toString());
+        player.setContactNumber(tilContactNumber.getEditText().getText().toString().trim());
+        player.setEmail(tilEmail.getEditText().getText().toString().trim());
+
+        if (player.getName().isEmpty()) {
+            tilName.setError(getString(R.string.error_invalid_name));
+            validated = false;
+        }
+        else {
+            tilName.setErrorEnabled(false);
+        }
+
+        if (!pattern.matcher(player.getEmail()).matches()) {
+            tilEmail.setError(getString(R.string.error_invalid_email));
+            validated = false;
+        }
+        else {
+            tilEmail.setErrorEnabled(false);
+        }
+
+        return validated;
 
     }
 
@@ -155,7 +200,6 @@ public class AddPlayerActivity extends AppCompatActivity {
     public void addNewPlayer() {
 
         myRef.removeEventListener(myEventListener);
-        Person player = new Person();
 
         player.setName(tilName.getEditText().getText().toString().trim());
         player.setAge(Integer.parseInt(tilAge.getEditText().getText().toString().trim()));
@@ -182,15 +226,11 @@ public class AddPlayerActivity extends AppCompatActivity {
     // The preferred position spinner data is set here
     public void setSpinner() {
         String[] positions = new String[]{"Goalkeeper",
-                "Center-back",
-                "Full-back",
-                "Wing-back",
-                "Holding midfielder",
-                "Central",
-                "Attacking midfielder",
-                "Wide midfielders",
-                "Center-forward",
-                "Withdrawn striker"};
+                "Right Back",
+                "Centre Back",
+                "Left Back",
+                "Right Wing Midfielder",
+                "Left Wing Striker"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, positions);
         spPreferredPosition.setAdapter(adapter);
