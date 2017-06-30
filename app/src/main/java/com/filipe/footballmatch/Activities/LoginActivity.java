@@ -47,6 +47,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static com.facebook.internal.CallbackManagerImpl.RequestCodeOffset.Login;
 
 /**
@@ -55,10 +58,25 @@ import static com.facebook.internal.CallbackManagerImpl.RequestCodeOffset.Login;
  * login with google, login with facebook or register a new account
  */
 
-public class LoginActivity extends AppCompatActivity implements  GoogleApiClient.OnConnectionFailedListener{
+public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-    private TextInputLayout login_et;
-    private TextInputLayout password_et;
+    @BindView(R.id.tilLogin)
+    TextInputLayout login_et;
+
+    @BindView(R.id.tilPassword)
+    TextInputLayout password_et;
+
+    @BindView(R.id.buttonLogin)
+    TextView buttonLogin;
+
+    @BindView(R.id.google_login)
+    TextView buttonGoogleLogin;
+
+    @BindView(R.id.facebook_login)
+    TextView buttonFacebookLogin;
+
+    @BindView(R.id.buttonRegister)
+    TextView buttonRegister;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -75,6 +93,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
 
         // The content layout of screen is set
         setContentView(R.layout.activity_login);
+        ButterKnife.bind(this);
 
         // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -83,86 +102,66 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         // An instance of FirebaseAuth is set
         mAuth = FirebaseAuth.getInstance();
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                final FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
+        mAuthListener = firebaseAuth -> {
+            final FirebaseUser user = firebaseAuth.getCurrentUser();
+            if (user != null) {
 
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" +user.getUid());
+                // User is signed in
+                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
 
-                    // Get instance of database
-                    FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    final DatabaseReference myRef = database.getReference("Person/");
+                // Get instance of database
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                final DatabaseReference myRef = database.getReference("Person/");
 
-                    // Check if info about the user already exists in the database
-                    myRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                // Check if info about the user already exists in the database
+                myRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
 
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot){
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
 
-                            // If there is no info, create a new entry in the database
-                            if (!dataSnapshot.exists()) {
+                        // If there is no info, create a new entry in the database
+                        if (!dataSnapshot.exists()) {
 
-                                Log.d(TAG, "New User");
+                            Log.d(TAG, "New User");
 
-                                // Creating new user node, which returns the unique key value
-                                // new user node would be /User/$userid/
-                                final String newUserId = user.getUid();
+                            // Creating new user node, which returns the unique key value
+                            // new user node would be /User/$userid/
+                            final String newUserId = user.getUid();
 
-                                // Creating Person object
-                                Person person = new Person();
+                            // Creating Person object
+                            Person person = new Person();
 
-                                // Populating person
-                                person.setName(user.getDisplayName());
+                            // Populating person
+                            person.setName(user.getDisplayName());
 
-                                if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
-                                    person.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
-                                }
-
-                                // Storing values to the database
-                                myRef.child(newUserId).setValue(person);
+                            if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
+                                person.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
                             }
 
-                            // The userId is then saved to Shared Preferences (locally, in the device)
-                            SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                            SharedPreferences.Editor editor=saved_values.edit();
-                            editor.putString(getString(R.string.user_id_SharedPref), user.getUid());
-                            editor.commit();
-
-                            // And the user is redirected to the MainMenuActivity, now logged in
-                            Intent intent = new Intent(LoginActivity.this, MainMenuActivity.class);
-                            LoginActivity.this.startActivity(intent);
-
+                            // Storing values to the database
+                            myRef.child(newUserId).setValue(person);
                         }
 
-                        @Override
-                        public void onCancelled(DatabaseError error){
-                            // Failed to read value
-                            Log.w(TAG,"Failed to read value.",error.toException());
-                        }
-                    });
+                        // And the user is redirected to the MainMenuActivity, now logged in
+                        Intent intent = new Intent(LoginActivity.this, MainMenuActivity.class);
+                        LoginActivity.this.startActivity(intent);
 
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-                // ...
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        // Failed to read value
+                        Log.w(TAG, "Failed to read value.", error.toException());
+                    }
+                });
+
+            } else {
+                // User is signed out
+                Log.d(TAG, "onAuthStateChanged:signed_out");
             }
+            // ...
         };
-
-        // The layout is now built
-        // First, the TextViews that will act as LoginActivity screen buttons are set
-        TextView buttonLogin = (TextView) findViewById(R.id.buttonLogin);
-        TextView buttonGoogleLogin = (TextView) findViewById(R.id.google_login);
-        TextView buttonFacebookLogin = (TextView) findViewById(R.id.facebook_login);
-        TextView buttonRegister = (TextView) findViewById(R.id.buttonRegister);
-
-        // And then, the TextInputLayout fields that will collect the login inputs
-        login_et = (TextInputLayout) findViewById(R.id.tilLogin);
-        password_et = (TextInputLayout) findViewById(R.id.tilPassword);
 
         // Hints are added to the fields to help the user insert the right info
         login_et.setHint(getString(R.string.prompt_login));
@@ -171,83 +170,69 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         // The Listeners for the buttons are now set
 
         //Click Listener for button register
-        buttonRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonRegister.setOnClickListener(v -> {
 
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(intent);
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
 
-            }
         });
 
         //Click Listener for button login
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonLogin.setOnClickListener(v -> {
 
-                if (validateInfo()) {
-                    if (Utility.isConnectedToNet(LoginActivity.this)) {
+            if (validateInfo()) {
+                if (Utility.isConnectedToNet(LoginActivity.this)) {
 
-                        // Getting login input from the user
-                        String email = login_et.getEditText().getText().toString().trim();
-                        String password = password_et.getEditText().getText().toString().trim();
+                    // Getting login input from the user
+                    String email = login_et.getEditText().getText().toString().trim();
+                    String password = password_et.getEditText().getText().toString().trim();
 
-                        mAuth.signInWithEmailAndPassword(email, password)
-                                .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                    mAuth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
-                                        // If sign in fails, display a message to the user. If sign in succeeds
-                                        // the auth state listener will be notified and logic to handle the
-                                        // signed in user can be handled in the listener.
-                                        if (!task.isSuccessful()) {
-                                            Log.w(TAG, "signInWithEmail:failed", task.getException());
-                                            final MessageDialog dialog = new MessageDialog(LoginActivity.this, task.getException().getMessage(), R.string.dialog_edit_ok_text, -1, -1);
-                                            dialog.setCancelable(false);
-                                            dialog.show();
-                                            dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View view) {
-                                                    mAuth.signOut();
-                                                    dialog.cancel();
-                                                }
-                                            });
-                                        }
+                                    // If sign in fails, display a message to the user. If sign in succeeds
+                                    // the auth state listener will be notified and logic to handle the
+                                    // signed in user can be handled in the listener.
+                                    if (!task.isSuccessful()) {
+                                        Log.w(TAG, "signInWithEmail:failed", task.getException());
+                                        final MessageDialog dialog = new MessageDialog(LoginActivity.this, task.getException().getMessage(), R.string.dialog_edit_ok_text, -1, -1);
+                                        dialog.setCancelable(false);
+                                        dialog.show();
+                                        dialog.okButton.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                mAuth.signOut();
+                                                dialog.cancel();
+                                            }
+                                        });
                                     }
-                                });
-                    } else {
-                        Utility.noNetworkError(LoginActivity.this);
-                    }
+                                }
+                            });
+                } else {
+                    Utility.noNetworkError(LoginActivity.this);
                 }
             }
         });
 
         //Click Listener for button google login
-        buttonGoogleLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonGoogleLogin.setOnClickListener(v -> {
 
-                if (Utility.isConnectedToNet(LoginActivity.this)) {
-                    signInWithGoogle();
-                }
-                else {
-                    Utility.noNetworkError(LoginActivity.this);
-                }
+            if (Utility.isConnectedToNet(LoginActivity.this)) {
+                signInWithGoogle();
+            } else {
+                Utility.noNetworkError(LoginActivity.this);
             }
         });
 
         //Click Listener for button facebook login
-        buttonFacebookLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Utility.isConnectedToNet(LoginActivity.this)) {
-                    signInWithFacebook();
-                }
-                else {
-                    Utility.noNetworkError(LoginActivity.this);
-                }
+        buttonFacebookLogin.setOnClickListener(v -> {
+            if (Utility.isConnectedToNet(LoginActivity.this)) {
+                signInWithFacebook();
+            } else {
+                Utility.noNetworkError(LoginActivity.this);
             }
         });
 
@@ -286,7 +271,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         super.onActivityResult(requestCode, resultCode, data);
 
         //facebook
-        if(requestCode == Login.toRequestCode()){
+        if (requestCode == Login.toRequestCode()) {
             callbackManager.onActivityResult(requestCode, resultCode, data);
         }
 
@@ -315,24 +300,21 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         Log.d(TAG, "firebaseAuthWithGooogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                .addOnCompleteListener(this, task -> {
+                    Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Utility.generalError(LoginActivity.this, null);
-                            mAuth.signOut();
-                        }
+                    // If sign in fails, display a message to the user. If sign in succeeds
+                    // the auth state listener will be notified and logic to handle the
+                    // signed in user can be handled in the listener.
+                    if (!task.isSuccessful()) {
+                        Utility.generalError(LoginActivity.this, null);
+                        mAuth.signOut();
                     }
                 });
     }
 
     private void signInWithFacebook() {
-        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile", "user_friends","email"));
+        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile", "user_friends", "email"));
     }
 
     private void handleFacebookAccessToken(AccessToken token) {
@@ -340,22 +322,19 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
 
         final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                .addOnCompleteListener(this, task -> {
+                    Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential", task.getException());
-                            Utility.generalError(LoginActivity.this, null);
-                            mAuth.signOut();
-
-                        }
+                    // If sign in fails, display a message to the user. If sign in succeeds
+                    // the auth state listener will be notified and logic to handle the
+                    // signed in user can be handled in the listener.
+                    if (!task.isSuccessful()) {
+                        Log.w(TAG, "signInWithCredential", task.getException());
+                        Utility.generalError(LoginActivity.this, null);
+                        mAuth.signOut();
 
                     }
+
                 });
     }
 
@@ -374,8 +353,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         if (!pattern.matcher(email).matches()) {
             login_et.setError(getString(R.string.error_login_invalid_email));
             validated = false;
-        }
-        else {
+        } else {
             // Login input is ok, remove error
             login_et.setErrorEnabled(false);
         }
@@ -385,8 +363,7 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
         if (password.length() <= 5) {
             password_et.setError(getString(R.string.error_login_invalid_password));
             validated = false;
-        }
-        else {
+        } else {
             // Password input is ok, remove error
             password_et.setErrorEnabled(false);
         }
@@ -421,7 +398,8 @@ public class LoginActivity extends AppCompatActivity implements  GoogleApiClient
             }
 
             @Override
-            public void onCancel() {}
+            public void onCancel() {
+            }
 
             @Override
             public void onError(FacebookException error) {

@@ -1,14 +1,9 @@
 <resources>
 
-    <string name="app_name">C13 Football Events</string>
+    <string name="app_name">Football Match</string>
 
     <string name="facebook_app_id">1840847389518927</string>
     <string name="fb_login_protocol_scheme">fb1840847389518927</string>
-
-    <string name="key">AIzaSyB9GlqRmb3Dl_mQqE3UkMDAbQyoioPmfag</string>
-
-    <!-- Shared Preferences -->
-    <string name="user_id_SharedPref">User Id</string>
 
     <!-- Dialog Messages -->
     <string name="logout_confirmation_message">Are you sure that you want to logout?</string>
@@ -71,6 +66,8 @@
     <string name="error_invalid_name">Please insert a valid name to continue.</string>
     <string name="error_invalid_age">Please insert a valid age to continue.</string>
     <string name="error_invalid_email">Please insert a valid email to continue.</string>
+    <string name="label_gallery">Gallery</string>
+    <string name="label_camera">Camera</string>
 
     <!-- EditProfile Layout -->
     <string name="user_name_hint">Name</string>

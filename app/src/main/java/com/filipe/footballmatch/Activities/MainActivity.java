@@ -11,6 +11,8 @@ import com.filipe.footballmatch.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import butterknife.ButterKnife;
+
 /**
  * Created by Filipe on 23/01/2017.
  * This is the first activity, here the program checks if the user is logged or not.
@@ -30,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ButterKnife.bind(this);
+
         // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
@@ -37,25 +41,22 @@ public class MainActivity extends AppCompatActivity {
         // An instance of FirebaseAuth is set
         mAuth = FirebaseAuth.getInstance();
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + id);
+        mAuthListener = firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            if (user != null) {
+                // User is signed in
+                Log.d(TAG, "onAuthStateChanged:signed_in:" + id);
 
-                    Intent intent = new Intent(MainActivity.this, MainMenuActivity.class);
-                    MainActivity.this.startActivity(intent);
-                } else {
-                    // User is not signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                Intent intent = new Intent(MainActivity.this, MainMenuActivity.class);
+                MainActivity.this.startActivity(intent);
+            } else {
+                // User is not signed in
+                Log.d(TAG, "onAuthStateChanged:signed_out");
 
-                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                    MainActivity.this.startActivity(intent);
-                }
-                // ...
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                MainActivity.this.startActivity(intent);
             }
+            // ...
         };
 
     }

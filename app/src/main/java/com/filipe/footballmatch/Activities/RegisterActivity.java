@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
+import com.filipe.footballmatch.Repositories.UserRepository;
 import com.filipe.footballmatch.Utilities.MessageDialog;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
@@ -31,6 +32,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.regex.Pattern;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static com.filipe.footballmatch.R.id.tilAge;
 import static com.filipe.footballmatch.R.id.tilEmail;
 
@@ -38,20 +42,34 @@ import static com.filipe.footballmatch.R.id.tilEmail;
  * Created by Filipe on 21/01/2017.
  */
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity implements UserRepository.OnFinished{
 
-    private TextInputLayout editTextName;
-    private TextInputLayout editTextAge;
-    private TextInputLayout editTextEmail;
-    private TextInputLayout editTextConfirmEmail;
-    private TextInputLayout editTextPassword;
-    private TextInputLayout editTextConfirmPassword;
+    @BindView(R.id.tilName)
+    TextInputLayout editTextName;
+
+    @BindView(R.id.tilAge)
+    TextInputLayout editTextAge;
+
+    @BindView(R.id.tilEmail)
+    TextInputLayout editTextEmail;
+
+    @BindView(R.id.tilConfirmEmail)
+    TextInputLayout editTextConfirmEmail;
+
+    @BindView(R.id.tilPassword)
+    TextInputLayout editTextPassword;
+
+    @BindView(R.id.tilConfirmPassword)
+    TextInputLayout editTextConfirmPassword;
+
+    @BindView(R.id.buttonSave)
+    TextView buttonRegister;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private DatabaseReference myRef;
 
     public static final String TAG = RegisterActivity.class.getSimpleName();
+    UserRepository userRepository = new UserRepository();
 
     Person person = new Person();
     String oldKey;
@@ -62,6 +80,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // The content layout of screen is set
         setContentView(R.layout.activity_register);
+        ButterKnife.bind(this);
 
         // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -70,84 +89,35 @@ public class RegisterActivity extends AppCompatActivity {
         // An instance of FirebaseAuth is set
         mAuth = FirebaseAuth.getInstance();
 
-        // An instance of FirebaseDatabase is set
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("Person");
+        mAuthListener = firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            if (user != null) {
+                // Registration was successful and user is signed in
+                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
-        // The layout is now built
-        // First, the TextViews that will act as LoginActivity screen buttons are set
-        TextView buttonRegister = (TextView) findViewById(R.id.buttonSave);
+                // Storing values to the database
+                person.setName(editTextName.getEditText().getText().toString().trim());
+                person.setAge(Integer.parseInt(editTextAge.getEditText().getText().toString().trim()));
 
-        // Then, the TextInputLayout that will allow the user to insert data are set
-        editTextName = (TextInputLayout) findViewById(R.id.tilName);
-        editTextAge = (TextInputLayout) findViewById(tilAge);
-        editTextEmail = (TextInputLayout) findViewById(tilEmail);
-        editTextConfirmEmail = (TextInputLayout) findViewById(R.id.tilConfirmEmail);
-        editTextPassword= (TextInputLayout) findViewById(R.id.tilPassword);
-        editTextConfirmPassword= (TextInputLayout) findViewById(R.id.tilConfirmPassword);
-
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-
-                    // Remove old entry of user (if exists)
-                    if (oldKey != null && !oldKey.isEmpty()){
-                        myRef.child(oldKey).removeValue();
-                    }
-
-                    // Creating new user node, which returns the unique key value
-                    // new user node would be /User/$userid/
-                    String userId = user.getUid();
-
-                    // Storing values to the database
-                    myRef.child(userId).setValue(person);
-
-                    // The userId is then saved to Shared Preferences (locally, in the device)
-                    SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor = saved_values.edit();
-                    editor.putString(getString(R.string.user_id_SharedPref), user.getUid());
-                    editor.commit();
-
-                    // A message is then displayed, informing the user that the registration was successful
-                    final MessageDialog dialog = new MessageDialog(RegisterActivity.this, R.string.success_register_user, R.string.dialog_edit_ok_text, -1, -1);
-                    dialog.setCancelable(false);
-                    dialog.show();
-                    dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent intent = new Intent(RegisterActivity.this, MainMenuActivity.class);
-                            RegisterActivity.this.startActivity(intent);
-                            dialog.cancel();
-                        }
-                    });
-
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-                // ...
+                userRepository.getExtraValuesAndSave(person, this);
+            } else {
+                // User is signed out
+                Log.d(TAG, "onAuthStateChanged:signed_out");
             }
         };
 
         // Click Listener for button register
-        buttonRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideKeyboard();
-                if (validateInfo()) {
-                    if (Utility.isConnectedToNet(RegisterActivity.this)) {
-                        gettingExtraValues();
-                    }
-                    else {
-                        Utility.noNetworkError(RegisterActivity.this);
-                    }
-                }
+        buttonRegister.setOnClickListener(v -> {
+            hideKeyboard();
+            if (validateInfo()) {
+                if (Utility.isConnectedToNet(RegisterActivity.this)) {
+                    storeValues();
 
+                } else {
+                    Utility.noNetworkError(RegisterActivity.this);
+                }
             }
+
         });
     }
 
@@ -186,8 +156,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (name.isEmpty()) {
             editTextName.setError(getString(R.string.error_invalid_name));
             validated = false;
-        }
-        else {
+        } else {
             editTextName.setErrorEnabled(false);
         }
 
@@ -195,16 +164,14 @@ public class RegisterActivity extends AppCompatActivity {
         if (!pattern.matcher(email).matches()) {
             editTextEmail.setError(getString(R.string.error_invalid_email));
             validated = false;
-        }
-        else {
+        } else {
             editTextEmail.setErrorEnabled(false);
         }
 
         if (!email.equals(editTextConfirmEmail.getEditText().getText().toString().trim())) {
             editTextConfirmEmail.setError(getString(R.string.error_different_email));
             validated = false;
-        }
-        else {
+        } else {
             editTextConfirmEmail.setErrorEnabled(false);
         }
 
@@ -212,8 +179,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (password.length() <= 5) {
             editTextPassword.setError(getString(R.string.error_invalid_password));
             validated = false;
-        }
-        else {
+        } else {
             editTextPassword.setErrorEnabled(false);
         }
 
@@ -221,8 +187,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (!password.equals(editTextConfirmPassword.getEditText().getText().toString().trim())) {
             editTextConfirmPassword.setError(getString(R.string.error_different_password));
             validated = false;
-        }
-        else {
+        } else {
             editTextConfirmPassword.setErrorEnabled(false);
         }
 
@@ -240,66 +205,55 @@ public class RegisterActivity extends AppCompatActivity {
 
     // If the person was created by another user in the app, when the real user creates an account,
     // this account as extra info coming from the already registered user
-    public void gettingExtraValues() {
+    public void getExtraValuesAndSave() {
 
         // Read from the database
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                person.setEmail(editTextEmail.getEditText().getText().toString().trim());
-                person.setName(editTextName.getEditText().getText().toString().trim());
-                person.setAge(Integer.parseInt(editTextAge.getEditText().getText().toString().trim()));
-
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    if (dsp.getValue(Person.class) != null
-                            && dsp.getValue(Person.class).getEmail() != null
-                            && dsp.getValue(Person.class).getEmail().equals(person.getEmail())) {
-                        person = dsp.getValue(Person.class);
-                        person.setOldKey(dsp.getKey());
-                        oldKey = dsp.getKey();
-                    }
-                }
-                storeValues();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-                Utility.generalError(RegisterActivity.this, error.getMessage());
-            }
-
-        });
     }
 
     public void storeValues() {
 
         // Getting values to store
 //        person.setEmail(editTextEmail.getEditText().getText().toString().trim());
+        person.setEmail(editTextEmail.getEditText().getText().toString().trim());
         String password = editTextPassword.getEditText().getText().toString().trim();
 
         mAuth.createUserWithEmailAndPassword(person.getEmail(), password)
-                .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
+                .addOnCompleteListener(RegisterActivity.this, task -> {
+                    Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            try {
-                                Utility.generalError(RegisterActivity.this, task.getException().getMessage());
-                            }
-                            catch (NullPointerException e) {
-                                Utility.generalError(RegisterActivity.this, getString(R.string.error_general));
-                            }
-                            mAuth.signOut();
+                    // If sign in fails, display a message to the user. If sign in succeeds
+                    // the auth state listener will be notified and logic to handle the
+                    // signed in user can be handled in the listener.
+                    if (!task.isSuccessful()) {
+                        try {
+                            Utility.generalError(RegisterActivity.this, task.getException().getMessage());
+                        } catch (NullPointerException e) {
+                            Utility.generalError(RegisterActivity.this, getString(R.string.error_general));
                         }
+                        mAuth.signOut();
                     }
                 });
+
     }
 
+    @Override
+    public void onUserSaveSuccess() {
+        // A message is then displayed, informing the user that the registration was successful
+        final MessageDialog dialog = new MessageDialog(RegisterActivity.this, R.string.success_register_user, R.string.dialog_edit_ok_text, -1, -1);
+        dialog.setCancelable(false);
+        dialog.show();
+        dialog.okButton.setOnClickListener(view -> {
+            Intent intent = new Intent(RegisterActivity.this, MainMenuActivity.class);
+            RegisterActivity.this.startActivity(intent);
+            dialog.cancel();
+        });
+    }
+
+    @Override
+    public void onUserSaveFailed(String exception) {
+        Log.w(TAG, exception);
+        Utility.generalError(RegisterActivity.this, exception);
+    }
 }

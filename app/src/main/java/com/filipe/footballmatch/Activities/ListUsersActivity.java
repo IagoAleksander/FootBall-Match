@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
 import com.filipe.footballmatch.Adapters.UsersAdapter;
+import com.filipe.footballmatch.Repositories.UserRepository;
 import com.filipe.footballmatch.Utilities.Utility;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,35 +26,54 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by Filipe on 23/01/2017.
  */
 
-public class ListUsersActivity extends AppCompatActivity {
+public class ListUsersActivity extends AppCompatActivity implements UserRepository.OnGetUsersList{
 
-
-    RecyclerView mRecyclerView;
     UsersAdapter adapter;
     Context context;
 
+    @BindView(R.id.users_recycler_view)
+    RecyclerView mRecyclerView;
+
+    @BindView(R.id.search_user_layout)
     CardView searchUserLayout;
+
+    @BindView(R.id.search_user_showFilter)
     LinearLayout showFilterLayout;
+
+    @BindView(R.id.add_new_player_layout)
     CardView addNewPlayerLayout;
 
+    @BindView(R.id.tilName)
     TextInputLayout userNameLayout;
+
+    @BindView(R.id.tilAge)
     TextInputLayout userAgeLayout;
 
+    @BindView(R.id.search_button)
     TextView searchUserButton;
+
+    @BindView(R.id.add_new_player_button)
     TextView addnewPlayerButton;
+
+    @BindView(R.id.show_filter_button)
     TextView showFilterButton;
 
     String userName;
-    int userAge;
+    String userAge;
 
     public boolean isFromCreateMatch = false;
 
     public static final String TAG = ListUsersActivity.class.getSimpleName();
+    UserRepository userRepository = new UserRepository();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +81,7 @@ public class ListUsersActivity extends AppCompatActivity {
 
         // The content layout of screen is set
         setContentView(R.layout.activity_list_users);
+        ButterKnife.bind(this);
 
         // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -72,112 +93,74 @@ public class ListUsersActivity extends AppCompatActivity {
         // (If it is from create match or directly from the main menu)
         isFromCreateMatch = getIntent().getBooleanExtra("isFromCreateMatch", false);
 
-
-        // The layout is now built
-        // First, the CardViews that will act as sections for the screen are set
-        searchUserLayout = (CardView) findViewById(R.id.search_user_layout);
-        addNewPlayerLayout = (CardView) findViewById(R.id.add_new_player_layout);
-        showFilterLayout = (LinearLayout) findViewById(R.id.search_user_showFilter);
-
-        // Then, the TextInputLayout fields that will collect the user inputs to filter the list
-        userNameLayout = (TextInputLayout) findViewById(R.id.tilName);
-        userAgeLayout = (TextInputLayout) findViewById(R.id.tilAge);
-
-        // The TextViews that will act as ListUsersActivity screen buttons are set
-        searchUserButton = (TextView) findViewById(R.id.search_button);
-        addnewPlayerButton = (TextView) findViewById(R.id.add_new_player_button);
-        showFilterButton = (TextView) findViewById(R.id.show_filter_button);
-
-        // And, finally, the RecyclerView, that will display the list of elements
-        mRecyclerView = (RecyclerView) findViewById(R.id.users_recycler_view);
-
         //Click Listener for button search user
-        searchUserButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        searchUserButton.setOnClickListener(v -> {
 
-                // The filter section is hided, a show filter button is set and the list is displayed with the results
-                searchUserLayout.setVisibility(View.GONE);
-                showFilterLayout.setVisibility(View.VISIBLE);
-                mRecyclerView.setVisibility(View.VISIBLE);
+            // The filter section is hided, a show filter button is set and the list is displayed with the results
+            searchUserLayout.setVisibility(View.GONE);
+            showFilterLayout.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.VISIBLE);
 
-                if (!userNameLayout.getEditText().getText().toString().trim().isEmpty()) {
-                    userName = userNameLayout.getEditText().getText().toString().trim();
-                }
-                if (!userAgeLayout.getEditText().getText().toString().trim().isEmpty()) {
-                    userAge = Integer.parseInt(userAgeLayout.getEditText().getText().toString().trim());
-                }
+            userName = userNameLayout.getEditText().getText().toString().trim();
+            userAge = userAgeLayout.getEditText().getText().toString().trim();
 
-                // An instance of FirebaseDatabase is set
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-                DatabaseReference myRef = database.getReference("Person/");
+            userRepository.fetchListUsers(this);
 
-                // Read from the database
-                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                        ArrayList<Person> users = new ArrayList<>();
-
-                        // Recover all the items from the database that match with the filter
-                        for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                            if ((userNameLayout.getEditText().getText().toString().trim().isEmpty()
-                                    || dsp.getValue(Person.class).getName().equals(userName))
-                                    && (userAgeLayout.getEditText().getText().toString().trim().isEmpty()
-                                    || dsp.getValue(Person.class).getAge() == userAge)) {
-
-                                users.add(dsp.getValue(Person.class));
-                                users.get(users.size() - 1).setUserKey(dsp.getKey());
-                            }
-                        }
-
-                        // set the RecyclerView parameters
-                        LinearLayoutManager llm = new LinearLayoutManager(context);
-                        llm.setOrientation(LinearLayoutManager.VERTICAL);
-
-                        mRecyclerView.setLayoutManager(llm);
-                        mRecyclerView.setHasFixedSize(true);
-
-                        // Update the list with the results
-                        adapter = new UsersAdapter(ListUsersActivity.this, users);
-                        mRecyclerView.setAdapter(adapter);
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError error) {
-                        // Failed to read value
-                        Log.w(TAG, "Failed to read value.", error.toException());
-                        Utility.generalError(ListUsersActivity.this, error.getMessage());
-                    }
-                });
-            }
+            // set the RecyclerView parameters
+            LinearLayoutManager llm = new LinearLayoutManager(context);
+            llm.setOrientation(LinearLayoutManager.VERTICAL);
         });
 
         //Click Listener for button show filter
-        showFilterButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchUserLayout.setVisibility(View.VISIBLE);
-                showFilterLayout.setVisibility(View.GONE);
-                mRecyclerView.setVisibility(View.GONE);
-            }
+        showFilterButton.setOnClickListener(v -> {
+            searchUserLayout.setVisibility(View.VISIBLE);
+            showFilterLayout.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.GONE);
         });
 
         // If the user reach this screen form the create match flow, a new option appears
         // this option allows the user to add a new player to the match (not registered in the app)
         if (isFromCreateMatch) {
             addNewPlayerLayout.setVisibility(View.VISIBLE);
-            addnewPlayerButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(ListUsersActivity.this, AddPlayerActivity.class);
-                    ListUsersActivity.this.startActivity(intent);
-                }
+            addnewPlayerButton.setOnClickListener(v -> {
+                Intent intent = new Intent(ListUsersActivity.this, AddPlayerActivity.class);
+                ListUsersActivity.this.startActivity(intent);
             });
         }
 
     }
 
+    @Override
+    public void OnGetUsersListSuccess(DataSnapshot dataSnapshot) {
+
+        ArrayList<Person> users = new ArrayList<>();
+
+        // Recover all the items from the database that match with the filter
+        for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+            if ((userName.isEmpty() || dsp.getValue(Person.class).getName().equals(userName))
+                    && (userAge.isEmpty() || dsp.getValue(Person.class).getAge() == Integer.parseInt(userAge))) {
+
+                users.add(dsp.getValue(Person.class));
+                users.get(users.size() - 1).setUserKey(dsp.getKey());
+            }
+        }
+
+        // set the RecyclerView parameters
+        LinearLayoutManager llm = new LinearLayoutManager(context);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+
+        mRecyclerView.setLayoutManager(llm);
+        mRecyclerView.setHasFixedSize(true);
+
+        // Update the list with the results
+        adapter = new UsersAdapter(ListUsersActivity.this, users);
+        mRecyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void OnGetUsersListFailed(String error) {
+        // Failed to read value
+        Log.e(TAG, error);
+        Utility.generalError(ListUsersActivity.this, error);
+    }
 }

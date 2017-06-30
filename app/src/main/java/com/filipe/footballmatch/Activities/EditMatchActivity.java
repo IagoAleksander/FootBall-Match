@@ -29,6 +29,8 @@ import android.widget.TextView;
 import com.filipe.footballmatch.Models.Event;
 import com.filipe.footballmatch.Models.Person;
 import com.filipe.footballmatch.R;
+import com.filipe.footballmatch.Repositories.EventRepository;
+import com.filipe.footballmatch.Repositories.UserRepository;
 import com.filipe.footballmatch.Utilities.DatePickerFragment;
 import com.filipe.footballmatch.Utilities.MessageDialog;
 import com.filipe.footballmatch.Utilities.TimePickerFragment;
@@ -58,13 +60,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static android.R.attr.name;
 import static android.R.attr.value;
 import static com.filipe.footballmatch.R.id.buttonCancel;
 import static com.filipe.footballmatch.Utilities.Utility.call;
 
 public class EditMatchActivity extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener, LocationListener, GoogleApiClient.ConnectionCallbacks{
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, GoogleApiClient.ConnectionCallbacks, UserRepository.OnGetUsersList, EventRepository.OnFinished {
 
     private static final String TAG = "EditMatchActivity";
     private static final int PLACE_PICKER_REQUEST = 1;
@@ -75,24 +80,64 @@ public class EditMatchActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
-    private LinearLayout section2;
-    private RelativeLayout section3;
-    private LinearLayout playerListLayout;
-    private TextView mName;
-    private TextView mAddress;
-    private TextView mPhone;
-    private Spinner mSpinner;
+    UserRepository userRepository = new UserRepository();
+    EventRepository eventRepository = new EventRepository();
+
+    @BindView(R.id.section2)
+    LinearLayout section2;
+
+    @BindView(R.id.section3)
+    RelativeLayout section3;
+
+    @BindView(R.id.event_players_list)
+    LinearLayout playerListLayout;
+
+    @BindView(R.id.venue_name)
+    TextView mName;
+
+    @BindView(R.id.venue_address)
+    TextView mAddress;
+
+    @BindView(R.id.venue_phone)
+    TextView mPhone;
+
+    @BindView(R.id.spinner)
+    Spinner mSpinner;
+
+    @BindView(R.id.pickerButton)
     TextView pickerButton;
 
-    private TextView mTime;
-    private TextView mDate;
+    @BindView(R.id.event_time)
+    TextView mTime;
+
+    @BindView(R.id.event_date)
+    TextView mDate;
+
+    @BindView(R.id.date_picker)
+    TextView datePicker;
+
+    @BindView(R.id.time_picker)
+    TextView timePicker;
+
+    @BindView(R.id.tilEventName)
+    TextInputLayout eventNameLayout;
+
+    @BindView(R.id.callButton)
+    TextView callButton;
+
+    @BindView(R.id.buttonAddPlayer)
+    TextView addPlayerButton;
+
+    @BindView(R.id.buttonCreateEvent)
+    TextView createEventButton;
+
+    @BindView(R.id.buttonCancel)
+    TextView cancelButton;
 
     Place place;
-    TextInputLayout eventNameLayout;
     private ArrayList<String> playerIdList = new ArrayList<>();
     private ArrayList<Person> playerList = new ArrayList<>();
 
-    private int index;
     private int maxPlayers = 0;
     private boolean pickerClicked = false;
 
@@ -105,6 +150,7 @@ public class EditMatchActivity extends AppCompatActivity implements
 
         // The content layout of screen is set
         setContentView(R.layout.activity_create_match);
+        ButterKnife.bind(this);
 
         // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -113,46 +159,13 @@ public class EditMatchActivity extends AppCompatActivity implements
         // Get the event data from the previous activity
         event = Parcels.unwrap(getIntent().getExtras().getParcelable("event"));
 
-        // The actual user id is recovered from the device local storage...
-        SharedPreferences saved_values = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        id = saved_values.getString(getString(R.string.user_id_SharedPref), "");
-
-        // The layout is now built
-        // First, the Layouts that will act as sections for the screen are set
-        section2 = (LinearLayout) findViewById(R.id.section2);
-        section3 = (RelativeLayout) findViewById(R.id.section3);
-        playerListLayout = (LinearLayout) findViewById(R.id.event_players_list);
-
-        // Then, the TextInputLayout field that the user to give a name for the event
-        eventNameLayout = (TextInputLayout) findViewById(R.id.tilEventName);
-
-        // The TextViews that will display the info about the venue
-        mName = (TextView) findViewById(R.id.venue_name);
-        mAddress = (TextView) findViewById(R.id.venue_address);
-        mPhone = (TextView) findViewById(R.id.venue_phone);
-
-        // The pickers that will allow the user to choose the date...
-        TextView datePicker = (TextView) findViewById(R.id.date_picker);
-        mDate = (TextView) findViewById(R.id.event_date);
-
-        // ... and the time of the match
-        TextView timePicker = (TextView) findViewById(R.id.time_picker);
-        mTime = (TextView) findViewById(R.id.event_time);
+        // The actual user id is recovered
+        id = userRepository.getUidCurrentUser();
 
         // The spinner that will allow the user to select the number of players in the match
-        mSpinner = (Spinner) findViewById(R.id.spinner);
         String[] items = new String[]{"10 (5x2)", "14 (7x2)", "22 (11x2)"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, items);
         mSpinner.setAdapter(adapter);
-
-
-
-        // And, finally, the TextViews that will act as LoginActivity screen buttons are set
-        TextView callButton = (TextView) findViewById(R.id.callButton);
-        pickerButton = (TextView) findViewById(R.id.pickerButton);
-        TextView addPlayerButton = (TextView) findViewById(R.id.buttonAddPlayer);
-        TextView createEventButton = (TextView) findViewById(R.id.buttonCreateEvent);
-        TextView cancelButton = (TextView) findViewById(buttonCancel);
 
         // If the event data recovered from the intent is not null, then the fields are populated
         if (event != null) {
@@ -182,96 +195,59 @@ public class EditMatchActivity extends AppCompatActivity implements
                 playerIdList = event.getPlayersIdList();
             }
 
-            for (String playerId : playerIdList) {
-                getIdInfo(playerId);
-            }
+            userRepository.fetchListUsers(this);
         }
 
         // Click Listener for button choose match venue
-        pickerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickerClicked = true;
-                getLocation();
-            }
+        pickerButton.setOnClickListener(v -> {
+            pickerClicked = true;
+            getLocation();
         });
 
         // Click Listener for button call venue
-        callButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Utility.call(EditMatchActivity.this, event.getPhone());
-            }
-        });
+        callButton.setOnClickListener(v -> Utility.call(EditMatchActivity.this, event.getPhone()));
 
         // Click Listener for timePicker, opens time picker fragment
-        timePicker.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fm = getFragmentManager();
-                DialogFragment newFragment = new TimePickerFragment();
-                newFragment.show(fm, "timePicker");
-            }
+        timePicker.setOnClickListener(v -> {
+            FragmentManager fm = getFragmentManager();
+            DialogFragment newFragment = new TimePickerFragment();
+            newFragment.show(fm, "timePicker");
         });
 
         // Click Listener for datePicker, opens date picker fragment
-        datePicker.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fm = getFragmentManager();
-                DialogFragment newFragment = new DatePickerFragment();
-                newFragment.show(fm, "datePicker");
-            }
+        datePicker.setOnClickListener(v -> {
+            FragmentManager fm = getFragmentManager();
+            DialogFragment newFragment = new DatePickerFragment();
+            newFragment.show(fm, "datePicker");
         });
 
         // Click Listener for button add player
-        addPlayerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(EditMatchActivity.this, ListUsersActivity.class);
-                intent.putExtra("isFromCreateMatch", true);
-                EditMatchActivity.this.startActivityForResult(intent, ADD_PLAYER_REQUEST_CODE);
-            }
+        addPlayerButton.setOnClickListener(v -> {
+            Intent intent = new Intent(EditMatchActivity.this, ListUsersActivity.class);
+            intent.putExtra("isFromCreateMatch", true);
+            EditMatchActivity.this.startActivityForResult(intent, ADD_PLAYER_REQUEST_CODE);
         });
 
         // Click Listener for button create event
-        createEventButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (validateData()) {
-                    if (Utility.isConnectedToNet(EditMatchActivity.this)) {
-                        registerMatch();
-                    }
-                    else {
-                        Utility.noNetworkError(EditMatchActivity.this);
-                    }
+        createEventButton.setOnClickListener(v -> {
+            if (validateData()) {
+                if (Utility.isConnectedToNet(EditMatchActivity.this)) {
+                    registerMatch();
+                } else {
+                    Utility.noNetworkError(EditMatchActivity.this);
                 }
-                else {
-                    displayErrorPopup();
-                }
+            } else {
+                displayErrorPopup();
             }
         });
 
         // Click Listener for button cancel
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final MessageDialog dialog = new MessageDialog(EditMatchActivity.this, R.string.cancel_edit_match_message, -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
-                dialog.setCancelable(false);
-                dialog.show();
-                dialog.noButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.yesButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        finish();
-                    }
-                });
-            }
+        cancelButton.setOnClickListener(v -> {
+            final MessageDialog dialog = new MessageDialog(EditMatchActivity.this, R.string.cancel_edit_match_message, -1, R.string.dialog_edit_no_text, R.string.dialog_edit_yes_text);
+            dialog.setCancelable(false);
+            dialog.show();
+            dialog.noButton.setOnClickListener(view -> dialog.dismiss());
+            dialog.yesButton.setOnClickListener(view -> finish());
         });
     }
 
@@ -313,15 +289,13 @@ public class EditMatchActivity extends AppCompatActivity implements
 
             pickerButton.setText(getString(R.string.change_match_venue_button));
 
-        }
-        else if (requestCode == ADD_PLAYER_REQUEST_CODE
-                && resultCode == Activity.RESULT_OK){
+        } else if (requestCode == ADD_PLAYER_REQUEST_CODE
+                && resultCode == Activity.RESULT_OK) {
             String userId = data.getStringExtra("userId");
 
             if (userId == null || userId.isEmpty()) {
                 Utility.generalError(EditMatchActivity.this, getString(R.string.error_general));
-            }
-            else if (playerIdList != null) {
+            } else if (playerIdList != null) {
 
                 int maxPlayers = 0;
                 switch (event.getNumberOfPlayers()) {
@@ -342,17 +316,15 @@ public class EditMatchActivity extends AppCompatActivity implements
                     Utility.generalError(EditMatchActivity.this, getString(R.string.error_player_max_number_exceeded));
                 } else {
                     playerIdList.add(userId);
-                    getIdInfo(userId);
+                    userRepository.fetchListUsers(this);
                 }
-            }
-            else {
+            } else {
                 playerIdList = new ArrayList<>();
                 playerIdList.add(userId);
-                getIdInfo(userId);
+                userRepository.fetchListUsers(this);
             }
 
-        }
-        else {
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -472,8 +444,7 @@ public class EditMatchActivity extends AppCompatActivity implements
                 Date date = format.parse(dtStart);
                 if (date.before(new Date())) {
                     dataValidated = false;
-                }
-                else {
+                } else {
                     event.setDate(date);
                 }
             } catch (ParseException e) {
@@ -482,7 +453,7 @@ public class EditMatchActivity extends AppCompatActivity implements
                 Utility.generalError(EditMatchActivity.this, e.getMessage());
             }
 
-            switch(mSpinner.getSelectedItemPosition()) {
+            switch (mSpinner.getSelectedItemPosition()) {
                 case 0:
                     maxPlayers = 10;
                     break;
@@ -508,19 +479,15 @@ public class EditMatchActivity extends AppCompatActivity implements
 
         if (event.getEventName().isEmpty()) {
             Utility.generalError(EditMatchActivity.this, getString(R.string.error_invalid_event_name));
-        }
-        else if (event.getName().isEmpty()) {
+        } else if (event.getName().isEmpty()) {
             Utility.generalError(EditMatchActivity.this, getString(R.string.error_invalid_venue));
-        }
-        else if (mDate.getText().toString().trim().isEmpty()) {
+        } else if (mDate.getText().toString().trim().isEmpty()) {
             Utility.generalError(EditMatchActivity.this, getString(R.string.error_invalid_date));
-        }
-        else if (mTime.getText().toString().trim().isEmpty()) {
+        } else if (mTime.getText().toString().trim().isEmpty()) {
             Utility.generalError(EditMatchActivity.this, getString(R.string.error_invalid_time));
         } else if (playerIdList.size() > maxPlayers) {
             Utility.generalError(EditMatchActivity.this, getString(R.string.error_player_max_number_exceeded));
-        }
-        else {
+        } else {
             Utility.generalError(EditMatchActivity.this, getString(R.string.error_past_date));
         }
     }
@@ -528,81 +495,17 @@ public class EditMatchActivity extends AppCompatActivity implements
     // If the data is ok, the match is registered
     public void registerMatch() {
 
-        //  Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("Event");
-
-        // Creating new event node, which returns the unique key value
-        // new event node would be /Event/$eventid/
-        if (event.getEventKey() == null) {
-            event.setEventKey(myRef.push().getKey());
-        }
-
         // Adding values
         event.setNumberOfPlayers(mSpinner.getSelectedItem().toString());
         event.setPlayersIdList(playerIdList);
         event.setEventKey(event.getEventKey());
         event.setCreator(id);
 
-        myRef.child(event.getEventKey()).setValue(event);
-
-        final MessageDialog dialog = new MessageDialog(EditMatchActivity.this, R.string.success_register_match, R.string.dialog_edit_ok_text, -1, -1);
-        dialog.setCancelable(false);
-        dialog.show();
-        dialog.okButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(EditMatchActivity.this, MainMenuActivity.class);
-                EditMatchActivity.this.startActivity(intent);
-
-                dialog.cancel();
-            }
-        });
+        eventRepository.saveEvent(event, this);
     }
 
-    // For every player added to the event, the app search for its info in the database...
-    public void getIdInfo(final String id) {
-
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("Person/");
-
-        // Read from the database
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    if (dsp.getKey() != null
-                            && dsp.getKey().equals(id)) {
-                        Person temp = dsp.getValue(Person.class);
-                        temp.setUserKey(dsp.getKey());
-                        playerList.add(temp);
-                        constructPlayerLayout();
-                        Log.d(TAG, "Value is: " + value);
-                    }
-                    else if (dsp.getValue(Person.class).getOldKey() != null
-                            && dsp.getValue(Person.class).getOldKey().equals(id)) {
-                        Person temp = dsp.getValue(Person.class);
-                        temp.setUserKey(dsp.getKey());
-                        playerList.add(temp);
-                        constructPlayerLayout();
-                        Log.d(TAG, "Value is: " + value);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-                Utility.generalError(EditMatchActivity.this, error.getMessage());
-            }
-
-        });
-    }
-
-    // ... and populate the layout with the player name and preferred position
+    // For every player added to the event, the app search for its info in the database
+    // and populate the layout with the player name and preferred position
     public void constructPlayerLayout() {
         View.inflate(this, R.layout.item_user_list, playerListLayout);
 
@@ -615,13 +518,10 @@ public class EditMatchActivity extends AppCompatActivity implements
         playerPreferredPosition.setText(" (" + playerList.get(i).getPreferredPosition() + ")");
 
 
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(EditMatchActivity.this, ViewProfileActivity.class);
-                intent.putExtra("userKey", v.getTag().toString());
-                EditMatchActivity.this.startActivity(intent);
-            }
+        view.setOnClickListener(v -> {
+            Intent intent = new Intent(EditMatchActivity.this, ViewProfileActivity.class);
+            intent.putExtra("userKey", v.getTag().toString());
+            EditMatchActivity.this.startActivity(intent);
         });
     }
 
@@ -632,8 +532,7 @@ public class EditMatchActivity extends AppCompatActivity implements
 
         if (event.getNumberOfPlayers() == null) {
             position = 0;
-        }
-        else {
+        } else {
             switch (event.getNumberOfPlayers()) {
 
                 case "10 (5x2)":
@@ -652,5 +551,49 @@ public class EditMatchActivity extends AppCompatActivity implements
             }
         }
         mSpinner.setSelection(position);
+    }
+
+    @Override
+    public void OnGetUsersListSuccess(DataSnapshot dataSnapshot) {
+
+        for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+            if ((dsp.getKey() != null && dsp.getKey().equals(id))
+                    || (dsp.getValue(Person.class).getOldKey() != null
+                    && dsp.getValue(Person.class).getOldKey().equals(id))) {
+
+                Person temp = dsp.getValue(Person.class);
+                temp.setUserKey(dsp.getKey());
+                playerList.add(temp);
+                constructPlayerLayout();
+                Log.d(TAG, "Value is: " + value);
+            }
+        }
+    }
+
+    @Override
+    public void OnGetUsersListFailed(String error) {
+        // Failed to read value
+        Log.e(TAG, error);
+        Utility.generalError(EditMatchActivity.this, error);
+    }
+
+    @Override
+    public void onEventSaveSuccess() {
+        final MessageDialog dialog = new MessageDialog(EditMatchActivity.this, R.string.success_register_match, R.string.dialog_edit_ok_text, -1, -1);
+        dialog.setCancelable(false);
+        dialog.show();
+        dialog.okButton.setOnClickListener(view -> {
+            Intent intent = new Intent(EditMatchActivity.this, MainMenuActivity.class);
+            EditMatchActivity.this.startActivity(intent);
+
+            dialog.cancel();
+        });
+    }
+
+    @Override
+    public void onEventSaveFailed(String exception) {
+        // Failed to read value
+        Log.e(TAG, exception);
+        Utility.generalError(EditMatchActivity.this, exception);
     }
 }
