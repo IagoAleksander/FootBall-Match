@@ -51,15 +51,16 @@ public class AvailableEventsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         String formattedDate = sdf.format(events.get(position).getDate());
         holder.date.setText(formattedDate);
 
-        holder.eventLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.eventLayout.setOnClickListener(v -> {
 
-                Intent intent = new Intent(activity, ViewMatchActivity.class);
-                intent.putExtra("eventKey", events.get(position).getEventKey());
-                activity.startActivity(intent);
-            }
+            Intent intent = new Intent(activity, ViewMatchActivity.class);
+            intent.putExtra("eventKey", events.get(position).getEventKey());
+            activity.startActivity(intent);
         });
+
+        if (position == events.size()-1) {
+            activity.progressDialog.dismiss();
+        }
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
@@ -82,6 +83,10 @@ public class AvailableEventsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public int getItemCount() {
+
+        if (events.isEmpty()){
+            activity.progressDialog.dismiss();
+        }
         return events.size();
     }
 }

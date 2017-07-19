@@ -1,5 +1,6 @@
 package com.filipe.footballmatch.Activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -44,13 +45,10 @@ public class ListUsersActivity extends AppCompatActivity implements UserReposito
     RecyclerView mRecyclerView;
 
     @BindView(R.id.search_user_layout)
-    CardView searchUserLayout;
+    LinearLayout searchUserLayout;
 
     @BindView(R.id.search_user_showFilter)
     LinearLayout showFilterLayout;
-
-    @BindView(R.id.add_new_player_layout)
-    CardView addNewPlayerLayout;
 
     @BindView(R.id.tilName)
     TextInputLayout userNameLayout;
@@ -75,6 +73,8 @@ public class ListUsersActivity extends AppCompatActivity implements UserReposito
     public static final String TAG = ListUsersActivity.class.getSimpleName();
     UserRepository userRepository = new UserRepository();
 
+    public ProgressDialog progressDialog = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +95,8 @@ public class ListUsersActivity extends AppCompatActivity implements UserReposito
 
         //Click Listener for button search user
         searchUserButton.setOnClickListener(v -> {
+
+            progressDialog = ProgressDialog.show(this, null,  "Searching...");
 
             // The filter section is hided, a show filter button is set and the list is displayed with the results
             searchUserLayout.setVisibility(View.GONE);
@@ -121,7 +123,7 @@ public class ListUsersActivity extends AppCompatActivity implements UserReposito
         // If the user reach this screen form the create match flow, a new option appears
         // this option allows the user to add a new player to the match (not registered in the app)
         if (isFromCreateMatch) {
-            addNewPlayerLayout.setVisibility(View.VISIBLE);
+            addnewPlayerButton.setVisibility(View.VISIBLE);
             addnewPlayerButton.setOnClickListener(v -> {
                 Intent intent = new Intent(ListUsersActivity.this, AddPlayerActivity.class);
                 ListUsersActivity.this.startActivity(intent);
@@ -159,6 +161,9 @@ public class ListUsersActivity extends AppCompatActivity implements UserReposito
 
     @Override
     public void OnGetUsersListFailed(String error) {
+
+        progressDialog.dismiss();
+
         // Failed to read value
         Log.e(TAG, error);
         Utility.generalError(ListUsersActivity.this, error);

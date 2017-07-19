@@ -4,11 +4,8 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
@@ -38,7 +35,6 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
@@ -46,12 +42,7 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -62,7 +53,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.R.attr.value;
-import static com.filipe.footballmatch.R.id.buttonCancel;
 
 public class CreateMatchActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, UserRepository.OnGetUsersList, EventRepository.OnFinished {
@@ -140,6 +130,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
     private int maxPlayers = 0;
     private String id;
+    private String playerId;
     private boolean pickerClicked = false;
 
     private FusedLocationProviderClient mFusedLocationClient;
@@ -259,7 +250,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
 
         } else if (requestCode == ADD_PLAYER_REQUEST_CODE
                 && resultCode == Activity.RESULT_OK) {
-            String userId = data.getStringExtra("userId");
+            playerId = data.getStringExtra("userId");
 
             switch (mSpinner.getSelectedItemPosition()) {
                 case 0:
@@ -273,20 +264,23 @@ public class CreateMatchActivity extends AppCompatActivity implements
                     break;
             }
 
-            if (userId == null || userId.isEmpty()) {
+            if (playerId == null || playerId.isEmpty()) {
                 Utility.generalError(CreateMatchActivity.this, getString(R.string.error_general));
             } else if (playerIdList != null) {
-                if (playerIdList.contains(userId)) {
+
+                playerListLayout.setVisibility(View.VISIBLE);
+
+                if (playerIdList.contains(playerId)) {
                     Utility.generalError(CreateMatchActivity.this, getString(R.string.error_user_already_added));
                 } else if (playerIdList.size() >= maxPlayers) {
                     Utility.generalError(CreateMatchActivity.this, getString(R.string.error_player_max_number_exceeded));
                 } else {
-                    playerIdList.add(userId);
+                    playerIdList.add(playerId);
                     userRepository.fetchListUsers(this);
                 }
             } else {
                 playerIdList = new ArrayList<>();
-                playerIdList.add(userId);
+                playerIdList.add(playerId);
                 userRepository.fetchListUsers(this);
             }
 
@@ -506,9 +500,7 @@ public class CreateMatchActivity extends AppCompatActivity implements
     public void OnGetUsersListSuccess(DataSnapshot dataSnapshot) {
 
         for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-            if ((dsp.getKey() != null && dsp.getKey().equals(id))
-            || (dsp.getValue(Person.class).getOldKey() != null
-                    && dsp.getValue(Person.class).getOldKey().equals(id))){
+            if (dsp.getKey() != null && dsp.getKey().equals(playerId)) {
 
                 Person temp = dsp.getValue(Person.class);
                 temp.setUserKey(dsp.getKey());

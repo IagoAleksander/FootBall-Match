@@ -30,6 +30,8 @@ public class UserRepository {
     private final DatabaseReference reference;
     private FirebaseAuth firebaseAuth;
 
+    EventRepository eventRepository = new EventRepository();
+
     private StorageReference storageRef;
     private File localFile = null;
 
@@ -53,10 +55,10 @@ public class UserRepository {
     public void saveUser (final Person user, Bitmap userImage, final OnFinished onFinished) {
 
         if (userImage != null)
-            saveUserImageOnStorage(userImage, user.getUserKey(), new OnImageUpload() {
+            saveUserImageOnStorage(userImage, getUidCurrentUser(), new OnImageUpload() {
                 @Override
                 public void onUploadSuccess(Uri imageUrl) {
-//                    user.setPhotoUrl(imageUrl.toString());
+                    user.setImageUrl(imageUrl.toString());
                     saveUser(user, onFinished);
                 }
 
@@ -140,7 +142,6 @@ public class UserRepository {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                boolean userExists = false;
                 Person user = player;
 
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
@@ -148,16 +149,13 @@ public class UserRepository {
                             && dsp.getValue(Person.class).getEmail() != null
                             && dsp.getValue(Person.class).getEmail().equals(player.getEmail())) {
                         user = dsp.getValue(Person.class);
-                        user.setOldKey(dsp.getKey());
                         user.setName(player.getName());
                         user.setAge(player.getAge());
-                        userExists = true;
-                    }
-                }
 
-                // Remove old entry of user (if exists)
-                if (userExists) {
-                    reference.child(user.getOldKey()).removeValue();
+                        // Remove old entry of user (if exists)
+                        reference.child(dsp.getKey()).removeValue();
+                        eventRepository.updateOldKey(dsp.getKey(), getUidCurrentUser());
+                    }
                 }
                 user.setUserKey(getUidCurrentUser());
                 saveNewUser(user, onFinished);

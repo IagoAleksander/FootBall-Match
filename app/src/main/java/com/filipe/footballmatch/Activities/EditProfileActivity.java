@@ -1,6 +1,7 @@
 package com.filipe.footballmatch.Activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -82,6 +83,8 @@ public class EditProfileActivity extends AppCompatActivity implements UserReposi
     private CustomPhotoPickerDialog photoDialog;
     boolean wasPictureChanged = false;
 
+    ProgressDialog progressDialog = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,6 +132,8 @@ public class EditProfileActivity extends AppCompatActivity implements UserReposi
                         bitmap = profilePicture.getDrawingCache();
                     }
 
+                    progressDialog = ProgressDialog.show(this, null,  "Saving...");
+                    editedInfo.setImageUrl(person.getImageUrl());
                     userRepository.saveUser(editedInfo, bitmap, EditProfileActivity.this);
                 }
         });
@@ -272,9 +277,8 @@ public class EditProfileActivity extends AppCompatActivity implements UserReposi
 
     @Override
     public void onUserSaveSuccess() {
-//        if (mProgressDialog != null) {
-//            mProgressDialog.dismiss();
-//        }
+
+        progressDialog.dismiss();
 
         final MessageDialog dialog = new MessageDialog(this, R.string.success_update_profile, R.string.dialog_edit_ok_text, -1, -1);
         dialog.setCancelable(false);
@@ -289,9 +293,8 @@ public class EditProfileActivity extends AppCompatActivity implements UserReposi
 
     @Override
     public void onUserSaveFailed(String exception) {
-//        if (mProgressDialog != null) {
-//            mProgressDialog.dismiss();
-//        }
+
+        progressDialog.dismiss();
 
         final MessageDialog dialog = new MessageDialog(EditProfileActivity.this, exception, R.string.dialog_edit_ok_text, -1, -1);
         dialog.setCancelable(false);

@@ -79,6 +79,37 @@ public class EventRepository {
         });
     }
 
+    public void updateOldKey(final String oldKey, final String newKey) {
+
+
+
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+
+                    Event temp = dsp.getValue(Event.class);
+                    if (temp != null && temp.getPlayersIdList().contains(oldKey)) {
+                        int index = temp.getPlayersIdList().indexOf(oldKey);
+                        temp.getPlayersIdList().remove(index);
+                        temp.getPlayersIdList().add(index, newKey);
+
+                        reference.child(dsp.getKey()).setValue(temp);
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+            }
+        });
+    }
+
 
     public interface OnFinished {
         void onEventSaveSuccess();

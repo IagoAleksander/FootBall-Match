@@ -1,5 +1,6 @@
 package com.filipe.footballmatch.Activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -87,6 +88,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     public static final String TAG = LoginActivity.class.getSimpleName();
     private static final int GOOGLE_SIGN_IN = 9001;
 
+    ProgressDialog progressDialog = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,6 +146,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             myRef.child(newUserId).setValue(person);
                         }
 
+                        progressDialog.hide();
                         // And the user is redirected to the MainMenuActivity, now logged in
                         Intent intent = new Intent(LoginActivity.this, MainMenuActivity.class);
                         LoginActivity.this.startActivity(intent);
@@ -151,12 +155,18 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
                     @Override
                     public void onCancelled(DatabaseError error) {
+
+                        progressDialog.hide();
+
                         // Failed to read value
                         Log.w(TAG, "Failed to read value.", error.toException());
                     }
                 });
 
             } else {
+
+                progressDialog.hide();
+
                 // User is signed out
                 Log.d(TAG, "onAuthStateChanged:signed_out");
             }
@@ -183,32 +193,27 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             if (validateInfo()) {
                 if (Utility.isConnectedToNet(LoginActivity.this)) {
 
+                    progressDialog.show(this, null,  "Logging...");
                     // Getting login input from the user
                     String email = login_et.getEditText().getText().toString().trim();
                     String password = password_et.getEditText().getText().toString().trim();
 
                     mAuth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                            .addOnCompleteListener(LoginActivity.this, task -> {
+                                Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
-                                    // If sign in fails, display a message to the user. If sign in succeeds
-                                    // the auth state listener will be notified and logic to handle the
-                                    // signed in user can be handled in the listener.
-                                    if (!task.isSuccessful()) {
-                                        Log.w(TAG, "signInWithEmail:failed", task.getException());
-                                        final MessageDialog dialog = new MessageDialog(LoginActivity.this, task.getException().getMessage(), R.string.dialog_edit_ok_text, -1, -1);
-                                        dialog.setCancelable(false);
-                                        dialog.show();
-                                        dialog.okButton.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                mAuth.signOut();
-                                                dialog.cancel();
-                                            }
-                                        });
-                                    }
+                                // If sign in fails, display a message to the user. If sign in succeeds
+                                // the auth state listener will be notified and logic to handle the
+                                // signed in user can be handled in the listener.
+                                if (!task.isSuccessful()) {
+                                    Log.w(TAG, "signInWithEmail:failed", task.getException());
+                                    final MessageDialog dialog = new MessageDialog(LoginActivity.this, task.getException().getMessage(), R.string.dialog_edit_ok_text, -1, -1);
+                                    dialog.setCancelable(false);
+                                    dialog.show();
+                                    dialog.okButton.setOnClickListener(view -> {
+                                        mAuth.signOut();
+                                        dialog.cancel();
+                                    });
                                 }
                             });
                 } else {

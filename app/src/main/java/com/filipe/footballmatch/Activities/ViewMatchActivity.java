@@ -2,15 +2,14 @@ package com.filipe.footballmatch.Activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -24,13 +23,9 @@ import com.filipe.footballmatch.Repositories.EventRepository;
 import com.filipe.footballmatch.Repositories.UserRepository;
 import com.filipe.footballmatch.Utilities.MessageDialog;
 import com.filipe.footballmatch.Utilities.Utility;
-import com.google.android.gms.location.places.ui.PlacePicker;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.parceler.Parcels;
 
@@ -40,13 +35,8 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.R.attr.switchMinWidth;
 import static android.R.attr.value;
 import static android.view.View.GONE;
-import static com.filipe.footballmatch.R.id.pickerButton;
-import static com.filipe.footballmatch.R.id.section2;
-import static com.filipe.footballmatch.R.id.section3;
-import static com.filipe.footballmatch.Utilities.Utility.call;
 
 /**
  * Created by Filipe on 21/01/2017.
@@ -83,8 +73,8 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
     @BindView(R.id.event_players_list)
     LinearLayout lEventPlayers;
 
-    @BindView(R.id.separator_4)
-    LinearLayout lSeparator;
+    @BindView(R.id.event_players_layout)
+    CardView lEventPlayersLayout;
 
     @BindView(R.id.callButton)
     TextView callButton;
@@ -110,6 +100,7 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
     boolean isFirstTime = true;
 
     String message;
+    ProgressDialog progressDialog = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -123,6 +114,10 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        progressDialog = ProgressDialog.show(this, null,  "Loading...");
+
+        buttonEditEvent.setVisibility(GONE);
+
         // An instance of FirebaseDatabase is set
         myRef = database.getReference("Event/");
 
@@ -135,6 +130,12 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
         // Read from the database
         eventRepository.fetchEventInfo(eventId, this);
 
+    }
+
+    // The player layout is cleared to be construct again
+    public void clearPlayerLayout() {
+        View.inflate(this, R.layout.item_user_list, lEventPlayers);
+        lEventPlayers.removeAllViews();
     }
 
     // For every player added to the event, the app search for its info in the database
@@ -195,7 +196,7 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
                 lEventPlayers.removeView(playerView);
 
                 if (lEventPlayers.getChildCount() == 0) {
-                    lSeparator.setVisibility(GONE);
+                    lEventPlayersLayout.setVisibility(GONE);
                 }
 
                 //update the database
@@ -270,7 +271,6 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
                     } else {
                         // add the current user to the match players list
                         playerIdList.add(id);
-                        userRepository.fetchListUsers(this);
 
                         //update the database
                         updateMatch(getString(R.string.success_join_match));
@@ -299,6 +299,8 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
                 });
                 break;
         }
+
+        buttonEditEvent.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -331,7 +333,7 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
 
         if (event.getPlayersIdList() != null
                 && !event.getPlayersIdList().isEmpty()) {
-            lSeparator.setVisibility(View.VISIBLE);
+            lEventPlayersLayout.setVisibility(View.VISIBLE);
             playerIdList = event.getPlayersIdList();
 
             if (isFirstTime) {
@@ -339,7 +341,7 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
                 userRepository.fetchListUsers(this);
             }
         } else {
-            lSeparator.setVisibility(GONE);
+            lEventPlayersLayout.setVisibility(GONE);
         }
 
         // If the chosen match was created by the actual user of the app, it can be edited
@@ -355,10 +357,15 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
             }
 
         }
+
+        progressDialog.dismiss();
     }
 
     @Override
     public void OnGetEventInfoFailed(String error) {
+
+        progressDialog.dismiss();
+
         // Failed to read value
         Log.e(TAG, error);
         Utility.generalError(ViewMatchActivity.this, error);
@@ -366,27 +373,29 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
 
     @Override
     public void OnGetUsersListSuccess(DataSnapshot dataSnapshot) {
+
+        progressDialog.dismiss();
+
+        playerList.clear();
+        clearPlayerLayout();
+
         for (DataSnapshot dsp : dataSnapshot.getChildren()) {
             if (dsp.getKey() != null
-                    && dsp.getKey().equals(id)) {
-                Person temp = dsp.getValue(Person.class);
-                temp.setUserKey(dsp.getKey());
-                playerList.add(temp);
-                populatePlayerLayout();
-                Log.d(TAG, "Value is: " + value);
-            } else if (dsp.getValue(Person.class).getOldKey() != null
-                    && dsp.getValue(Person.class).getOldKey().equals(id)) {
-                Person temp = dsp.getValue(Person.class);
-                temp.setUserKey(dsp.getKey());
-                playerList.add(temp);
-                populatePlayerLayout();
-                Log.d(TAG, "Value is: " + value);
+                    && playerIdList.contains(dsp.getKey())) {
+            Person temp = dsp.getValue(Person.class);
+            temp.setUserKey(dsp.getKey());
+            playerList.add(temp);
+            populatePlayerLayout();
+            Log.d(TAG, "Value is: " + value);
             }
         }
     }
 
     @Override
     public void OnGetUsersListFailed(String error) {
+
+        progressDialog.dismiss();
+
         // Failed to read value
         Log.e(TAG, error);
         Utility.generalError(ViewMatchActivity.this, error);
@@ -394,14 +403,23 @@ public class ViewMatchActivity extends AppCompatActivity implements EventReposit
 
     @Override
     public void onEventSaveSuccess() {
+
+        progressDialog.dismiss();
+
         final MessageDialog dialog = new MessageDialog(ViewMatchActivity.this, message, R.string.dialog_edit_ok_text, -1, -1);
         dialog.setCancelable(false);
         dialog.show();
-        dialog.okButton.setOnClickListener(view -> dialog.dismiss());
+        dialog.okButton.setOnClickListener(view -> {
+            eventRepository.fetchEventInfo(eventId, this);
+            userRepository.fetchListUsers(this);
+            dialog.dismiss();
+        });
     }
 
     @Override
     public void onEventSaveFailed(String exception) {
+
+        progressDialog.dismiss();
         // Failed to read value
         Log.e(TAG, exception);
         Utility.generalError(ViewMatchActivity.this, exception);

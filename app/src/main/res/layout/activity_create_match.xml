@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,376 +8,398 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerInParent="true">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
 
-        <android.support.v7.widget.CardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            card_view:cardCornerRadius="4dp">
+            android:orientation="vertical">
 
-            <LinearLayout
+            <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorAccent2"
-                android:orientation="vertical"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin">
-
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/tilEventName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp"
-                    android:textColorHint="@color/grey_500"
-                    tools:override="true">
-
-                    <android.support.design.widget.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:alpha="0.6"
-                        android:fontFamily="sans-serif"
-                        android:gravity="center"
-                        android:hint="@string/event_name_hint"
-                        android:inputType="text"
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
-
-                </android.support.design.widget.TextInputLayout>
+                android:layout_margin="10dp"
+                card_view:cardCornerRadius="4dp">
 
                 <LinearLayout
-                    android:id="@+id/venue_info_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@color/colorAccent2"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/activity_vertical_margin"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:paddingTop="@dimen/activity_vertical_margin">
+
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/tilEventName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:textColorHint="@color/grey_500"
+                        tools:override="true">
+
+                        <android.support.design.widget.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:alpha="0.6"
+                            android:fontFamily="sans-serif"
+                            android:gravity="center"
+                            android:hint="@string/event_name_hint"
+                            android:inputType="text"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                    <LinearLayout
+                        android:id="@+id/venue_info_section"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:id="@+id/section1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/pickerButton"
+                                style="?android:textAppearanceSmall"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:background="@color/colorPrimary"
+                                android:elevation="1dp"
+                                android:fontFamily="sans-serif-medium"
+                                android:gravity="center"
+                                android:minWidth="196dp"
+                                android:padding="8dp"
+                                android:text="@string/choose_match_venue_button"
+                                android:textColor="@android:color/white"
+                                android:textSize="14sp" />
+
+                            <LinearLayout
+                                android:id="@+id/separator_1"
+                                android:layout_width="fill_parent"
+                                android:layout_height="1dp"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="12dp"
+                                android:background="@color/colorPrimaryDark"
+                                android:orientation="horizontal" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/venue_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center"
+                            android:visibility="gone" />
+
+                        <LinearLayout
+                            android:id="@+id/section2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/event_address_header" />
+
+                            <TextView
+                                android:id="@+id/venue_address"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+
+                        </LinearLayout>
+
+                        <RelativeLayout
+                            android:id="@+id/section3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:id="@+id/venue_phone_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:text="@string/event_phone_header" />
+
+                            <TextView
+                                android:id="@+id/venue_phone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_toEndOf="@id/venue_phone_label"
+                                android:layout_toRightOf="@id/venue_phone_label" />
+
+                            <TextView
+                                android:id="@+id/callButton"
+                                style="?android:textAppearanceSmall"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"
+                                android:layout_gravity="center"
+                                android:layout_marginLeft="16dp"
+                                android:layout_marginRight="16dp"
+                                android:layout_marginTop="8dp"
+                                android:background="@color/colorPrimary"
+                                android:elevation="1dp"
+                                android:fontFamily="sans-serif-medium"
+                                android:gravity="center"
+                                android:minWidth="100dp"
+                                android:padding="8dp"
+                                android:text="@string/match_venue_call_button"
+                                android:textColor="@android:color/white"
+                                android:textSize="14sp" />
+
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/event_number_of_players_header" />
+
+                        <Spinner
+                            android:id="@+id/spinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="1dp"
+                            android:layout_marginLeft="1dp"
+                            android:layout_marginRight="1dp"
+                            android:layout_marginStart="1dp"
+                            android:clickable="true" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/separator_2"
+                        android:layout_width="fill_parent"
+                        android:layout_height="1dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="12dp"
+                        android:background="@color/colorPrimaryDark"
+                        android:orientation="horizontal" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.5"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/event_date_header" />
+
+                                <TextView
+                                    android:id="@+id/event_date"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/date_picker"
+                                style="?android:textAppearanceSmall"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginLeft="16dp"
+                                android:layout_marginRight="16dp"
+                                android:layout_marginTop="8dp"
+                                android:background="@color/colorPrimary"
+                                android:elevation="1dp"
+                                android:fontFamily="sans-serif-medium"
+                                android:gravity="center"
+                                android:minWidth="196dp"
+                                android:padding="8dp"
+                                android:text="@string/pick_match_date_button"
+                                android:textColor="@android:color/white"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.5"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/event_time_header" />
+
+                                <TextView
+                                    android:id="@+id/event_time"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/time_picker"
+                                style="?android:textAppearanceSmall"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginLeft="16dp"
+                                android:layout_marginRight="16dp"
+                                android:layout_marginTop="8dp"
+                                android:background="@color/colorPrimary"
+                                android:elevation="1dp"
+                                android:fontFamily="sans-serif-medium"
+                                android:gravity="center"
+                                android:minWidth="196dp"
+                                android:padding="8dp"
+                                android:text="@string/pick_match_time_button"
+                                android:textColor="@android:color/white"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                card_view:cardCornerRadius="4dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorAccent2"
                     android:orientation="vertical">
 
                     <LinearLayout
-                        android:id="@+id/section1"
+                        android:id="@+id/event_players_list"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/pickerButton"
-                            style="?android:textAppearanceSmall"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:background="@color/colorPrimary"
-                            android:elevation="1dp"
-                            android:fontFamily="sans-serif-medium"
-                            android:gravity="center"
-                            android:minWidth="196dp"
-                            android:padding="8dp"
-                            android:text="@string/choose_match_venue_button"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp" />
-
-                        <LinearLayout
-                            android:id="@+id/separator_1"
-                            android:layout_width="fill_parent"
-                            android:layout_height="1dp"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="12dp"
-                            android:background="@color/colorPrimaryDark"
-                            android:orientation="horizontal" />
-
-                    </LinearLayout>
+                        android:layout_margin="8dp"
+                        android:orientation="vertical"
+                        android:visibility="gone"/>
 
                     <TextView
-                        android:id="@+id/venue_name"
+                        android:id="@+id/buttonAddPlayer"
+                        style="?android:textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginTop="12dp"
+                        android:layout_margin="5dp"
+                        android:background="@color/colorPrimary"
+                        android:elevation="1dp"
+                        android:fontFamily="sans-serif-medium"
                         android:gravity="center"
-                        android:visibility="gone" />
-
-                    <LinearLayout
-                        android:id="@+id/section2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:orientation="horizontal"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/event_address_header" />
-
-                        <TextView
-                            android:id="@+id/venue_address"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/section3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/venue_phone_label"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:text="@string/event_phone_header" />
-
-                        <TextView
-                            android:id="@+id/venue_phone"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_toEndOf="@id/venue_phone_label"
-                            android:layout_toRightOf="@id/venue_phone_label" />
-
-                        <TextView
-                            android:id="@+id/callButton"
-                            style="?android:textAppearanceSmall"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:layout_gravity="center"
-                            android:layout_marginLeft="16dp"
-                            android:layout_marginRight="16dp"
-                            android:layout_marginTop="8dp"
-                            android:background="@color/colorPrimary"
-                            android:elevation="1dp"
-                            android:fontFamily="sans-serif-medium"
-                            android:gravity="center"
-                            android:minWidth="100dp"
-                            android:padding="8dp"
-                            android:text="@string/match_venue_call_button"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp" />
-
-                    </RelativeLayout>
+                        android:minWidth="196dp"
+                        android:padding="8dp"
+                        android:text="@string/match_add_player_button"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
+
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="10dp"
+                card_view:cardCornerRadius="4dp">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center">
+                    android:background="@color/colorAccent2"
+                    android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/buttonCreateEvent"
+                        style="?android:textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/event_number_of_players_header" />
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@color/colorPrimary"
+                        android:elevation="1dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:minWidth="196dp"
+                        android:padding="8dp"
+                        android:text="@string/confirm_create_match_button"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
 
-                    <Spinner
-                        android:id="@+id/spinner"
+                    <TextView
+                        android:id="@+id/buttonCancel"
+                        style="?android:textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginLeft="1dp"
-                        android:layout_marginRight="1dp"
-                        android:layout_marginStart="1dp"
-                        android:clickable="true" />
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@color/colorPrimary"
+                        android:elevation="1dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:minWidth="196dp"
+                        android:padding="8dp"
+                        android:text="@string/cancel_create_match_button"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/separator_2"
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="12dp"
-                    android:background="@color/colorPrimaryDark"
-                    android:orientation="horizontal" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/event_date_header" />
-
-                            <TextView
-                                android:id="@+id/event_date"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/date_picker"
-                            style="?android:textAppearanceSmall"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginLeft="16dp"
-                            android:layout_marginRight="16dp"
-                            android:layout_marginTop="8dp"
-                            android:background="@color/colorPrimary"
-                            android:elevation="1dp"
-                            android:fontFamily="sans-serif-medium"
-                            android:gravity="center"
-                            android:minWidth="196dp"
-                            android:padding="8dp"
-                            android:text="@string/pick_match_date_button"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/event_time_header" />
-
-                            <TextView
-                                android:id="@+id/event_time"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/time_picker"
-                            style="?android:textAppearanceSmall"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginLeft="16dp"
-                            android:layout_marginRight="16dp"
-                            android:layout_marginTop="8dp"
-                            android:background="@color/colorPrimary"
-                            android:elevation="1dp"
-                            android:fontFamily="sans-serif-medium"
-                            android:gravity="center"
-                            android:minWidth="196dp"
-                            android:padding="8dp"
-                            android:text="@string/pick_match_time_button"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/separator_3"
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="12dp"
-                    android:background="@color/colorPrimaryDark"
-                    android:orientation="horizontal" />
-
-                <LinearLayout
-                    android:id="@+id/event_players_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="6dp"
-                    android:layout_marginTop="6dp"
-                    android:orientation="vertical" />
-
-                <TextView
-                    android:id="@+id/buttonAddPlayer"
-                    style="?android:textAppearanceSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@color/colorPrimary"
-                    android:elevation="1dp"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center"
-                    android:minWidth="196dp"
-                    android:padding="8dp"
-                    android:text="@string/match_add_player_button"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp" />
-
-                <LinearLayout
-                    android:id="@+id/separator_4"
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="12dp"
-                    android:background="@color/colorPrimaryDark"
-                    android:orientation="horizontal" />
-
-                <TextView
-                    android:id="@+id/buttonCreateEvent"
-                    style="?android:textAppearanceSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginTop="12dp"
-                    android:background="@color/colorPrimary"
-                    android:elevation="1dp"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center"
-                    android:minWidth="196dp"
-                    android:padding="8dp"
-                    android:text="@string/confirm_create_match_button"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/buttonCancel"
-                    style="?android:textAppearanceSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp"
-                    android:background="@color/colorPrimary"
-                    android:elevation="1dp"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center"
-                    android:minWidth="196dp"
-                    android:padding="8dp"
-                    android:text="@string/cancel_create_match_button"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
-
-        </android.support.v7.widget.CardView>
-
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
     </ScrollView>
-</RelativeLayout>
+</LinearLayout>

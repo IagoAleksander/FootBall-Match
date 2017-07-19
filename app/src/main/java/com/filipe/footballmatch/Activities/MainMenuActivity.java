@@ -26,13 +26,9 @@ import butterknife.ButterKnife;
  * the user and each one of them redirected him to a different flow.
  */
 
-public class MainMenuActivity extends AppCompatActivity implements UserRepository.OnGetUserInfo {
+public class MainMenuActivity extends AppCompatActivity {
 
     public static final String TAG = MainMenuActivity.class.getSimpleName();
-    UserRepository userRepository = new UserRepository();
-
-    @BindView(R.id.activity_main_menu_name)
-    TextView nameTextView;
 
     @BindView(R.id.buttonViewProfile)
     TextView viewProfileButton;
@@ -60,9 +56,6 @@ public class MainMenuActivity extends AppCompatActivity implements UserRepositor
         // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
-
-        String id = userRepository.getUidCurrentUser();
-        userRepository.fetchUserInfo(id, this);
 
         //Click Listener for button view profile
         viewProfileButton.setOnClickListener(v -> {
@@ -124,19 +117,5 @@ public class MainMenuActivity extends AppCompatActivity implements UserRepositor
     @Override
     public void onStop() {
         super.onStop();
-    }
-
-    @Override
-    public void OnGetUserInfoSuccess(Person user) {
-
-        // The greeting TextView is populated
-        nameTextView.setText("Hello, " + user.getName() + "!");
-    }
-
-    @Override
-    public void OnGetUserInfoFailed(String error) {
-        // Failed to read value
-        Log.e(TAG, error);
-        Utility.generalError(MainMenuActivity.this, error);
     }
 }

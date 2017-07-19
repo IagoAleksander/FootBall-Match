@@ -2,6 +2,7 @@ package com.filipe.footballmatch.Activities;
 
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -49,7 +50,7 @@ public class ListAvailableEventsActivity extends AppCompatActivity implements Ev
     RecyclerView mRecyclerView;
 
     @BindView(R.id.search_event_layout)
-    CardView searchEventLayout;
+    LinearLayout searchEventLayout;
 
     @BindView(R.id.search_event_showFilter)
     LinearLayout showFilterLayout;
@@ -87,6 +88,8 @@ public class ListAvailableEventsActivity extends AppCompatActivity implements Ev
     UserRepository userRepository = new UserRepository();
     EventRepository eventRepository = new EventRepository();
 
+    public ProgressDialog progressDialog = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +101,8 @@ public class ListAvailableEventsActivity extends AppCompatActivity implements Ev
         // The action bar title is customized
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
+
+        progressDialog = ProgressDialog.show(this, null,  "Searching...");
 
         // The id of the user is recovered
         id = userRepository.getUidCurrentUser();
@@ -171,6 +176,9 @@ public class ListAvailableEventsActivity extends AppCompatActivity implements Ev
 
     @Override
     public void OnGetEventsListFailed(String error) {
+
+        progressDialog.dismiss();
+
         // Failed to read value
         Log.w(TAG, error);
         Utility.generalError(ListAvailableEventsActivity.this, error);

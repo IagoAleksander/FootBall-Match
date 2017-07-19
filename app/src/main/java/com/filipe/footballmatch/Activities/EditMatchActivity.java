@@ -5,17 +5,13 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -48,10 +44,6 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.parceler.Parcels;
 
@@ -63,10 +55,7 @@ import java.util.Date;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.R.attr.name;
 import static android.R.attr.value;
-import static com.filipe.footballmatch.R.id.buttonCancel;
-import static com.filipe.footballmatch.Utilities.Utility.call;
 
 public class EditMatchActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener, LocationListener, GoogleApiClient.ConnectionCallbacks, UserRepository.OnGetUsersList, EventRepository.OnFinished {
@@ -142,6 +131,7 @@ public class EditMatchActivity extends AppCompatActivity implements
     private boolean pickerClicked = false;
 
     private String id;
+    private String playerId;
     private Event event;
 
     @Override
@@ -192,6 +182,7 @@ public class EditMatchActivity extends AppCompatActivity implements
             mTime.setText(formattedTime);
 
             if (event.getPlayersIdList() != null) {
+                playerListLayout.setVisibility(View.VISIBLE);
                 playerIdList = event.getPlayersIdList();
             }
 
@@ -291,9 +282,9 @@ public class EditMatchActivity extends AppCompatActivity implements
 
         } else if (requestCode == ADD_PLAYER_REQUEST_CODE
                 && resultCode == Activity.RESULT_OK) {
-            String userId = data.getStringExtra("userId");
+            playerId = data.getStringExtra("userId");
 
-            if (userId == null || userId.isEmpty()) {
+            if (playerId == null || playerId.isEmpty()) {
                 Utility.generalError(EditMatchActivity.this, getString(R.string.error_general));
             } else if (playerIdList != null) {
 
@@ -310,17 +301,17 @@ public class EditMatchActivity extends AppCompatActivity implements
                         break;
                 }
 
-                if (playerIdList.contains(userId)) {
+                if (playerIdList.contains(playerId)) {
                     Utility.generalError(EditMatchActivity.this, getString(R.string.error_user_already_added));
                 } else if (playerIdList.size() >= maxPlayers) {
                     Utility.generalError(EditMatchActivity.this, getString(R.string.error_player_max_number_exceeded));
                 } else {
-                    playerIdList.add(userId);
+                    playerIdList.add(playerId);
                     userRepository.fetchListUsers(this);
                 }
             } else {
                 playerIdList = new ArrayList<>();
-                playerIdList.add(userId);
+                playerIdList.add(playerId);
                 userRepository.fetchListUsers(this);
             }
 
@@ -504,6 +495,12 @@ public class EditMatchActivity extends AppCompatActivity implements
         eventRepository.saveEvent(event, this);
     }
 
+    // The player layout is cleared to be construct again
+    public void clearPlayerLayout() {
+        View.inflate(this, R.layout.item_user_list, playerListLayout);
+        playerListLayout.removeAllViews();
+    }
+
     // For every player added to the event, the app search for its info in the database
     // and populate the layout with the player name and preferred position
     public void constructPlayerLayout() {
@@ -555,11 +552,11 @@ public class EditMatchActivity extends AppCompatActivity implements
 
     @Override
     public void OnGetUsersListSuccess(DataSnapshot dataSnapshot) {
+        playerList.clear();
+        clearPlayerLayout();
 
         for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-            if ((dsp.getKey() != null && dsp.getKey().equals(id))
-                    || (dsp.getValue(Person.class).getOldKey() != null
-                    && dsp.getValue(Person.class).getOldKey().equals(id))) {
+            if (dsp.getKey() != null && playerIdList.contains(dsp.getKey())) {
 
                 Person temp = dsp.getValue(Person.class);
                 temp.setUserKey(dsp.getKey());

@@ -1,5 +1,6 @@
 package com.filipe.footballmatch.Activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -72,7 +73,7 @@ public class RegisterActivity extends AppCompatActivity implements UserRepositor
     UserRepository userRepository = new UserRepository();
 
     Person person = new Person();
-    String oldKey;
+    ProgressDialog progressDialog = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,6 +102,7 @@ public class RegisterActivity extends AppCompatActivity implements UserRepositor
 
                 userRepository.getExtraValuesAndSave(person, this);
             } else {
+                progressDialog.dismiss();
                 // User is signed out
                 Log.d(TAG, "onAuthStateChanged:signed_out");
             }
@@ -205,14 +207,9 @@ public class RegisterActivity extends AppCompatActivity implements UserRepositor
 
     // If the person was created by another user in the app, when the real user creates an account,
     // this account as extra info coming from the already registered user
-    public void getExtraValuesAndSave() {
-
-        // Read from the database
-
-
-    }
-
     public void storeValues() {
+
+        progressDialog = ProgressDialog.show(this, null,  "Registering...");
 
         // Getting values to store
 //        person.setEmail(editTextEmail.getEditText().getText().toString().trim());
@@ -227,6 +224,7 @@ public class RegisterActivity extends AppCompatActivity implements UserRepositor
                     // the auth state listener will be notified and logic to handle the
                     // signed in user can be handled in the listener.
                     if (!task.isSuccessful()) {
+                        progressDialog.dismiss();
                         try {
                             Utility.generalError(RegisterActivity.this, task.getException().getMessage());
                         } catch (NullPointerException e) {
@@ -240,6 +238,8 @@ public class RegisterActivity extends AppCompatActivity implements UserRepositor
 
     @Override
     public void onUserSaveSuccess() {
+        progressDialog.dismiss();
+
         // A message is then displayed, informing the user that the registration was successful
         final MessageDialog dialog = new MessageDialog(RegisterActivity.this, R.string.success_register_user, R.string.dialog_edit_ok_text, -1, -1);
         dialog.setCancelable(false);
@@ -253,6 +253,8 @@ public class RegisterActivity extends AppCompatActivity implements UserRepositor
 
     @Override
     public void onUserSaveFailed(String exception) {
+        progressDialog.dismiss();
+
         Log.w(TAG, exception);
         Utility.generalError(RegisterActivity.this, exception);
     }

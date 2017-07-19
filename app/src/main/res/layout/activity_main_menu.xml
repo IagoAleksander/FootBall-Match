@@ -1,135 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.filipe.footballmatch.Activities.MainMenuActivity"
-    android:background="@drawable/background1">
+    android:background="@drawable/background1"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context="com.filipe.footballmatch.Activities.MainMenuActivity">
+
 
     <android.support.v7.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         card_view:cardCornerRadius="4dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true">
+        android:layout_margin="3dp">
 
         <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:background="@color/colorAccent2"
-        >
-
-        <TextView
-            android:id="@+id/activity_main_menu_name"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_gravity="center"/>
+            android:background="@color/colorAccent2"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/buttonViewProfile"
-            style="?android:textAppearanceSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/main_menu_view_profile_button"
-            android:minWidth="196dp"
-            android:padding="8dp"
-            android:gravity="center"
-            android:textSize="14sp"
-            android:background="@color/colorPrimary"
-            android:elevation="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@android:color/white"
-            android:layout_gravity="center" />
+            <TextView
+                android:id="@+id/buttonViewProfile"
+                style="?android:textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:background="@color/colorPrimary"
+                android:elevation="1dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:minWidth="196dp"
+                android:padding="8dp"
+                android:text="@string/main_menu_view_profile_button"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/buttonSearchUser"
-            style="?android:textAppearanceSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/main_menu_search_user_button"
-            android:minWidth="196dp"
-            android:padding="8dp"
-            android:gravity="center"
-            android:textSize="14sp"
-            android:background="@color/colorPrimary"
-            android:elevation="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@android:color/white"
-            android:layout_gravity="center" />
-
-        <TextView
-            android:id="@+id/buttonCreateMatch"
-            style="?android:textAppearanceSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/main_menu_create_match_button"
-            android:minWidth="196dp"
-            android:padding="8dp"
-            android:gravity="center"
-            android:textSize="14sp"
-            android:background="@color/colorPrimary"
-            android:elevation="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@android:color/white"
-            android:layout_gravity="center" />
-
-        <TextView
-            android:id="@+id/buttonListMatches"
-            style="?android:textAppearanceSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/main_menu_list_available_matches_button"
-            android:minWidth="196dp"
-            android:padding="8dp"
-            android:gravity="center"
-            android:textSize="14sp"
-            android:background="@color/colorPrimary"
-            android:elevation="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@android:color/white"
-            android:layout_gravity="center" />
-
-        <TextView
-            android:id="@+id/buttonLogout"
-            style="?android:textAppearanceSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/main_menu_logout_button"
-            android:minWidth="196dp"
-            android:padding="8dp"
-            android:gravity="center"
-            android:textSize="14sp"
-            android:background="@color/colorPrimary"
-            android:elevation="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@android:color/white"
-            android:layout_gravity="center" />
-
-    </LinearLayout>
+        </LinearLayout>
 
     </android.support.v7.widget.CardView>
-</RelativeLayout>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        card_view:cardCornerRadius="4dp"
+        android:layout_margin="3dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent2"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/buttonSearchUser"
+                style="?android:textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:background="@color/colorPrimary"
+                android:elevation="1dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:minWidth="196dp"
+                android:padding="8dp"
+                android:text="@string/main_menu_search_user_button"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        card_view:cardCornerRadius="4dp"
+        android:layout_margin="3dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent2"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/buttonCreateMatch"
+                style="?android:textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:background="@color/colorPrimary"
+                android:elevation="1dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:minWidth="196dp"
+                android:padding="8dp"
+                android:text="@string/main_menu_create_match_button"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        card_view:cardCornerRadius="4dp"
+        android:layout_margin="3dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent2"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/buttonListMatches"
+                style="?android:textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:background="@color/colorPrimary"
+                android:elevation="1dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:minWidth="196dp"
+                android:padding="8dp"
+                android:text="@string/main_menu_list_available_matches_button"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        card_view:cardCornerRadius="4dp"
+        android:layout_margin="3dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent2"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/buttonLogout"
+                style="?android:textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:layout_marginBottom="8dp"
+                android:background="@color/colorPrimary"
+                android:elevation="1dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:minWidth="196dp"
+                android:padding="8dp"
+                android:text="@string/main_menu_logout_button"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>
